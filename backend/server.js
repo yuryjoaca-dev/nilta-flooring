@@ -91,7 +91,12 @@ function createTransporter() {
 // CORS
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:3000"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://nilta-flooring-41kr.vercel.app",
+    ],
+    credentials: true,
   })
 );
 
