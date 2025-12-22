@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import Breadcrumbs from "../components/Breadcrumbs.jsx";
 import BreadcrumbLD from "../components/BreadcrumbLD.jsx";
+ import { API_BASE } from "../config/api";
 import {
   Store,
   Landmark,
@@ -18,7 +19,9 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+fetch(`${API_BASE}/api/gallery?category=Commercial`);
+
+
 
 const FALLBACK_GALLERY = [
   "/commercial/1.jpg",

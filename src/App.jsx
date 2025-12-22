@@ -18,6 +18,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
 import RefundPolicy from "./pages/RefundPolicy.jsx";
 import CookiePolicy from "./pages/CookiePolicy.jsx";
 import AdminLayout from "./pages/admin/AdminLayout.jsx";
+import { API_BASE } from "./config/api";
 
 export default function App() {
   return (

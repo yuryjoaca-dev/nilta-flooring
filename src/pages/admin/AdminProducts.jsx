@@ -2,7 +2,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+import { API_BASE } from "../../config/api"; // ajustezi path-ul
+
+fetch(`${API_BASE}/api/admin/products`)
 
 function getToken() {
   return localStorage.getItem("adminToken");
