@@ -19,6 +19,9 @@ import {
   MapPin,
   Award,
   ArrowRight,
+  Sparkles,
+  Phone,
+  Mail,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import Breadcrumbs from "../components/Breadcrumbs.jsx";
@@ -31,12 +34,10 @@ export default function About() {
     <main className="pt-16 min-h-screen bg-[#050507] text-white">
       {/* ✅ SEO META TAGS + JSON-LD */}
       <Helmet>
-        <title>
-          About Us | Nilta Flooring – Edmonton Flooring Supply & Installation
-        </title>
+        <title>About Us | Nilta Flooring – Edmonton Flooring Supply & Installation</title>
         <meta
           name="description"
-          content="Edmonton-based flooring contractor. We supply and install LVP, laminate, engineered hardwood, and tile with clean prep, tight seams, and on-time delivery."
+          content="Nilta Flooring Inc. is an Edmonton-based flooring company. We supply and install LVP, laminate, carpet, engineered hardwood, and tile with clear communication, tidy sites, proper prep, and dependable scheduling."
         />
         <meta property="og:title" content="About Nilta Flooring" />
         <meta
@@ -68,24 +69,21 @@ export default function About() {
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Organization",
-            name: "Nilta Flooring",
+            name: "Nilta Flooring Inc.",
             url: "https://nilta.ca/",
             logo: "https://nilta.ca/logo.png",
-            sameAs: [
-              "https://www.facebook.com/YOURPAGE",
-              "https://www.instagram.com/YOURPAGE",
-              "https://twitter.com/YOURPAGE",
-            ],
             address: {
               "@type": "PostalAddress",
+              streetAddress: "16307 111 Ave NW",
               addressLocality: "Edmonton",
               addressRegion: "AB",
+              postalCode: "T5M 2S2",
               addressCountry: "CA",
             },
             contactPoint: [
               {
                 "@type": "ContactPoint",
-                telephone: "+1-780-555-0123",
+                telephone: "+1-780-761-9500",
                 contactType: "customer service",
                 areaServed: "CA",
               },
@@ -94,9 +92,8 @@ export default function About() {
         </script>
       </Helmet>
 
-      {/* HERO – bigger + video background */}
-      <section className="relative h-[70vh] md:h-[80vh] overflow-hidden">
-        {/* Background video */}
+      {/* HERO */}
+      <section className="relative h-[72vh] md:h-[82vh] overflow-hidden">
         <video
           className="absolute inset-0 h-full w-full object-cover"
           src="/video/about-hero.mp4"
@@ -104,19 +101,16 @@ export default function About() {
           muted
           loop
           playsInline
-        // poster="/images/about-hero-poster.jpg"
         />
-        {/* Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/50 to-[#050507]" />
-        <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/70 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/55 to-[#050507]" />
+        <div className="absolute inset-0 bg-radial from-transparent via-black/15 to-black/70 pointer-events-none" />
 
-        {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto h-full px-6 flex flex-col justify-center">
           <motion.p
             className="uppercase tracking-[0.35em] text-xs md:text-sm text-gray-300 mb-3"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.45 }}
           >
             Nilta Flooring • About Us
           </motion.p>
@@ -125,28 +119,29 @@ export default function About() {
             className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight max-w-3xl"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.05 }}
+            transition={{ duration: 0.65, delay: 0.05 }}
           >
-            Built on craft.{" "}
-            <span className="text-[#F3E9EC]">Installed with care.</span>
+            Floors done right —{" "}
+            <span className="text-[#F3E9EC]">from prep to finish.</span>
           </motion.h1>
 
           <motion.p
-            className="mt-4 max-w-3xl text-white/85 text-sm md:text-base"
+            className="mt-4 max-w-3xl text-white/85 text-sm md:text-base leading-relaxed"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.12 }}
+            transition={{ duration: 0.65, delay: 0.12 }}
           >
-            We’re an Edmonton-based flooring company supplying and installing
-            LVP, laminate, engineered hardwood, and tile—delivered with clear
-            communication, tidy sites, and dependable timelines.
+            At Nilta Flooring, we believe every great floor starts with genuine care and
+            craftsmanship. We supply and install LVP, laminate, carpet, carpet-tile,
+            hardwood, engineered hardwood, and tile — with clear communication, tidy
+            workspaces, and a commitment to staying on schedule.
           </motion.p>
 
           <motion.div
             className="mt-6 flex flex-wrap gap-3"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.18 }}
+            transition={{ duration: 0.65, delay: 0.18 }}
           >
             <Link
               to="/projects"
@@ -156,10 +151,22 @@ export default function About() {
             </Link>
             <Link
               to="/contact"
-              className="px-6 py-3 rounded-full border border-white/40 text-white/90 hover:bg-white hover:text-black transition text-sm md:text-base"
+              className="px-6 py-3 rounded-full border border-white/35 text-white/90 hover:bg-white hover:text-black transition text-sm md:text-base"
             >
-              Talk to our team
+              Request an estimate
             </Link>
+          </motion.div>
+
+          <motion.div
+            className="mt-7 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.22 }}
+          >
+            <Pill icon={<ShieldCheck className="h-4 w-4" />} text="Licensed & insured" />
+            <Pill icon={<ClipboardCheck className="h-4 w-4" />} text="Proper prep" />
+            <Pill icon={<Timer className="h-4 w-4" />} text="On-time scheduling" />
+            <Pill icon={<Sparkles className="h-4 w-4" />} text="Clean finishes" />
           </motion.div>
         </div>
       </section>
@@ -180,39 +187,67 @@ export default function About() {
         ]}
       />
 
-      {/* INTRO / MISSION */}
+      {/* ABOUT + MISSION + WHY */}
       <section className="max-w-7xl mx-auto px-6 py-14 grid lg:grid-cols-3 gap-8">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="lg:col-span-2"
+          className="lg:col-span-2 space-y-8"
         >
-          <h2 className="text-3xl md:text-4xl font-bold">
-            Our mission at Nilta Flooring
-          </h2>
-          <p className="text-white/80 mt-4 leading-relaxed text-sm md:text-base">
-            To make flooring projects predictable and stress-free. From product
-            selection to final walkthrough, we keep you informed, protect your
-            home or business, and install to plan—no corners cut. Our goal is
-            floors that look great, feel solid, and last.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            <Badge
-              icon={<ShieldCheck className="h-4 w-4" />}
-              text="Licensed & Insured"
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold">About Nilta Flooring Inc.</h2>
+            <p className="text-white/80 mt-4 leading-relaxed text-sm md:text-base max-w-3xl">
+              We’re an Edmonton-based flooring company focused on doing things the right way:
+              honest recommendations, solid prep, clean workmanship, and a handover you feel
+              good about. Whether it’s a single room refresh or a full commercial fit-out,
+              we keep the process simple and predictable.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl">
+            <div className="flex items-start gap-3">
+              <span className="grid place-items-center h-10 w-10 rounded-2xl bg-white/[0.05] border border-white/10">
+                <ThumbsUp className="h-5 w-5" />
+              </span>
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold">Our Mission</h3>
+                <p className="text-white/80 mt-3 leading-relaxed text-sm md:text-base">
+                  We’re here to make flooring simple and reliable. From helping you choose the
+                  right product to the final walkthrough, we keep you in the loop and never cut
+                  corners. Our goal is simple: floors that look great, feel solid, and stand the
+                  test of time.
+                </p>
+
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Badge
+                    icon={<Handshake className="h-4 w-4" />}
+                    text="Clear communication"
+                  />
+                  <Badge
+                    icon={<ClipboardCheck className="h-4 w-4" />}
+                    text="Moisture & subfloor prep"
+                  />
+                  <Badge icon={<Timer className="h-4 w-4" />} text="On-time scheduling" />
+                  <Badge
+                    icon={<Paintbrush className="h-4 w-4" />}
+                    text="Tidy workspaces"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-6">
+            <InfoCard
+              title="What we install"
+              text="LVP • Laminate • Carpet • Carpet-tile • Hardwood • Engineered hardwood • Tile"
+              icon={<Layers className="h-5 w-5 text-[#F3E9EC]" />}
             />
-            <Badge
-              icon={<ClipboardCheck className="h-4 w-4" />}
-              text="Moisture & Subfloor Prep"
-            />
-            <Badge
-              icon={<Timer className="h-4 w-4" />}
-              text="On-Time Scheduling"
-            />
-            <Badge
-              icon={<ThumbsUp className="h-4 w-4" />}
-              text="10/10 Client Rating"
+            <InfoCard
+              title="How we work"
+              text="Proper prep, clean transitions, and walkthroughs that leave you confident—not guessing."
+              icon={<Gauge className="h-5 w-5 text-[#F3E9EC]" />}
             />
           </div>
         </motion.div>
@@ -221,17 +256,48 @@ export default function About() {
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl"
+          className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl h-fit"
         >
-          <div className="text-sm text-white/60">At a glance</div>
-          <ul className="mt-3 space-y-3 text-white/85 text-sm md:text-base">
-            <Li icon={<MapPin />} text="Edmonton, Alberta — primary service area" />
-            <Li icon={<Users />} text="Certified installers & vetted partners" />
-            <Li icon={<HardHat />} text="COR-aligned safety & dust control" />
+          <div className="text-sm text-white/60">Why choose us</div>
+          <p className="text-white/85 mt-3 text-sm md:text-base leading-relaxed">
+            We’re fully licensed and insured, with a focus on proper moisture and subfloor prep,
+            on-time scheduling, and a track record of happy clients. Our values are all about
+            accountability, safety, efficiency, and craftsmanship.
+          </p>
+
+          <div className="mt-5 space-y-3 text-white/85 text-sm md:text-base">
+            <Li icon={<MapPin />} text="16307 111 Ave NW, Edmonton, AB T5M 2S2" />
+            <Li icon={<ShieldCheck />} text="Licensed & insured in Alberta" />
+            <Li icon={<HardHat />} text="Clean, safe, respectful job sites" />
             <Li icon={<Award />} text="Workmanship & manufacturer warranties" />
-          </ul>
-          <div className="mt-6">
-            <TextArrowLink to="/contact">Work with us</TextArrowLink>
+          </div>
+
+          <div className="mt-6 grid gap-2">
+            <TextArrowLink to="/contact">Get an estimate</TextArrowLink>
+
+            <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+              <div className="grid gap-3 text-sm">
+                <div className="flex items-start gap-2">
+                  <Phone className="h-4 w-4 mt-0.5 text-white/70" />
+                  <div>
+                    <div className="text-white/70 text-xs">Phone</div>
+                    <div className="text-white/90 font-semibold">
+                      O: 1-780-761-9500
+                    </div>
+                    <div className="text-white/90 font-semibold">
+                      C: 1-780-222-5669
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Mail className="h-4 w-4 mt-0.5 text-white/70" />
+                  <div>
+                    <div className="text-white/70 text-xs">Email</div>
+                    <div className="text-white/90 font-semibold">info@nilta.ca</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </motion.aside>
       </section>
@@ -239,35 +305,54 @@ export default function About() {
       {/* VALUES */}
       <section className="max-w-7xl mx-auto px-6 pb-10">
         <h3 className="text-2xl md:text-3xl font-bold">Our values</h3>
+        <p className="text-white/70 mt-2 max-w-2xl text-sm md:text-base">
+          The standards we bring to every job—small or large.
+        </p>
+
         <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <ValueCard
             icon={<Handshake className="h-5 w-5 text-[#F3E9EC]" />}
             title="Accountability"
-            text="One team from quote to install. Clear ownership at every step."
+            text="Clear ownership and honest updates from quote to walkthrough."
           />
           <ValueCard
             icon={<ShieldCheck className="h-5 w-5 text-[#F3E9EC]" />}
-            title="Safety First"
-            text="Protection, dust control, and tidy sites—every single day."
+            title="Safety"
+            text="Protection, dust control, and tidy workspaces—every day."
           />
           <ValueCard
             icon={<Gauge className="h-5 w-5 text-[#F3E9EC]" />}
             title="Efficiency"
-            text="Sequencing and logistics that keep materials and schedules on track."
+            text="Planning and logistics that keep materials and timelines on track."
           />
           <ValueCard
             icon={<Paintbrush className="h-5 w-5 text-[#F3E9EC]" />}
             title="Craftsmanship"
-            text="Level substrates, tight seams, clean transitions, and crisp lines."
+            text="Proper prep, clean transitions, and tight finishing details."
           />
         </div>
       </section>
 
-      {/* TEAM / LEADERSHIP */}
-      <section className="max-w-7xl mx-auto px-6 pb-6">
-        <div className="flex items-center justify-between">
-          <h3 className="text-2xl md:text-3xl font-bold">Leadership</h3>
+      {/* TEAM (WITH PHOTOS) */}
+      <section className="max-w-7xl mx-auto px-6 pb-10">
+        <div className="flex items-end justify-between gap-4 flex-wrap">
+          <div>
+            <h3 className="text-2xl md:text-3xl font-bold">Meet our team</h3>
+            <p className="text-white/70 mt-2 max-w-3xl text-sm md:text-base">
+              From Ahmet, our founder with over two decades of flooring expertise, to our
+              project managers Vladimir and Andrii—our team is focused on clear planning,
+              tidy sites, and results that last.
+            </p>
+          </div>
+          <Link
+            to="/contact"
+            className="inline-flex items-center rounded-full border border-white/20 px-5 py-2 font-semibold text-white/90 transition hover:border-[#8F2841] hover:bg-[#8F2841]/10 hover:text-[#F2C4D0]"
+          >
+            Work with us
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
         </div>
+
         <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {TEAM.map((m, i) => (
             <motion.article
@@ -276,26 +361,34 @@ export default function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.04 }}
-              className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]"
+              className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] shadow-xl"
             >
               <div className="relative">
                 <img
                   src={m.photo}
                   alt={m.name}
-                  className="h-56 w-full object-cover transition-transform duration-700 hover:scale-105"
+                  className="h-64 w-full object-cover transition-transform duration-700 hover:scale-105"
+                  loading="lazy"
                 />
-                <div className="absolute top-3 left-3 rounded-full bg-black/60 backdrop-blur px-3 py-1 text-xs border border-white/10">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
+                <div className="absolute top-3 left-3 rounded-full bg-black/55 backdrop-blur px-3 py-1 text-[11px] border border-white/15">
                   {m.role}
                 </div>
               </div>
+
               <div className="p-5">
-                <div className="font-semibold">{m.name}</div>
-                <div className="text-white/60 text-sm">{m.focus}</div>
-                <p className="text-white/75 mt-3 text-sm">{m.blurb}</p>
+                <div className="font-semibold text-lg">{m.name}</div>
+                <div className="text-white/70 text-sm">{m.focus}</div>
+                <p className="text-white/80 mt-3 text-sm leading-relaxed">{m.blurb}</p>
               </div>
             </motion.article>
           ))}
         </div>
+
+        <p className="text-white/55 text-xs mt-4">
+          Tip: replace the photo paths in the TEAM array below with your real image files
+          (e.g. /team/ahmet.webp).
+        </p>
       </section>
 
       {/* CAPABILITIES STRIP */}
@@ -303,16 +396,14 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-6 py-12 grid md:grid-cols-2 gap-6">
           <Capability
             title="Residential Flooring"
-            desc="Whole-home or room-by-room installs—LVP, laminate, engineered hardwood, and tile—with moisture checks and clean finishes."
+            desc="Whole-home or room-by-room installs—LVP, laminate, carpet, engineered hardwood, and tile—with moisture checks and clean finishes."
             items={[
               { icon: <Ruler />, text: "Moisture testing & substrate plan" },
               { icon: <Layers />, text: "Underlay & sound control" },
               { icon: <Wrench />, text: "Levelling, patching & repairs" },
               { icon: <Paintbrush />, text: "Stairs, trims & transitions" },
             ]}
-            links={[
-              { label: "Explore Residential", to: "/residential", primary: true }
-            ]}
+            links={[{ label: "Explore Residential", to: "/residential", primary: true }]}
           />
           <Capability
             title="Commercial Flooring"
@@ -323,40 +414,24 @@ export default function About() {
               { icon: <ClipboardCheck />, text: "Compliance & inspections" },
               { icon: <Timer />, text: "Tight timelines & phasing" },
             ]}
-            links={[
-              { label: "Explore Commercial", to: "/commercial", primary: true },
-            ]}
+            links={[{ label: "Explore Commercial", to: "/commercial", primary: true }]}
           />
         </div>
       </section>
 
       {/* TIMELINE */}
       <section className="max-w-7xl mx-auto px-6 py-14">
-        <h3 className="text-2xl md:text-3xl font-bold">
-          Our project timeline
-        </h3>
+        <h3 className="text-2xl md:text-3xl font-bold">Our project timeline</h3>
         <p className="text-white/75 mt-2 max-w-2xl text-sm md:text-base">
-          A simple, transparent process that keeps you in the loop from first
-          walkthrough to final handover.
+          A simple, transparent process that keeps you in the loop from first walkthrough
+          to final handover.
         </p>
         <div className="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            {
-              title: "Discovery",
-              text: "Walkthrough, product options, and transparent quote.",
-            },
-            {
-              title: "Plan & Schedule",
-              text: "Moisture checks, subfloor prep plan, and logistics.",
-            },
-            {
-              title: "Install",
-              text: "Sequenced crews, daily tidy-ups, and quality checks.",
-            },
-            {
-              title: "Handover",
-              text: "Final walkthrough, documentation, and warranty.",
-            },
+            { title: "Discovery", text: "Walkthrough, product options, and transparent quote." },
+            { title: "Plan & Schedule", text: "Moisture checks, subfloor prep plan, and logistics." },
+            { title: "Install", text: "Sequenced crews, daily tidy-ups, and quality checks." },
+            { title: "Handover", text: "Final walkthrough, documentation, and warranty." },
           ].map((s, i) => (
             <motion.div
               key={i}
@@ -373,26 +448,14 @@ export default function About() {
         </div>
       </section>
 
-      {/* KPI BAND */}
-      <section className="bg-black/80">
-        <div className="max-w-7xl mx-auto px-6 py-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <KPI value="120+" label="Projects Completed" />
-          <KPI value="100%" label="On-Time Installs" />
-          <KPI value="10/10" label="Client Satisfaction" />
-          <KPI value="5+" label="Active Crews" />
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="border-t border-white/10 bg-black/70">
         <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <div className="text-xl md:text-2xl font-semibold">
-              Ready to plan your flooring?
-            </div>
+            <div className="text-xl md:text-2xl font-semibold">Ready to get started?</div>
             <div className="text-white/70 text-sm md:text-base">
-              We’ll recommend the right product, prep plan, and timeline—clearly
-              and honestly.
+              Let’s make your flooring vision a reality. Reach out for an estimate—and we’ll
+              take it from there.
             </div>
           </div>
           <TextArrowLink to="/contact">Request an estimate</TextArrowLink>
@@ -403,34 +466,52 @@ export default function About() {
 }
 
 /* --- data --- */
+/**
+ * Replace these photo paths with your real team images.
+ * Recommended: add files like:
+ *   /public/team/ahmet.webp
+ *   /public/team/vladimir.webp
+ *   /public/team/andrii.webp
+ */
 const TEAM = [
   {
-    name: "Alex Morgan",
-    role: "Founder & Project Director",
-    focus: "Residential strategy & client success",
-    photo: "https://picsum.photos/seed/team1/1200/800",
+    name: "Ahmet",
+    role: "Founder",
+    focus: "20+ years of flooring expertise",
+    photo: "/team/ahmet.webp",
     blurb:
-      "15+ years in flooring and renovations—pairing product knowledge with field pragmatism.",
+      "Built Nilta on craftsmanship and care—focused on prep, planning, and clean finishes that hold up over time.",
   },
   {
-    name: "Riley Chen",
-    role: "Operations Lead",
-    focus: "Scheduling, procurement & logistics",
-    photo: "https://picsum.photos/seed/team2/1200/800",
+    name: "Vladimir",
+    role: "Project Manager",
+    focus: "Scheduling, coordination & client updates",
+    photo: "/team/vladimir.webp",
     blurb:
-      "Keeps materials moving, timelines honest, and job sites humming from start to finish.",
+      "Keeps timelines honest, materials organized, and communication clear—so projects run smoothly from start to finish.",
   },
   {
-    name: "Jordan Patel",
-    role: "Install Manager",
-    focus: "Safety, quality & inspections",
-    photo: "https://picsum.photos/seed/team3/1200/800",
+    name: "Andrii",
+    role: "Project Manager",
+    focus: "Quality checks, site readiness & finishing",
+    photo: "/team/andrii.webp",
     blurb:
-      "Quality-control focused on level substrates, clean seams, and tidy handovers.",
+      "Focused on the details that matter: proper prep, clean transitions, and a tidy, confident handover.",
   },
 ];
 
 /* --- small components --- */
+function Pill({ icon, text }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 flex items-center gap-2">
+      <span className="grid place-items-center h-8 w-8 rounded-xl bg-white/[0.05] border border-white/10">
+        {icon}
+      </span>
+      <span className="text-sm text-white/85 font-medium">{text}</span>
+    </div>
+  );
+}
+
 function Badge({ icon, text }) {
   return (
     <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.03] px-3 py-1 text-xs text-white/80">
@@ -442,12 +523,24 @@ function Badge({ icon, text }) {
 
 function Li({ icon, text }) {
   return (
-    <li className="flex items-center gap-2">
+    <div className="flex items-center gap-2">
       <span className="grid place-items-center h-8 w-8 rounded-lg bg-white/[0.05] border border-white/10">
         {icon}
       </span>
       <span>{text}</span>
-    </li>
+    </div>
+  );
+}
+
+function InfoCard({ icon, title, text }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl">
+      <div className="flex items-center gap-2">
+        <span>{icon}</span>
+        <div className="font-semibold">{title}</div>
+      </div>
+      <p className="text-white/75 mt-2 text-sm leading-relaxed">{text}</p>
+    </div>
   );
 }
 
@@ -494,7 +587,6 @@ function Capability({ title, desc, items = [], links = [] }) {
   );
 }
 
-/* Capsule links – same style as Projects/Home */
 function TextArrowLink({ to, children }) {
   return (
     <Link
@@ -515,10 +607,11 @@ function GhostLink({ to, label, primary }) {
     <Link
       to={to}
       className={`group inline-flex items-center rounded-full px-4 py-2 text-xs md:text-sm font-semibold transition
-      ${primary
+      ${
+        primary
           ? "border border-[#8F2841]/80 bg-white/[0.03] hover:border-[#8F2841] hover:bg-[#8F2841]/10 text-white/90 hover:text-[#F2C4D0]"
           : "border border-white/15 bg-white/[0.03] hover:border-[#8F2841] hover:bg-[#8F2841]/10 text-white/85 hover:text-[#F2C4D0]"
-        }`}
+      }`}
     >
       <span className="relative">{label}</span>
       <ArrowRight
@@ -526,14 +619,5 @@ function GhostLink({ to, label, primary }) {
         aria-hidden="true"
       />
     </Link>
-  );
-}
-
-function KPI({ value, label }) {
-  return (
-    <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-6 text-center shadow-xl">
-      <div className="text-3xl font-extrabold tracking-tight">{value}</div>
-      <div className="mt-1 text-white/70 text-sm">{label}</div>
-    </div>
   );
 }

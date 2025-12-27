@@ -22,7 +22,7 @@ export default function Blog() {
   const blogLd = {
     "@context": "https://schema.org",
     "@type": "Blog",
-    name: "Nilta Flooring Blog",
+    name: "Nilta Flooring • Guide & Tips",
     url: pageUrl,
     inLanguage: "en-CA",
     publisher: { "@type": "Organization", name: "Nilta Flooring" },
@@ -71,16 +71,16 @@ export default function Blog() {
     <main className="pt-16 min-h-screen bg-neutral-950 text-white">
       {/* SEO META */}
       <Helmet>
-        <title>Blog | Nilta Flooring – Guides, Design & Commercial</title>
+        <title>Guide & Tips | Nilta Flooring – Insights & Practical Guides</title>
         <meta
           name="description"
-          content="Practical flooring guides and insights for residential and commercial spaces in Edmonton, AB—LVP, laminate, engineered hardwood, and tile."
+          content="Flooring insights and practical guidance, shaped by hands-on experience across Alberta residential and commercial projects."
         />
         <link rel="canonical" href={pageUrl} />
-        <meta property="og:title" content="Nilta Flooring Blog" />
+        <meta property="og:title" content="Nilta Flooring • Guide & Tips" />
         <meta
           property="og:description"
-          content="Guides and insights on flooring products, prep, installation, and care across Edmonton, AB."
+          content="Practical guides on flooring choices, prep, timelines, and care—built from real experience in Edmonton and across Alberta."
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={pageUrl} />
@@ -97,11 +97,11 @@ export default function Blog() {
         <script type="application/ld+json">{JSON.stringify(itemListLd)}</script>
       </Helmet>
 
-      {/* HERO – same vibe as About/Projects */}
+      {/* HERO */}
       <section className="relative h-[50vh] md:h-[60vh] overflow-hidden">
         <img
           src="/blog/blog-hero-new.webp"
-          alt="Blog hero"
+          alt="Guide & Tips hero"
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/45 to-neutral-950" />
@@ -112,14 +112,14 @@ export default function Blog() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            Nilta Flooring • Blog
+            Nilta Flooring • Guide & Tips
           </motion.p>
           <motion.h1
             className="text-4xl md:text-6xl font-extrabold"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            Flooring Insights & Guides
+            Flooring Insights & Practical Guides
           </motion.h1>
           <motion.p
             className="mt-3 text-white/85 max-w-2xl text-sm md:text-base"
@@ -127,8 +127,8 @@ export default function Blog() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
           >
-            Practical advice on selecting, preparing, installing, and maintaining
-            floors—for homes and commercial spaces.
+            Flooring insights and practical guidance, shaped by hands-on
+            experience across Alberta residential and commercial projects.
           </motion.p>
         </div>
       </section>
@@ -138,52 +138,100 @@ export default function Blog() {
         <Breadcrumbs
           items={[
             { label: "Home", to: "/" },
-            { label: "Blog", to: "/blog" },
+            { label: "Guide & Tips", to: "/blog" },
           ]}
         />
       </section>
       <BreadcrumbLD
         items={[
           { label: "Home", url: `${SITE_URL}/` },
-          { label: "Blog", url: pageUrl },
+          { label: "Guide & Tips", url: pageUrl },
         ]}
       />
 
-      {/* INTRO + “AT A GLANCE” (like About page structure) */}
+      {/* START HERE + ABOUT + WHO FOR */}
       <section className="max-w-7xl mx-auto px-6 py-10 grid lg:grid-cols-3 gap-8">
+        {/* Left: Start Here + About */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="lg:col-span-2"
+          className="lg:col-span-2 space-y-6"
         >
-          <h2 className="text-3xl md:text-4xl font-bold">What you&apos;ll find here</h2>
-          <p className="text-white/80 mt-4 leading-relaxed text-sm md:text-base max-w-3xl">
-            No fluff, no jargon. Just real-world notes from residential and
-            commercial jobs across Edmonton—what works, what fails, and how to
-            plan a flooring project without guessing.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            <Badge text="Homeowners" />
-            <Badge text="Property managers" />
-            <Badge text="Designers" />
-            <Badge text="GCs & trades" />
+          {/* Start Here */}
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl">
+            <p className="uppercase tracking-[0.25em] text-[11px] text-white/60">
+              Start Here
+            </p>
+            <h2 className="text-2xl md:text-3xl font-bold mt-2">
+              Welcome! If you’re not quite sure where to begin, you’re in good
+              company.
+            </h2>
+            <p className="text-white/80 mt-4 leading-relaxed text-sm md:text-base">
+              It’s completely normal to have questions—about flooring choices,
+              preparation, or the overall process. Our guides are designed to
+              make everything feel a bit more approachable and clear.
+            </p>
+            <p className="text-white/80 mt-3 leading-relaxed text-sm md:text-base">
+              Feel free to start with whatever feels most relevant to you right
+              now, and you can always return as new questions come up. And
+              remember, if you’d rather chat directly, just give us a call.
+              We’re more than happy to answer any questions and guide you
+              through the first steps of your project.
+            </p>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Link
+                to="/contact"
+                className="inline-flex items-center rounded-full border border-red-500/70 px-4 py-2 text-xs md:text-sm font-semibold hover:bg-red-600/10 hover:border-red-600 transition"
+              >
+                Contact us
+              </Link>
+              <a
+                href="#articles"
+                className="inline-flex items-center rounded-full border border-white/15 px-4 py-2 text-xs md:text-sm font-semibold hover:bg-white/5 transition"
+              >
+                Browse articles
+              </a>
+            </div>
+          </div>
+
+          {/* About these guides */}
+          <div>
+            <h3 className="text-xl md:text-2xl font-bold">About these guides</h3>
+            <p className="text-white/80 mt-3 leading-relaxed text-sm md:text-base max-w-3xl">
+              Everything you’ll find here comes from real experience—jobs
+              completed, lessons learned, and conversations we’ve had with
+              homeowners, builders, and property managers across Edmonton and
+              Alberta.
+            </p>
+            <p className="text-white/80 mt-3 leading-relaxed text-sm md:text-base max-w-3xl">
+              We write the same way we speak on-site and in our showroom:
+              honestly, clearly, and without pressure. The goal isn’t to rush
+              decisions—it’s to help you feel comfortable making them.
+            </p>
           </div>
         </motion.div>
 
+        {/* Right: Who this is for + filters */}
         <motion.aside
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl text-sm"
         >
-          <div className="text-sm text-white/60">At a glance</div>
+          <div className="text-sm text-white/60">Who this is for</div>
           <ul className="mt-3 space-y-3 text-white/85 text-sm">
-            <li>• Guides on choosing LVP, laminate, hardwood and tile.</li>
-            <li>• Prep checklists: subfloors, moisture, stairs, basements.</li>
-            <li>• Notes from commercial projects and phasing.</li>
-            <li>• Care tips so floors actually last.</li>
+            <li>• Homeowners planning a refresh or renovation</li>
+            <li>• Property managers thinking long-term</li>
+            <li>• Designers refining details and materials</li>
+            <li>• Builders and trades coordinating work</li>
           </ul>
+          <p className="text-xs text-white/60 mt-4">
+            Many people wear more than one hat—these guides are meant to support
+            that.
+          </p>
+
           <div className="mt-5 border-t border-white/10 pt-4">
             <p className="text-xs text-white/60 mb-2">Quick filters</p>
             <div className="flex flex-wrap gap-2">
@@ -194,10 +242,11 @@ export default function Blog() {
                     setCat(c);
                     setPage(1);
                   }}
-                  className={`rounded-full px-3 py-1 text-xs transition border ${cat === c
-                    ? "border-[#8F2841] bg-[#8F2841]/25 text-[#F3E9EC]"
-                    : "border-white/15 bg-white/[0.02] text-white/80 hover:bg-white/5"
-                    }`}
+                  className={`rounded-full px-3 py-1 text-xs transition border ${
+                    cat === c
+                      ? "border-[#8F2841] bg-[#8F2841]/25 text-[#F3E9EC]"
+                      : "border-white/15 bg-white/[0.02] text-white/80 hover:bg-white/5"
+                  }`}
                 >
                   {c}
                 </button>
@@ -207,7 +256,7 @@ export default function Blog() {
         </motion.aside>
       </section>
 
-      {/* SEARCH BAR (separate row, like a tool) */}
+      {/* SEARCH BAR */}
       <section className="max-w-7xl mx-auto px-6 pb-4">
         <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
           <div className="text-sm text-white/75">
@@ -223,7 +272,7 @@ export default function Blog() {
                   setQuery(e.target.value);
                   setPage(1);
                 }}
-                placeholder="LVP, basements, prep…"
+                placeholder="Basements, prep, waterproofing…"
                 className="flex-1 bg-transparent text-sm focus:outline-none placeholder:text-white/40"
                 aria-label="Search articles"
               />
@@ -232,7 +281,7 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* FEATURED ARTICLE – like a hero card at top of list */}
+      {/* FEATURED ARTICLE */}
       {featured && (
         <section className="max-w-7xl mx-auto px-6 pb-6">
           <motion.article
@@ -277,8 +326,8 @@ export default function Blog() {
         </section>
       )}
 
-      {/* GRID OF POSTS (rest of the list) */}
-      <section className="max-w-7xl mx-auto px-6 pb-12">
+      {/* GRID OF POSTS */}
+      <section id="articles" className="max-w-7xl mx-auto px-6 pb-12">
         {shown.length === 0 ? (
           <div className="text-white/70 text-sm">
             No articles match your filters yet. Try another category or search
@@ -302,18 +351,16 @@ export default function Blog() {
               <button
                 key={n}
                 onClick={() => setPage(n)}
-                className={`h-9 w-9 rounded-xl border text-sm transition ${page === n
-                  ? "border-[#8F2841] bg-[#8F2841]/30 text-[#F3E9EC]"
-                  : "border-white/15 bg-white/[0.03] text-white/80 hover:bg-white/10"
-                  }`}
+                className={`h-9 w-9 rounded-xl border text-sm transition ${
+                  page === n
+                    ? "border-[#8F2841] bg-[#8F2841]/30 text-[#F3E9EC]"
+                    : "border-white/15 bg-white/[0.03] text-white/80 hover:bg-white/10"
+                }`}
               >
                 {n}
               </button>
             ))}
-            <PageBtn
-              disabled={page === totalPages}
-              onClick={() => setPage(page + 1)}
-            >
+            <PageBtn disabled={page === totalPages} onClick={() => setPage(page + 1)}>
               Next
             </PageBtn>
           </div>
@@ -408,13 +455,5 @@ function PageBtn({ children, ...props }) {
     >
       {children}
     </button>
-  );
-}
-
-function Badge({ text }) {
-  return (
-    <span className="inline-flex items-center rounded-full border border-white/15 bg-white/[0.03] px-3 py-1 text-xs text-white/80">
-      {text}
-    </span>
   );
 }

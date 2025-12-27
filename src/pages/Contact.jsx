@@ -17,26 +17,39 @@ import {
   CheckCircle2,
   X,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 
 const ACCENT = "#8F2841";
 
 export default function Contact() {
-  // ---------- Hours ----------
+  // ---------- Hours (Edmonton local time) ----------
+  // Requested:
+  // Mon–Fri: 8:30 AM – 6:00 PM
+  // Sat: 9:00 AM – 4:00 PM
+  // Sun: Closed
   const HOURS = {
-    1: { open: "08:00", close: "18:00" },
-    2: { open: "08:00", close: "18:00" },
-    3: { open: "08:00", close: "18:00" },
-    4: { open: "08:00", close: "18:00" },
-    5: { open: "08:00", close: "16:00" },
-    6: null,
+    1: { open: "08:30", close: "18:00" },
+    2: { open: "08:30", close: "18:00" },
+    3: { open: "08:30", close: "18:00" },
+    4: { open: "08:30", close: "18:00" },
+    5: { open: "08:30", close: "18:00" },
+    6: { open: "09:00", close: "16:00" },
     0: null,
   };
+
+  // ---------- Business info ----------
+  const ADDRESS_DISPLAY = "16307 111 Ave NW, Edmonton, AB T5M 2S2";
+  const ADDRESS_QUERY = "16307 111 Ave NW, Edmonton, AB T5M 2S2";
+  const PHONE_MAIN = "780-222-5669";
+  const PHONE_OFFICE = "1-780-761-9500";
+  const EMAIL = "info@nilta.ca";
 
   // ---------- Local time + open/closed ----------
   const { nowStr, isOpen, todayIdx } = useMemo(() => {
     const now = new Date();
-    const fmt = new Intl.DateTimeFormat("en-CA", {
+
+    const timeFmt = new Intl.DateTimeFormat("en-CA", {
       timeZone: "America/Edmonton",
       hour: "2-digit",
       minute: "2-digit",
@@ -46,10 +59,9 @@ export default function Contact() {
       timeZone: "America/Edmonton",
       weekday: "long",
     });
-    const [h, m] = fmt
-      .format(now)
-      .split(":")
-      .map(Number);
+
+    const [h, m] = timeFmt.format(now).split(":").map(Number);
+
     const w = new Date(
       now.toLocaleString("en-CA", { timeZone: "America/Edmonton" })
     ).getDay(); // 0..6
@@ -66,21 +78,22 @@ export default function Contact() {
     }
 
     return {
-      nowStr: `${dayFmt.format(now)} • ${fmt.format(now)} (Edmonton)`,
+      nowStr: `${dayFmt.format(now)} • ${timeFmt.format(now)} (Edmonton)`,
       isOpen: open,
       todayIdx: w,
     };
   }, []);
 
-  // ---------- Business info ----------
-  const ADDRESS = "16307 111 Ave Edmonton AB T5M 2S2";
-  const PHONE = " 780-222-5669";
-  const EMAIL = "hello@niltaflooring.ca"; // update if needed
-
   const mapEmbedSrc = useMemo(() => {
-    const q = encodeURIComponent(`Nilta Flooring Edmonton, ${ADDRESS}`);
+    const q = encodeURIComponent(`Nilta Flooring, ${ADDRESS_QUERY}`);
     return `https://www.google.com/maps?q=${q}&output=embed`;
-  }, [ADDRESS]);
+  }, [ADDRESS_QUERY]);
+
+  const mapsSearchUrl = useMemo(() => {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      ADDRESS_QUERY
+    )}`;
+  }, [ADDRESS_QUERY]);
 
   // ---------- Form state ----------
   const [form, setForm] = useState({
@@ -96,7 +109,6 @@ export default function Contact() {
   const [toastOpen, setToastOpen] = useState(false);
 
   const maxChars = 1000;
-
   const validateEmail = (v) => /\S+@\S+\.\S+/.test(v);
 
   const validate = () => {
@@ -104,8 +116,7 @@ export default function Contact() {
     if (!form.name.trim()) next.name = "Please enter your full name.";
     if (!form.email.trim() || !validateEmail(form.email))
       next.email = "Enter a valid email address.";
-    if (!form.message.trim())
-      next.message = "Tell us a bit about your project.";
+    if (!form.message.trim()) next.message = "Tell us a bit about your project.";
     return next;
   };
 
@@ -144,25 +155,26 @@ export default function Contact() {
     return () => clearTimeout(id);
   }, [toastOpen]);
 
+  const telMain = `tel:+1${PHONE_MAIN.replace(/[^0-9]/g, "")}`;
+  const telOffice = `tel:+1${PHONE_OFFICE.replace(/[^0-9]/g, "")}`;
+
   return (
     <main className="pt-16 min-h-screen bg-[#050507] text-white">
       {/* SEO */}
       <Helmet>
-        <title>
-          Contact Us | Nilta Flooring – Edmonton Flooring Supply & Installation
-        </title>
+        <title>Contact Us | Nilta Flooring – Edmonton Flooring Supply & Installation</title>
         <meta
           name="description"
-          content="Contact Nilta Flooring in Edmonton, AB. Fast, transparent estimates for residential and commercial flooring—LVP, laminate, engineered hardwood, and tile."
+          content="Ready to transform your floors? Contact Nilta Flooring in Edmonton, AB. Fast, transparent estimates for residential and commercial flooring."
         />
-        <link rel="canonical" href="https://example.com/contact" />
+        <link rel="canonical" href="https://nilta.ca/contact" />
         <meta property="og:title" content="Contact Nilta Flooring" />
         <meta
           property="og:description"
-          content="Tell us about your space. We’ll recommend the right product, prep plan, and timeline."
+          content="Tell us about your space—size, existing floors, and timeline. We’ll reply within one business day."
         />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://example.com/contact" />
+        <meta property="og:url" content="https://nilta.ca/contact" />
         <meta
           property="og:image"
           content="https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=1200&auto=format&fit=crop"
@@ -189,8 +201,8 @@ export default function Contact() {
                   Thanks — your message is on its way.
                 </div>
                 <div className="text-green-100/90 mt-0.5">
-                  Our estimator will reply within one business day. For urgent
-                  requests, call {PHONE}.
+                  We’ll reply within one business day. For urgent requests, call{" "}
+                  {PHONE_MAIN}.
                 </div>
               </div>
               <button
@@ -205,9 +217,8 @@ export default function Contact() {
         </motion.div>
       )}
 
-      {/* HERO – video, bigger height, same vibe as other pages */}
+      {/* HERO */}
       <section className="relative h-[70vh] md:h-[80vh] overflow-hidden">
-        {/* Background video */}
         <video
           className="absolute inset-0 h-full w-full object-cover"
           src="/video/contact-hero.mp4"
@@ -215,13 +226,10 @@ export default function Contact() {
           muted
           loop
           playsInline
-        // poster="/images/contact-hero-poster.jpg"
         />
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/55 to-[#050507]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/55 to-[#050507]" />
         <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/70 pointer-events-none" />
 
-        {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto h-full px-6 flex flex-col justify-center">
           <motion.p
             className="uppercase tracking-[0.35em] text-xs md:text-sm text-gray-300 mb-3"
@@ -233,24 +241,24 @@ export default function Contact() {
           </motion.p>
 
           <motion.h1
-            className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight max-w-3xl"
+            className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight max-w-4xl"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.05 }}
           >
-            Let&apos;s plan your{" "}
-            <span className="text-[#F3E9EC]">next floor</span> together.
+            Ready to transform your floors?{" "}
+            <span className="text-[#F3E9EC]">Connect with us today.</span>
           </motion.h1>
 
           <motion.p
-            className="mt-3 text-white/85 max-w-2xl text-sm md:text-base"
+            className="mt-4 text-white/85 max-w-3xl text-sm md:text-base leading-relaxed"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.12 }}
           >
-            Tell us about your space—rooms, square footage, existing floors, and
-            timing. We’ll respond within one business day with next steps and
-            options.
+            We’d love to hear about your project. Share a few details—like the size
+            of the area, your current floors, and your timeline—and we’ll get back
+            to you within one business day with next steps.
           </motion.p>
 
           <motion.div
@@ -260,103 +268,188 @@ export default function Contact() {
             transition={{ duration: 0.6, delay: 0.18 }}
           >
             <a
-              href={`tel:+17805550123`}
+              href={telMain}
               className="px-6 py-3 rounded-full bg-[#8F2841] hover:bg-[#a73753] text-white font-semibold shadow-lg transition text-sm md:text-base inline-flex items-center gap-2"
             >
               <Phone className="h-4 w-4" />
-              Call {PHONE}
+              Call {PHONE_MAIN}
             </a>
             <a
               href={`mailto:${EMAIL}`}
-              className="px-6 py-3 rounded-full border border-white/40 text-white/90 hover:bg-white hover:text-black transition text-sm md:text-base inline-flex items-center gap-2"
+              className="px-6 py-3 rounded-full border border-white/35 text-white/90 hover:bg-white hover:text-black transition text-sm md:text-base inline-flex items-center gap-2"
             >
               <Mail className="h-4 w-4" />
               Email us
             </a>
+            <a
+              href={mapsSearchUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="px-6 py-3 rounded-full border border-white/15 bg-white/[0.03] hover:bg-white/10 transition text-sm md:text-base inline-flex items-center gap-2"
+            >
+              <MapPin className="h-4 w-4" />
+              Open in Maps
+            </a>
+          </motion.div>
+
+          <motion.div
+            className="mt-7 grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-3xl"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.22 }}
+          >
+            <Pill icon={<ShieldCheck className="h-4 w-4" />} text="Licensed & insured" />
+            <Pill icon={<ClipboardCheck className="h-4 w-4" />} text="Clear scopes & estimates" />
+            <Pill icon={<HardHat className="h-4 w-4" />} text="Friendly, tidy crews" />
           </motion.div>
         </div>
       </section>
 
       {/* BREADCRUMBS + JSON-LD */}
       <section className="max-w-7xl mx-auto px-6 py-4">
-        <Breadcrumbs
-          items={[
-            { label: "Home", to: "/" },
-            { label: "Contact", to: "/contact" },
-          ]}
-        />
+        <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Contact", to: "/contact" }]} />
       </section>
       <BreadcrumbLD
         items={[
-          { label: "Home", url: "https://example.com/" },
-          { label: "Contact", url: "https://example.com/contact" },
+          { label: "Home", url: "https://nilta.ca/" },
+          { label: "Contact", url: "https://nilta.ca/contact" },
         ]}
       />
 
-      {/* QUICK CONTACT CARDS */}
-      <section className="max-w-7xl mx-auto px-6 pb-2 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <InfoCard
-          icon={<MapPin className="h-5 w-5" />}
-          title="Address"
-          text={ADDRESS}
-        />
-        <InfoCard
-          icon={<Phone className="h-5 w-5" />}
-          title="Phone"
-          text={PHONE}
-          href={`tel:+17805550123`}
-        />
-        <InfoCard
-          icon={<Mail className="h-5 w-5" />}
-          title="Email"
-          text={EMAIL}
-          href={`mailto:${EMAIL}`}
-        />
-        <InfoCard
-          icon={<Clock className="h-5 w-5" />}
-          title={isOpen ? "Open now" : "Closed"}
-          text={nowStr}
-          badge={isOpen ? "Open" : "Closed"}
-          badgeColor={
-            isOpen
-              ? "bg-green-500/20 text-green-400 border-green-500/40"
-              : "bg-red-500/20 text-red-400 border-red-500/40"
-          }
-        />
+      {/* HOW TO REACH US */}
+      <section className="max-w-7xl mx-auto px-6 pb-2">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl">
+          <div className="flex items-center gap-2 text-white/90">
+            <Sparkles className="h-5 w-5 text-[#F3E9EC]" />
+            <div className="font-semibold text-lg md:text-xl">How to reach us</div>
+          </div>
+          <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <InfoCard icon={<MapPin className="h-5 w-5" />} title="Address" text={ADDRESS_DISPLAY} />
+            <InfoCard
+              icon={<Phone className="h-5 w-5" />}
+              title="Phone"
+              text={PHONE_MAIN}
+              href={telMain}
+            />
+            <InfoCard
+              icon={<Phone className="h-5 w-5" />}
+              title="Office"
+              text={PHONE_OFFICE}
+              href={telOffice}
+            />
+            <InfoCard
+              icon={<Mail className="h-5 w-5" />}
+              title="Email"
+              text={EMAIL}
+              href={`mailto:${EMAIL}`}
+            />
+          </div>
+        </div>
+
+        <p className="text-white/55 text-xs mt-3">
+          Side note: for Google “opening hours” and address search display, update your Google Business Profile (GBP)
+          listing to match the hours/address above.
+        </p>
       </section>
 
-      {/* ASSURANCES STRIP */}
-      <section className="max-w-7xl mx-auto px-6 pb-4">
-        <div className="grid sm:grid-cols-3 gap-4">
-          <Assurance
-            icon={<ShieldCheck className="h-5 w-5" />}
-            text="Licensed & insured in Alberta"
-          />
-          <Assurance
-            icon={<ClipboardCheck className="h-5 w-5" />}
-            text="Clear scope & written estimates"
-          />
-          <Assurance
-            icon={<HardHat className="h-5 w-5" />}
-            text="Respectful crews & tidy sites"
-          />
+      {/* HOURS + STATUS */}
+      <section className="max-w-7xl mx-auto px-6 pt-6 pb-4">
+        <div className="grid lg:grid-cols-[1fr_360px] gap-6">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2 font-semibold">
+                <Clock className="h-5 w-5" /> Our hours of operation (Edmonton)
+              </div>
+              <span
+                className={`text-xs rounded-full px-2 py-0.5 border ${
+                  isOpen
+                    ? "bg-green-500/20 text-green-300 border-green-500/40"
+                    : "bg-red-500/20 text-red-300 border-red-500/40"
+                }`}
+              >
+                {isOpen ? "Open now" : "Closed"}
+              </span>
+            </div>
+
+            <div className="mt-4 grid sm:grid-cols-2 gap-3">
+              {[
+                { idx: 1, label: "Monday" },
+                { idx: 2, label: "Tuesday" },
+                { idx: 3, label: "Wednesday" },
+                { idx: 4, label: "Thursday" },
+                { idx: 5, label: "Friday" },
+                { idx: 6, label: "Saturday" },
+                { idx: 0, label: "Sunday" },
+              ].map((d) => {
+                const slot = HOURS[d.idx];
+                const active = d.idx === todayIdx;
+                return (
+                  <div
+                    key={d.idx}
+                    className={`rounded-xl border p-4 ${
+                      active ? "border-[#8F2841]/70 bg-[#8F2841]/15" : "border-white/10 bg-white/[0.02]"
+                    }`}
+                  >
+                    <div className="font-semibold text-sm md:text-base">{d.label}</div>
+                    <div className="text-white/75 text-sm mt-1">
+                      {slot ? `${slot.open} – ${slot.close}` : "Closed"}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-4 text-white/60 text-xs">{nowStr}</div>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl">
+            <div className="text-sm text-white/60">Why choose us?</div>
+            <ul className="mt-3 space-y-3 text-white/85 text-sm md:text-base">
+              <li className="flex items-start gap-2">
+                <span className="mt-1">
+                  <ShieldCheck className="h-4 w-4 text-[#F3E9EC]" />
+                </span>
+                Licensed and insured for your peace of mind
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-1">
+                  <ClipboardCheck className="h-4 w-4 text-[#F3E9EC]" />
+                </span>
+                Transparent estimates and clear project scopes
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-1">
+                  <HardHat className="h-4 w-4 text-[#F3E9EC]" />
+                </span>
+                Friendly crews who respect your space and keep things tidy
+              </li>
+            </ul>
+
+            <div className="mt-6">
+              <a
+                href={telMain}
+                className="group inline-flex w-full justify-center items-center rounded-full border border-white/20 px-5 py-2 font-semibold text-white/90 transition hover:border-[#8F2841] hover:bg-[#8F2841]/10 hover:text-[#F2C4D0]"
+              >
+                Want to chat instead? Call {PHONE_MAIN}
+                <ArrowRight className="ml-2 h-4 w-4 opacity-0 -translate-x-3 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-x-0" />
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* MAP + HOURS + FORM */}
+      {/* MAP + FORM */}
       <section className="max-w-7xl mx-auto px-6 py-10 grid lg:grid-cols-2 gap-8 items-start">
-        {/* MAP + HOURS */}
+        {/* MAP */}
         <div className="space-y-6">
           <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] shadow-xl">
             <div className="p-4 flex items-center justify-between">
               <div className="font-semibold flex items-center gap-2">
-                <MapPin className="h-5 w-5" /> Find us
+                <MapPin className="h-5 w-5" /> Find us on the map
               </div>
               <a
                 className="text-xs md:text-sm underline hover:text-[#F2C4D0]"
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                  ADDRESS
-                )}`}
+                href={mapsSearchUrl}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -375,55 +468,38 @@ export default function Contact() {
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl">
-            <div className="flex items-center gap-2 font-semibold">
-              <Clock className="h-5 w-5" /> Business hours (Edmonton)
-            </div>
-            <div className="mt-4 grid sm:grid-cols-2 gap-3">
-              {[
-                { idx: 1, label: "Monday" },
-                { idx: 2, label: "Tuesday" },
-                { idx: 3, label: "Wednesday" },
-                { idx: 4, label: "Thursday" },
-                { idx: 5, label: "Friday" },
-                { idx: 6, label: "Saturday" },
-              ].map((d) => {
-                const slot = HOURS[d.idx];
-                const active = d.idx === todayIdx;
-                return (
-                  <div
-                    key={d.idx}
-                    className={`rounded-xl border p-4 ${active
-                      ? "border-[#8F2841]/70 bg-[#8F2841]/15"
-                      : "border-white/10 bg-white/[0.02]"
-                      }`}
-                  >
-                    <div className="font-semibold text-sm md:text-base">
-                      {d.label}
-                    </div>
-                    <div className="text-white/75 text-sm mt-1">
-                      {slot ? `${slot.open} – ${slot.close}` : "Closed"}
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="font-semibold text-lg">Nilta Flooring</div>
+            <p className="text-white/75 mt-2 text-sm md:text-base leading-relaxed">
+              Your trusted Edmonton partner for quality floors that stand the test of time.
+            </p>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link
+                to="/projects"
+                className="group inline-flex items-center rounded-full border border-white/15 px-5 py-2 font-semibold text-white/90 transition hover:border-[#8F2841] hover:bg-[#8F2841]/10 hover:text-[#F2C4D0]"
+              >
+                <span className="relative">Explore projects</span>
+                <ArrowRight className="ml-2 h-4 w-4 opacity-0 -translate-x-3 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-x-0" />
+              </Link>
+              <Link
+                to="/guide"
+                className="group inline-flex items-center rounded-full border border-white/15 px-5 py-2 font-semibold text-white/90 transition hover:border-[#8F2841] hover:bg-[#8F2841]/10 hover:text-[#F2C4D0]"
+              >
+                <span className="relative">Guide & tips</span>
+                <ArrowRight className="ml-2 h-4 w-4 opacity-0 -translate-x-3 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-x-0" />
+              </Link>
             </div>
           </div>
         </div>
 
         {/* FORM */}
         <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl">
-          <div className="text-xl md:text-2xl font-semibold">
-            Get a free flooring estimate
-          </div>
+          <div className="text-xl md:text-2xl font-semibold">Request a free estimate</div>
           <p className="text-white/75 text-sm mt-1">
-            Share your scope—rooms, square footage, product ideas, and timing.
+            Single room or entire property—share your scope and we’ll send a tailored estimate and timeline.
           </p>
 
-          <form
-            className="mt-6 grid gap-4"
-            onSubmit={handleSubmit}
-            noValidate
-          >
+          <form className="mt-6 grid gap-4" onSubmit={handleSubmit} noValidate>
             <FormField
               label="Full name"
               error={errors.name}
@@ -491,6 +567,7 @@ export default function Contact() {
                     <option value="" className="text-neutral-900">
                       Select type…
                     </option>
+                    <option className="text-neutral-900">Single Room</option>
                     <option className="text-neutral-900">Whole-Home</option>
                     <option className="text-neutral-900">Kitchen</option>
                     <option className="text-neutral-900">Bathroom</option>
@@ -514,9 +591,7 @@ export default function Contact() {
                     <option value="" className="text-neutral-900">
                       Select timeline…
                     </option>
-                    <option className="text-neutral-900">
-                      As soon as possible
-                    </option>
+                    <option className="text-neutral-900">As soon as possible</option>
                     <option className="text-neutral-900">1–3 months</option>
                     <option className="text-neutral-900">3–6 months</option>
                     <option className="text-neutral-900">6+ months</option>
@@ -532,7 +607,7 @@ export default function Contact() {
               input={
                 <textarea
                   name="message"
-                  placeholder="Rooms, square footage, existing flooring, product ideas, site access…"
+                  placeholder="Size (sq ft), rooms, current floors, subfloor notes, stairs, pets/kids, access, preferred products…"
                   rows="6"
                   maxLength={maxChars}
                   className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 w-full outline-none focus:ring-2 focus:ring-[rgba(143,40,65,0.7)]"
@@ -544,11 +619,7 @@ export default function Contact() {
             />
 
             <div className="flex flex-wrap gap-3 items-center">
-              <TextArrowButton
-                type="submit"
-                disabled={sending}
-                aria-busy={sending}
-              >
+              <TextArrowButton type="submit" disabled={sending} aria-busy={sending}>
                 {sending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending…
@@ -558,41 +629,33 @@ export default function Contact() {
                 )}
               </TextArrowButton>
 
-              <Link
-                to="/projects"
+              <a
+                href={telMain}
                 className="group inline-flex items-center rounded-full border border-white/15 px-5 py-2 font-semibold text-white/90 transition hover:border-[#8F2841] hover:bg-[#8F2841]/10 hover:text-[#F2C4D0]"
               >
-                <span className="relative">Explore projects</span>
-                <ArrowRight
-                  className="ml-2 h-4 w-4 opacity-0 -translate-x-3 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-x-0"
-                  aria-hidden="true"
-                />
-              </Link>
+                <span className="relative">Want to chat instead?</span>
+                <ArrowRight className="ml-2 h-4 w-4 opacity-0 -translate-x-3 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-x-0" />
+              </a>
             </div>
           </form>
         </div>
       </section>
 
-      {/* CTA FINAL */}
+      {/* FINAL CTA */}
       <section className="border-t border-white/10 bg-black/70">
         <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <div className="text-xl md:text-2xl font-semibold">
-              Prefer a quick call?
-            </div>
+            <div className="text-xl md:text-2xl font-semibold">Want to chat instead?</div>
             <div className="text-white/70 text-sm md:text-base">
-              We’ll walk through your scope and outline the next steps.
+              Give us a call at {PHONE_MAIN}, and we’ll happily walk you through the process.
             </div>
           </div>
           <a
-            href={`tel:+17805550123`}
+            href={telMain}
             className="group inline-flex items-center rounded-full border border-white/15 px-5 py-2 font-semibold text-white/90 transition hover:border-[#8F2841] hover:bg-[#8F2841]/10 hover:text-[#F2C4D0]"
           >
-            <span className="relative">Call {PHONE}</span>
-            <ArrowRight
-              className="ml-2 h-4 w-4 opacity-0 -translate-x-3 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-x-0"
-              aria-hidden="true"
-            />
+            <span className="relative">Call {PHONE_MAIN}</span>
+            <ArrowRight className="ml-2 h-4 w-4 opacity-0 -translate-x-3 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-x-0" />
           </a>
         </div>
       </section>
@@ -601,6 +664,17 @@ export default function Contact() {
 }
 
 /* --- small components --- */
+function Pill({ icon, text }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 flex items-center gap-2">
+      <span className="grid place-items-center h-8 w-8 rounded-xl bg-white/[0.05] border border-white/10">
+        {icon}
+      </span>
+      <span className="text-sm text-white/85 font-medium">{text}</span>
+    </div>
+  );
+}
+
 function InfoCard({ icon, title, text, badge, badgeColor, href }) {
   const body = (
     <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-xl h-full">
@@ -611,8 +685,9 @@ function InfoCard({ icon, title, text, badge, badgeColor, href }) {
         </div>
         {badge && (
           <span
-            className={`text-xs rounded-full px-2 py-0.5 border ${badgeColor || "border-white/15 text-white/70 bg-white/5"
-              }`}
+            className={`text-xs rounded-full px-2 py-0.5 border ${
+              badgeColor || "border-white/15 text-white/70 bg-white/5"
+            }`}
           >
             {badge}
           </span>
@@ -621,6 +696,7 @@ function InfoCard({ icon, title, text, badge, badgeColor, href }) {
       <div className="text-white/75 text-sm mt-2">{text}</div>
     </div>
   );
+
   return href ? (
     <a href={href} className="block">
       {body}
@@ -630,35 +706,19 @@ function InfoCard({ icon, title, text, badge, badgeColor, href }) {
   );
 }
 
-function Assurance({ icon, text }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-center">
-      <div className="mx-auto grid place-items-center h-9 w-9 rounded-lg bg-white/[0.05] border border-white/10 mb-2">
-        {icon}
-      </div>
-      <div className="text-xs md:text-sm text-white/85">{text}</div>
-    </div>
-  );
-}
-
 function FormField({ label, input, error, help }) {
   return (
     <label className="block">
       <span className="block text-xs text-white/60 mb-1">{label}</span>
       {input}
       <div className="mt-1 flex items-center justify-between">
-        {error ? (
-          <span className="text-xs text-red-400">{error}</span>
-        ) : (
-          <span />
-        )}
+        {error ? <span className="text-xs text-red-400">{error}</span> : <span />}
         {help && <span className="text-xs text-white/50">{help}</span>}
       </div>
     </label>
   );
 }
 
-/* Capsule button with hover arrow */
 function TextArrowButton({ children, ...props }) {
   return (
     <button

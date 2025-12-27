@@ -62,7 +62,7 @@ export default function Projects() {
           muted
           loop
           playsInline
-        // poster="/images/projects-hero-poster.jpg"
+          // poster="/images/projects-hero-poster.jpg"
         />
         {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-[#050507]" />
@@ -76,7 +76,7 @@ export default function Projects() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            Nilta Flooring • Projects
+            NILTA FLOORING • PROJECTS
           </motion.p>
 
           <motion.h1
@@ -85,9 +85,8 @@ export default function Projects() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.05 }}
           >
-            Proven floors for{" "}
-            <span className="text-[#F3E9EC]">real homes</span> and{" "}
-            <span className="text-[#F3E9EC]">working spaces</span>.
+            FLOORS BUILT FOR{" "}
+            <span className="text-[#F3E9EC]">REAL LIFE.</span>
           </motion.h1>
 
           <motion.p
@@ -96,9 +95,10 @@ export default function Projects() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.12 }}
           >
-            From family basements to busy corridors, we design and install
-            flooring systems that stand up to Alberta’s climate, daily traffic,
-            and real-life use.
+            From family basements to busy commercial corridors, this page
+            highlights flooring projects designed and installed to handle
+            Alberta’s climate, daily traffic, and real-world use—without cutting
+            corners.
           </motion.p>
 
           <motion.div
@@ -129,28 +129,28 @@ export default function Projects() {
           item={{
             icon: <ShieldCheck className="h-5 w-5" />,
             title: "Licensed & Insured",
-            text: "Alberta-licensed installer. COR-aligned safety procedures.",
+            text: "Alberta-licensed installer with COR-aligned safety practices on every site.",
           }}
         />
         <Trust
           item={{
             icon: <Timer className="h-5 w-5" />,
             title: "On-Time Delivery",
-            text: "Material lead-time planning and milestone schedules.",
+            text: "Material lead times, milestones, and schedules planned upfront.",
           }}
         />
         <Trust
           item={{
             icon: <Handshake className="h-5 w-5" />,
             title: "Transparent Quotes",
-            text: "Scope clarity for prep, materials, trims, and transitions.",
+            text: "Clear scopes covering prep, materials, trims, and transitions—no surprises.",
           }}
         />
         <Trust
           item={{
             icon: <BadgeCheck className="h-5 w-5" />,
-            title: "Warranty",
-            text: "Workmanship warranty + manufacturer coverage on product.",
+            title: "Warranty Coverage",
+            text: "Workmanship warranty backed by manufacturer product guarantees.",
           }}
         />
       </section>
@@ -159,10 +159,10 @@ export default function Projects() {
       <section className="max-w-7xl mx-auto px-6 pb-4">
         <div className="flex flex-wrap gap-2 text-xs md:text-sm">
           {[
-            "WholeHouse installs",
-            "Basements & suites",
-            "Stairs & transitions",
-            "Retail & office",
+            "Whole-home installs",
+            "Basements & secondary suites",
+            "Stairs & clean transitions",
+            "Retail & office spaces",
             "Moisture-prone areas",
             "High-traffic corridors",
           ].map((tag, i) => (
@@ -187,8 +187,9 @@ export default function Projects() {
             Residential Flooring
           </h2>
           <p className="text-white/80 mt-2 max-w-3xl">
-            Whole-home installs or room-by-room upgrades with moisture checks,
-            level substrates, tight seams, and clean site standards.
+            Whole-home installations or targeted room-by-room upgrades,
+            completed with moisture testing, level substrates, tight seams, and
+            clean, respectful job sites.
           </p>
         </header>
 
@@ -215,11 +216,11 @@ export default function Projects() {
             viewport={{ once: true }}
             className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 flex flex-col"
           >
-            <h3 className="text-xl font-semibold">What we handle</h3>
+            <h3 className="text-xl font-semibold">What we handle in homes</h3>
             <div className="mt-3 grid sm:grid-cols-2 gap-3 text-white/80">
-              <Li icon={<Ruler />} text="Moisture testing & subfloor prep" />
+              <Li icon={<Ruler />} text="Moisture testing & subfloor preparation" />
               <Li icon={<Wrench />} text="Self-leveling, patching & repairs" />
-              <Li icon={<Layers />} text="Underlay & sound control" />
+              <Li icon={<Layers />} text="Underlay and sound control" />
               <Li icon={<Paintbrush />} text="Stairs, nosings & transitions" />
               <Li
                 icon={<ClipboardCheck />}
@@ -229,7 +230,7 @@ export default function Projects() {
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
-              <Pill text="WholeHouse Flooring" />
+              <Pill text="Whole-House Flooring" />
               <Pill text="Kitchen Flooring" />
               <Pill text="Bathroom Tile & LVP" />
               <Pill text="Basement Flooring" />
@@ -237,9 +238,7 @@ export default function Projects() {
             </div>
 
             <div className="mt-auto pt-6">
-              <TextArrowLink to="/residential">
-                Explore featured homes
-              </TextArrowLink>
+              <TextArrowLink to="/residential">Explore featured homes</TextArrowLink>
             </div>
           </motion.div>
         </article>
@@ -256,8 +255,9 @@ export default function Projects() {
             Commercial Flooring
           </h2>
           <p className="text-white/80 mt-2 max-w-3xl">
-            Phased, code-compliant installs for retail, office, hospitality, and
-            light industrial. Night-shift options keep operations moving.
+            Phased, code-compliant installations for retail, office, hospitality,
+            and light industrial spaces. Night-shift options are available to keep
+            operations moving.
           </p>
         </header>
 
@@ -280,17 +280,15 @@ export default function Projects() {
 
             <div className="mt-6 flex flex-wrap gap-2">
               <Pill text="Night-shift scheduling" />
-              <Pill text="Tenant coordination" />
+              <Pill text="Tenant and PM coordination" />
               <Pill text="Moisture mitigation" />
               <Pill text="Material staging" />
-              <Pill text="Daily reports" />
+              <Pill text="Daily progress reports" />
               <Pill text="Warranty support" />
             </div>
 
             <div className="mt-6">
-              <TextArrowLink to="/commercial">
-                See commercial approach
-              </TextArrowLink>
+              <TextArrowLink to="/commercial">See our commercial approach</TextArrowLink>
             </div>
           </motion.div>
 
@@ -315,10 +313,26 @@ export default function Projects() {
       {/* KPI BAND */}
       <section className="bg-gradient-to-br from-[#8F2841] via-neutral-900 to-black">
         <div className="max-w-7xl mx-auto px-6 py-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <KPI icon={<Gauge className="h-6 w-6" />} value="100%" label="On-Time Installs" />
-          <KPI icon={<Users className="h-6 w-6" />} value="10/10" label="Client Satisfaction" />
-          <KPI icon={<ClipboardCheck className="h-6 w-6" />} value="120+" label="Projects Completed" />
-          <KPI icon={<MapPin className="h-6 w-6" />} value="Edmonton" label="Primary Service Area" />
+          <KPI
+            icon={<Gauge className="h-6 w-6" />}
+            value="100%"
+            label="On-Time Installs"
+          />
+          <KPI
+            icon={<Users className="h-6 w-6" />}
+            value="10/10"
+            label="Client Satisfaction"
+          />
+          <KPI
+            icon={<ClipboardCheck className="h-6 w-6" />}
+            value="120+"
+            label="Projects Completed"
+          />
+          <KPI
+            icon={<MapPin className="h-6 w-6" />}
+            value="Edmonton"
+            label="Primary Service Area"
+          />
         </div>
       </section>
 
@@ -326,26 +340,26 @@ export default function Projects() {
       <section className="max-w-7xl mx-auto px-6 py-14">
         <h2 className="text-2xl md:text-3xl font-bold">How We Work</h2>
         <p className="text-white/75 mt-2 max-w-2xl text-sm md:text-base">
-          A clear, staged process keeps your project moving—whether it’s a
-          single room, a full home refresh or a phased commercial scope.
+          A clear, step-by-step process keeps projects moving—whether it’s a
+          single room, a full home refresh, or a phased commercial scope.
         </p>
         <div className="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             {
               title: "Discovery & Quote",
-              text: "Site visit, product options, clear scope and pricing.",
+              text: "Site visit, product options, and a clearly defined scope with accurate pricing.",
             },
             {
               title: "Plan & Schedule",
-              text: "Moisture checks, substrate plan, material logistics.",
+              text: "Moisture checks, substrate planning, and material logistics aligned with timelines.",
             },
             {
               title: "Install & Update",
-              text: "Daily tidy-ups, milestone check-ins, quality control.",
+              text: "Daily cleanups, milestone check-ins, and quality control throughout the install.",
             },
             {
               title: "Handover & Warranty",
-              text: "Final walkthrough, documentation, warranty support.",
+              text: "Final walkthrough, documentation, and warranty support for peace of mind.",
             },
           ].map((s, i) => (
             <motion.div
@@ -373,7 +387,7 @@ export default function Projects() {
             {
               n: "Avery M.",
               t: "Engineered Hardwood",
-              q: "Tight seams and flawless transitions. Crew was punctual and kept the site spotless.",
+              q: "Tight seams and flawless transitions. The crew was punctual and kept the site spotless.",
             },
             {
               n: "Jordan K.",
@@ -398,10 +412,7 @@ export default function Projects() {
                 <div className="text-sm text-white/60">{r.t}</div>
               </div>
               <p className="mt-3 text-white/80">“{r.q}”</p>
-              <div
-                className="mt-3 text-yellow-400"
-                aria-label="5 star rating"
-              >
+              <div className="mt-3 text-yellow-400" aria-label="5 star rating">
                 ★★★★★
               </div>
             </motion.div>
@@ -426,8 +437,9 @@ export default function Projects() {
                 >
                   <span className="font-semibold">{f.q}</span>
                   <ChevronDown
-                    className={`h-5 w-5 transition ${openIdx === i ? "rotate-180" : ""
-                      }`}
+                    className={`h-5 w-5 transition ${
+                      openIdx === i ? "rotate-180" : ""
+                    }`}
                   />
                 </button>
                 {openIdx === i && (
@@ -447,8 +459,8 @@ export default function Projects() {
               Ready to talk through your project?
             </div>
             <div className="text-white/70 text-sm md:text-base">
-              Share your plans, photos or square footage—we&apos;ll outline
-              options, timelines and a clear install path.
+              Share your plans, photos, or square footage—we’ll outline options,
+              timelines, and a clear installation path.
             </div>
           </div>
           <TextArrowLink to="/contact">Request an estimate</TextArrowLink>

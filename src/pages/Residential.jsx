@@ -13,10 +13,10 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { API_BASE } from "../config/api";
 
-const SITE_URL = "https://example.com"; // TODO: replace with real domain
-
-const API_BASE = "http://localhost:5000";
+// ✅ Fix: define SITE_URL (Vite env first, fallback to current origin)
+const SITE_URL = import.meta.env.VITE_SITE_URL || window.location.origin;
 
 // --- SERVICES + IMAGES ---
 // Change these image paths to your real photos (local or CDN)
@@ -24,7 +24,8 @@ const SERVICES = [
   {
     key: "whole-house",
     title: "Whole-House Flooring",
-    subtitle: "Continuous flooring that ties together living rooms, halls and bedrooms.",
+    subtitle:
+      "Our continuous flooring creates a seamless, cozy flow from room to room, making your home feel like a warm, unified space that’s perfect for families, kids, and pets alike.",
     icon: <Home className="h-4 w-4" />,
     images: [
       "/residential/wholehouse/1.webp",
@@ -38,7 +39,8 @@ const SERVICES = [
   {
     key: "kitchens",
     title: "Kitchen Flooring",
-    subtitle: "Durable, easy-to-clean floors for the busiest room in the house.",
+    subtitle:
+      "Durable, easy-to-clean flooring built for spills, busy foot traffic, and those daily moments that make the kitchen the heart of the home. We also offer countertops, cabinets, and backsplash tile to complete your kitchen transformation.",
     icon: <Ruler className="h-4 w-4" />,
     images: [
       "/residential/kitchen/1.jpg",
@@ -52,7 +54,8 @@ const SERVICES = [
   {
     key: "bathrooms",
     title: "Bathroom Tile & LVP",
-    subtitle: "Waterproofed showers, crisp tile lines and moisture-smart LVP.",
+    subtitle:
+      "Waterproofed showers, tile, stone and mosaic —planned for long-term performance. Our services also include custom shower builds, tailored to each project and executed with a focus on quality, waterproofing, and longevity.",
     icon: <Layers className="h-4 w-4" />,
     images: [
       "/residential/bathroom-tile/1.jpg",
@@ -66,7 +69,8 @@ const SERVICES = [
   {
     key: "basement",
     title: "Basement Flooring",
-    subtitle: "Floors planned around comfort, sound and moisture in lower levels.",
+    subtitle:
+      "Designed for comfort and quiet, with moisture-aware materials suited for lower levels—turning basements into a welcoming extensions of your home.",
     icon: <Layers className="h-4 w-4" />,
     images: [
       "/residential/basement/1.jpg",
@@ -80,8 +84,8 @@ const SERVICES = [
   {
     key: "stairs",
     title: "Stairs & Transitions",
-    subtitle: "Solid, quiet stair runs and clean transitions between rooms.",
-    // Reuse Ruler as a simple icon here
+    subtitle:
+      "Solid, quiet stair runs and clean transitions, carefully installed to ensure safety, durability, and a seamless transition from space to space.",
     icon: <Ruler className="h-4 w-4" />,
     images: [
       "/residential/stairs-transitions/1.jpg",
@@ -94,16 +98,6 @@ const SERVICES = [
   },
 ];
 
-async function loadGallery() {
-  const res = await fetch(`${API_BASE}/api/gallery`);
-  const data = await res.json();
-
-  const byCategory = {};
-  data.forEach((img) => {
-    if (!byCategory[img.category]) byCategory[img.category] = [];
-    byCategory[img.category].push(`${API_BASE}${img.url}`);
-  });
-}
 // Flatten all images so lightbox can move across everything
 function buildFlatImages(services) {
   const flat = [];
@@ -131,15 +125,19 @@ export default function Residential() {
   useEffect(() => {
     async function loadGallery() {
       try {
-        const res = await fetch(`${API_BASE}/api/gallery`);
+        // ✅ Fix: use category filter (matches your backend calls in console)
+        const res = await fetch(`${API_BASE}/api/gallery?category=Residential`);
         if (!res.ok) throw new Error("Failed to load gallery");
         const data = await res.json();
 
+        // If backend returns ONLY Residential images, this will still work.
+        // If backend returns mixed categories, this groups them.
         const byCategory = {};
         data.forEach((img) => {
           if (!byCategory[img.category]) byCategory[img.category] = [];
           byCategory[img.category].push(`${API_BASE}${img.url}`);
         });
+
         setGalleryByCategory(byCategory);
       } catch (err) {
         console.error("Failed to load gallery images", err);
@@ -225,7 +223,8 @@ export default function Residential() {
       {/* SEO */}
       <Helmet>
         <title>
-          Residential Flooring | Nilta – Whole-Home, Kitchens, Baths, Basements & Stairs
+          Residential Flooring | Nilta – Whole-Home, Kitchens, Baths, Basements &
+          Stairs
         </title>
         <meta
           name="description"
@@ -255,7 +254,6 @@ export default function Residential() {
           loop
           muted
           playsInline
-
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/45 to-[#050507]" />
 
@@ -266,27 +264,31 @@ export default function Residential() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            Nilta Flooring • Residential
+            NILTA FLOORING • RESIDENTIAL
           </motion.p>
+
           <motion.h1
             className="text-4xl md:text-5xl font-extrabold leading-tight max-w-3xl"
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.05 }}
           >
-            All your{" "}
-            <span className="text-[#F3E9EC]">home flooring</span>, in one place.
+            RESIDENTIAL FLOORING,
+            <br />
+            <span className="text-[#F3E9EC]">DONE WITH CARE.</span>
           </motion.h1>
+
           <motion.p
             className="mt-3 text-white/85 max-w-2xl text-sm md:text-base"
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            Whole-house installs, kitchens, bathrooms, basements and stairs—
-            this is a visual overview of the kind of floors we build in homes
-            across Edmonton.
+            From full-house installs to kitchens, bathrooms, basements and
+            stairs, this page highlights the thoughtful, durable floors we build
+            in homes across Edmonton and the surrounding area.
           </motion.p>
+
           <motion.div
             className="mt-6 flex flex-wrap gap-3"
             initial={{ opacity: 0, y: 18 }}
@@ -312,6 +314,7 @@ export default function Residential() {
           ]}
         />
       </section>
+
       <BreadcrumbLD
         items={[
           { label: "Home", url: `${SITE_URL}/` },
@@ -330,16 +333,19 @@ export default function Residential() {
           <h2 className="text-3xl md:text-4xl font-bold">
             How we think about floors at home
           </h2>
+
           <p className="text-white/80 mt-4 text-sm md:text-base max-w-3xl leading-relaxed">
-            We don&apos;t look at rooms in isolation. We look at how the whole
-            house flows—where the light hits, where water shows up, where kids
-            run, where pets sleep, and where stairs and transitions can trip
-            people up if they&apos;re not planned right.
+            We think about flooring the same way homeowners do—as part of
+            everyday life. We consider how light flows through a space, where
+            messes tend to happen, where kids and pets play, and how stairs and
+            transitions connect each area.
           </p>
+
           <p className="text-white/75 mt-3 text-sm md:text-base max-w-3xl">
-            Below, you&apos;ll see a mix of projects: whole-house installs,
-            kitchens, bathrooms, basements and stairs. The idea is simple: let
-            the photos do most of the talking.
+            Below is a collection of real residential projects, from whole-house
+            installs to kitchens, bathrooms, basements and stairs. It’s a simple
+            look at our work, designed to give you a feel for the care and
+            attention we bring to every home.
           </p>
         </motion.div>
 
@@ -351,10 +357,13 @@ export default function Residential() {
         >
           <div className="text-sm text-white/60">What we handle</div>
           <ul className="mt-3 space-y-2 text-white/85">
-            <li>• LVP, laminate, engineered hardwood & tile.</li>
-            <li>• Subfloor prep, leveling & moisture checks.</li>
-            <li>• Stairs, nosings, trims & transitions.</li>
-            <li>• Clean sites and clear timelines.</li>
+            <li>
+              • SPC, LVP, laminate, engineered hardwood & tile, carpet & carpet
+              tile
+            </li>
+            <li>• Subfloor prep, leveling & moisture testing</li>
+            <li>• Stairs, custom stair nosings, trims & clean transitions</li>
+            <li>• Clean job sites and clear, realistic timelines</li>
           </ul>
           <div className="mt-6">
             <Link
@@ -399,7 +408,11 @@ export default function Residential() {
             {/* Image grid */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {service.images.map((src, i) => {
-                const globalIndex = findGlobalIndex(FLAT_IMAGES, src, service.title);
+                const globalIndex = findGlobalIndex(
+                  FLAT_IMAGES,
+                  src,
+                  service.title
+                );
                 return (
                   <motion.figure
                     key={src}
@@ -431,11 +444,11 @@ export default function Residential() {
         <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <div className="text-xl md:text-2xl font-semibold">
-              Ready to plan new floors?
+              Let’s plan your new floors and wall tiles.
             </div>
             <div className="text-white/70 text-sm md:text-base">
-              Send a few photos and rough square footage—we&apos;ll come back
-              with product suggestions and a realistic timeline.
+              Share a few photos and rough square footage, and we’ll provide
+              product suggestions, budget guidance, and an achievable timeline.
             </div>
           </div>
           <Link
@@ -546,6 +559,7 @@ function Lightbox({ src, label, index, total, onClose, onPrev, onNext }) {
     </div>
   );
 }
+
 function TextArrowLink({ to, children }) {
   return (
     <Link

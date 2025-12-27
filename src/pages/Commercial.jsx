@@ -5,7 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import Breadcrumbs from "../components/Breadcrumbs.jsx";
 import BreadcrumbLD from "../components/BreadcrumbLD.jsx";
- import { API_BASE } from "../config/api";
+import { API_BASE } from "../config/api";
 import {
   Store,
   Landmark,
@@ -20,8 +20,6 @@ import {
 } from "lucide-react";
 
 fetch(`${API_BASE}/api/gallery?category=Commercial`);
-
-
 
 const FALLBACK_GALLERY = [
   "/commercial/1.jpg",
@@ -85,7 +83,7 @@ export default function Commercial() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [lightboxIdx]);
+  }, [lightboxIdx]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <main className="pt-16 min-h-screen bg-[#050507] text-white">
@@ -115,7 +113,6 @@ export default function Commercial() {
           loop
           muted
           playsInline
-
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-[#050507]" />
 
@@ -126,7 +123,7 @@ export default function Commercial() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            Nilta Flooring • Commercial
+            NILTA FLOORING • COMMERCIAL
           </motion.p>
 
           <motion.h1
@@ -135,8 +132,8 @@ export default function Commercial() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.05 }}
           >
-            Flooring for{" "}
-            <span className="text-[#F3E9EC]">spaces that stay busy</span>.
+            FLOORS THAT FIT YOUR BUSINESS’S{" "}
+            <span className="text-[#F3E9EC]">RHYTHM.</span>
           </motion.h1>
 
           <motion.p
@@ -145,8 +142,9 @@ export default function Commercial() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.12 }}
           >
-            Retail, office, hospitality and light industrial flooring planned
-            around business hours, tenants and traffic.
+            From retail shops and offices to hospitality and industrial spaces,
+            we craft commercial flooring solutions that flow naturally with your
+            business, adding a warm, welcoming feel to every step of the day.
           </motion.p>
 
           <motion.div
@@ -196,19 +194,30 @@ export default function Commercial() {
           className="lg:col-span-2"
         >
           <h2 className="text-2xl md:text-3xl font-bold">
-            Floors that can handle traffic—and schedules.
+            How we approach commercial flooring
           </h2>
+
           <p className="text-white/80 mt-3 text-sm md:text-base max-w-2xl">
-            We coordinate with tenants, property managers and other trades so
-            installs happen with minimal disruption—nights, phased areas or
-            condensed schedules when needed.
+            We understand that commercial spaces are always full of life.
+            Businesses keep buzzing, shoppers come and go, and we know that
+            timing those installations is just as crucial as choosing the right
+            floors.
           </p>
-          <div className="mt-4 flex flex-wrap gap-2 text-xs">
-            <Badge text="Retail & mall units" />
-            <Badge text="Office fit-outs" />
-            <Badge text="Hospitality & lobby areas" />
-            <Badge text="Light industrial offices" />
-          </div>
+
+          <p className="text-white/80 mt-3 text-sm md:text-base max-w-2xl">
+            That’s why we shape every commercial flooring project around the
+            natural flow of your space—working closely with tenants and property
+            managers to keep everything running smoothly. If we need to work
+            nights, phase installs, or adjust schedules, we do it to keep your
+            business on track.
+          </p>
+
+          <p className="text-white/80 mt-3 text-sm md:text-base max-w-2xl">
+            Below, you’ll see a few examples of commercial projects we’ve
+            completed around Edmonton and areas. We simply want to show how
+            thoughtful planning and a friendly, well-executed approach makes a
+            difference in busy places.
+          </p>
         </motion.div>
 
         <motion.div
@@ -220,28 +229,35 @@ export default function Commercial() {
           <Highlight
             icon={<Store className="h-4 w-4" />}
             title="Client-facing spaces"
-            text="Retail floors that stay clean-looking under constant foot traffic."
+            text="Retail flooring designed to stay clean-looking and professional under constant foot traffic."
           />
           <Highlight
             icon={<Building2 className="h-4 w-4" />}
-            title="Office & workplace"
-            text="Quiet, durable finishes for offices, corridors and meeting rooms."
+            title="Office & workplace environments"
+            text="Quiet, durable finishes for offices, corridors, common areas, and meeting rooms."
           />
           <Highlight
             icon={<HardHat className="h-4 w-4" />}
-            title="Jobsite-ready"
-            text="Safety, hoarding and coordination handled like a construction site."
+            title="Active job sites"
+            text="Safety, access, and coordination managed with care, clear structure, and respect for everyone on site."
           />
         </motion.div>
       </section>
 
       {/* GALLERY – clickable with lightbox */}
       <section className="max-w-7xl mx-auto px-6 pb-10">
-        <h3 className="text-2xl md:text-3xl font-bold">Commercial snapshots</h3>
+        <h3 className="text-2xl md:text-3xl font-bold">
+          Commercial project snapshots
+        </h3>
         <p className="text-white/75 mt-2 text-sm md:text-base max-w-2xl">
-          Retail, office and public spaces completed with resilient, tile and
-          carpet systems.
+          Retail, office, and public spaces completed with resilient flooring,
+          tile, or carpet—selected for daily durability, easy maintenance, and
+          lasting performance.
         </p>
+
+        {galleryError ? (
+          <div className="mt-4 text-xs text-white/60">{galleryError}</div>
+        ) : null}
 
         <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {gallery.map((src, i) => (
@@ -256,11 +272,11 @@ export default function Commercial() {
             >
               <img
                 src={src}
-                alt={`Commercial project ${i + 1}`}
+                alt={`Commercial Project · #${i + 1}`}
                 className="h-56 w-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <figcaption className="absolute bottom-3 left-3 rounded-full bg-black/60 backdrop-blur px-3 py-1 text-[11px] border border-white/10">
-                Commercial project · #{i + 1}
+                Commercial Project · #{i + 1}
               </figcaption>
             </motion.figure>
           ))}
@@ -277,34 +293,26 @@ export default function Commercial() {
         >
           <h3 className="text-2xl font-bold">Sectors & typical scope</h3>
           <p className="text-white/75 text-sm md:text-base mt-2">
-            Supply and install services tailored to how the space operates and
-            what traffic it sees.
+            Our Edmonton commercial flooring services are carefully planned
+            around the way each space functions and the level of daily traffic
+            it supports.
           </p>
           <div className="mt-4 grid sm:grid-cols-2 gap-3 text-white/85 text-sm">
             <FeatureItem
               icon={<Store />}
-              text="Retail units, corridors & back-of-house"
+              text="Retail units, corridors, and common areas"
             />
-            <FeatureItem
-              icon={<Landmark />}
-              text="Mall common areas & lobbies"
-            />
-            <FeatureItem
-              icon={<Building2 />}
-              text="Office tenant improvements"
-            />
+            <FeatureItem icon={<Landmark />} text="Mall common areas and lobbies" />
+            <FeatureItem icon={<Building2 />} text="Office tenant improvements" />
             <FeatureItem
               icon={<HardHat />}
-              text="Showrooms & light industrial offices"
+              text="Showrooms and industrial offices"
             />
             <FeatureItem
               icon={<ClipboardCheck />}
-              text="Moisture tests & substrate prep"
+              text="Moisture testing and substrate preparation"
             />
-            <FeatureItem
-              icon={<Timer />}
-              text="Night shifts & phased installs"
-            />
+            <FeatureItem icon={<Timer />} text="Night work and phased installations" />
           </div>
         </motion.div>
 
@@ -317,28 +325,37 @@ export default function Commercial() {
           <h3 className="text-2xl font-bold">How we run commercial projects</h3>
           <ol className="mt-4 space-y-4 text-sm md:text-base text-white/80">
             <li>
-              <span className="font-semibold">1. Scope & site review:</span>{" "}
-              Drawings, details and site conditions checked before numbers are
-              firmed up.
+              <span className="font-semibold">1. Scope &amp; site review</span>
+              <div className="text-white/75 mt-1 text-sm">
+                We take the time to review drawings, site conditions, and project
+                details carefully, ensuring everything is clearly understood
+                before pricing is finalized.
+              </div>
             </li>
             <li>
-              <span className="font-semibold">2. Planning:</span> Phasing,
-              access, freight, staging and safety aligned with your team.
+              <span className="font-semibold">2. Planning &amp; coordination</span>
+              <div className="text-white/75 mt-1 text-sm">
+                Phasing, access, freight, and safety are thoughtfully coordinated
+                with your team to align seamlessly with your schedules and
+                operations.
+              </div>
             </li>
             <li>
-              <span className="font-semibold">3. Install:</span> Crews scheduled
-              around hours of operation; daily cleanup and progress updates.
+              <span className="font-semibold">3. Installation</span>
+              <div className="text-white/75 mt-1 text-sm">
+                Our crews work around your hours of operation, maintaining clean
+                job sites each day and keeping you informed with clear,
+                consistent progress updates.
+              </div>
             </li>
             <li>
-
-
-              <span className="font-semibold">4. Close-out:</span> Walkthrough,
-              deficiency touch-ups and maintenance guidance.
-
-
+              <span className="font-semibold">4. Close-out</span>
+              <div className="text-white/75 mt-1 text-sm">
+                We complete final walkthroughs, handle touch-ups, and provide
+                maintenance guidance to support long-term durability.
+              </div>
             </li>
           </ol>
-
         </motion.div>
       </section>
 
@@ -347,18 +364,18 @@ export default function Commercial() {
         <div className="max-w-7xl mx-auto px-6 py-10 grid sm:grid-cols-3 gap-5 text-sm">
           <Benefit
             icon={<Gauge className="h-5 w-5" />}
-            title="Tight schedules"
-            text="We’re used to night work, phased areas and opening deadlines."
+            title="Schedule awareness"
+            text="We understand the importance of timing, with experience in night work, phased installations, and meeting opening deadlines."
           />
           <Benefit
             icon={<ClipboardCheck className="h-5 w-5" />}
-            title="Clear documentation"
-            text="Scopes, change orders and punchlists kept tidy."
+            title="Clear communication"
+            text="Scopes, change orders, and punch lists are kept organized, transparent, and easy to follow at every stage."
           />
           <Benefit
             icon={<HardHat className="h-5 w-5" />}
             title="Site readiness"
-            text="Safety, hoarding and communication aligned with GC/PM."
+            text="Safety, access, and coordination carefully managed in partnership with property managers and general contractors."
           />
         </div>
       </section>
@@ -368,16 +385,16 @@ export default function Commercial() {
         <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <div className="text-xl md:text-2xl font-semibold">
-              Planning a commercial flooring project?
+              Planning a commercial flooring project in Edmonton, the surrounding
+              area, or out of province?
             </div>
             <div className="text-white/70 text-sm md:text-base">
-              Share drawings or photos and target dates—we&apos;ll come back
-              with product options and a realistic schedule.
+              Send us your drawings or photos along with your timelines, and
+              we’ll help guide you with suitable product options and a clear,
+              realistic installation schedule.
             </div>
           </div>
-          <TextArrowLink to="/contact">
-            Start a commercial conversation
-          </TextArrowLink>
+          <TextArrowLink to="/contact">Start a commercial conversation</TextArrowLink>
         </div>
       </section>
 
@@ -397,7 +414,6 @@ export default function Commercial() {
 }
 
 /* --- LIGHTBOX MODAL WITH ARROWS + SWIPE --- */
-
 function Lightbox({ src, index, total, onClose, onPrev, onNext }) {
   const startXRef = useRef(null);
 
@@ -478,10 +494,9 @@ function Lightbox({ src, index, total, onClose, onPrev, onNext }) {
 }
 
 /* --- small components --- */
-
 function Badge({ text }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-white/15 bg_WHITE/[0.03] px-3 py-1 text-xs text-white/80">
+    <span className="inline-flex items-center rounded-full border border-white/15 bg-white/[0.03] px-3 py-1 text-xs text-white/80">
       {text}
     </span>
   );
@@ -504,7 +519,7 @@ function Highlight({ icon, title, text }) {
 function FeatureItem({ icon, text }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="grid place-items-center h-8 w-8 rounded-lg bg-white/[0.05] border border_white/10">
+      <span className="grid place-items-center h-8 w-8 rounded-lg bg-white/[0.05] border border-white/10">
         {icon}
       </span>
       <span>{text}</span>
@@ -514,7 +529,7 @@ function FeatureItem({ icon, text }) {
 
 function Benefit({ icon, title, text }) {
   return (
-    <div className="rounded-2xl border border_white/10 bg-white/[0.03] p-5 shadow-xl">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-xl">
       <div className="flex items-center gap-2 mb-1">
         {icon}
         <div className="font-semibold text-sm md:text-base">{title}</div>

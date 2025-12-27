@@ -113,6 +113,7 @@ app.use("/api", apiLimiter);
 // Static files for uploaded images
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+
 // --- STRIPE WEBHOOK (must come BEFORE express.json) ---
 app.post(
   "/api/stripe/webhook",
@@ -766,21 +767,33 @@ app.post("/api/contact", async (req, res) => {
 // ------------- STORE QUOTE (non-paid) – OPTIONAL -------------
 app.post("/api/order", async (req, res) => {
   try {
-    const { items, customer } = req.body || {};
-    if (!items || !Array.isArray(items) || items.length === 0) {
+    const body = req.body || {};
+    const itemsRaw = Array.isArray(body.items) ? body.items : [];
+    const customerRaw = body.customer || {};
+
+    if (!itemsRaw || itemsRaw.length === 0) {
       return res.status(400).json({ error: "No items in order." });
     }
 
-    // Save/update customer in database
-    if (customer && customer.email) {
+    // -------- Normalize customer --------
+    const firstName = String(customerRaw.firstName || "").trim();
+    const lastName = String(customerRaw.lastName || "").trim();
+
+    const customerName =
+      String(customerRaw.name || "").trim() ||
+      `${firstName} ${lastName}`.trim() ||
+      "Unknown";
+
+    const customerEmail = String(customerRaw.email || "").trim();
+    const customerPhone = String(customerRaw.phone || "").trim();
+    const customerNotes = String(customerRaw.notes || "").trim();
+
+    // Save/update customer in database (name/email/phone)
+    if (customerEmail) {
       try {
         await Customer.findOneAndUpdate(
-          { email: customer.email },
-          {
-            name: customer.name,
-            email: customer.email,
-            phone: customer.phone,
-          },
+          { email: customerEmail },
+          { name: customerName, email: customerEmail, phone: customerPhone },
           { upsert: true, new: true, setDefaultsOnInsert: true }
         );
       } catch (err) {
@@ -788,29 +801,70 @@ app.post("/api/order", async (req, res) => {
       }
     }
 
+    // -------- Normalize items (support old + new payloads) --------
+    const items = itemsRaw.map((it) => {
+      const name = String(it.name || it.id || "Unknown product").trim();
+      const description = String(it.description || "").trim();
+
+      const qty = Number(it.qty ?? it.quantity ?? 0) || 0;
+
+      // Allow optional pricing sent by frontend
+      const unitPrice =
+        typeof it.unitPrice === "number" ? it.unitPrice : null;
+
+      const lineTotal =
+        typeof it.lineTotal === "number"
+          ? it.lineTotal
+          : unitPrice !== null
+          ? unitPrice * qty
+          : null;
+
+      return { name, description, qty, unitPrice, lineTotal };
+    });
+
+    // total (optional); if not provided, compute if possible
+    const totalFromBody = typeof body.total === "number" ? body.total : null;
+    const computedTotal = items.reduce(
+      (sum, it) => sum + (it.lineTotal || 0),
+      0
+    );
+    const total =
+      totalFromBody !== null ? totalFromBody : computedTotal || null;
+
     const transporter = createTransporter();
 
-    const itemsHtml = items
-      .map(
-        (item, index) => `
-        <tr>
-          <td style="padding:4px 8px;border:1px solid #ddd;">${index + 1}</td>
-          <td style="padding:4px 8px;border:1px solid #ddd;">${
-            item.name || item.id
-          }</td>
-          <td style="padding:4px 8px;border:1px solid #ddd;">${item.qty}</td>
-        </tr>
-      `
-      )
-      .join("");
+    // -------- Email rows --------
+    const itemsRowsHtml = items
+      .map((item, index) => {
+        const unit =
+          item.unitPrice !== null ? `$${item.unitPrice.toFixed(2)}` : "-";
+        const line =
+          item.lineTotal !== null ? `$${item.lineTotal.toFixed(2)}` : "-";
 
-    const customerName = customer?.name || "Unknown";
-    const customerEmail = customer?.email || "";
-    const customerPhone = customer?.phone || "";
-    const customerNotes = customer?.notes || "";
+        return `
+          <tr>
+            <td style="padding:6px 10px;border:1px solid #ddd;">${index + 1}</td>
+            <td style="padding:6px 10px;border:1px solid #ddd;">
+              <div style="font-weight:600;">${item.name}</div>
+              ${
+                item.description
+                  ? `<div style="margin-top:4px;color:#666;font-size:12px;">${item.description}</div>`
+                  : ""
+              }
+            </td>
+            <td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">${
+              item.qty
+            }</td>
+            <td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">${unit}</td>
+            <td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">${line}</td>
+          </tr>
+        `;
+      })
+      .join("");
 
     const adminHtml = `
       <h2>New quote request from Store (unpaid)</h2>
+
       <h3>Customer details</h3>
       <p><b>Name:</b> ${customerName}</p>
       <p><b>Email:</b> ${customerEmail || "-"}</p>
@@ -820,18 +874,32 @@ app.post("/api/order", async (req, res) => {
       }</p>
 
       <h3>Requested products</h3>
-      <table style="border-collapse:collapse;border:1px solid #ddd;">
+      <table style="border-collapse:collapse;border:1px solid #ddd;min-width:560px;">
         <thead>
           <tr>
-            <th style="padding:4px 8px;border:1px solid #ddd;">#</th>
-            <th style="padding:4px 8px;border:1px solid #ddd;">Product</th>
-            <th style="padding:4px 8px;border:1px solid #ddd;">Qty</th>
+            <th style="padding:6px 10px;border:1px solid #ddd;text-align:left;">#</th>
+            <th style="padding:6px 10px;border:1px solid #ddd;text-align:left;">Product</th>
+            <th style="padding:6px 10px;border:1px solid #ddd;text-align:right;">Qty</th>
+            <th style="padding:6px 10px;border:1px solid #ddd;text-align:right;">Unit price (CAD)</th>
+            <th style="padding:6px 10px;border:1px solid #ddd;text-align:right;">Line total (CAD)</th>
           </tr>
         </thead>
         <tbody>
-          ${itemsHtml}
+          ${itemsRowsHtml}
         </tbody>
       </table>
+
+      ${
+        total !== null
+          ? `<p style="margin-top:12px;"><b>Total (estimated):</b> $${total.toFixed(
+              2
+            )} CAD</p>`
+          : `<p style="margin-top:12px;color:#666;"><i>Total not provided.</i></p>`
+      }
+
+      <p style="margin-top:12px;color:#666;font-size:12px;">
+        Note: This is an unpaid quote request. Final pricing may change based on exact product specs, availability, measurements, and installation details.
+      </p>
     `;
 
     await transporter.sendMail({
@@ -844,16 +912,28 @@ app.post("/api/order", async (req, res) => {
       html: adminHtml,
     });
 
+    // Customer confirmation email
     if (customerEmail) {
+      const listHtml = items
+        .map((it) => {
+          const line =
+            it.lineTotal !== null ? ` — $${it.lineTotal.toFixed(2)} CAD` : "";
+          return `<li>${it.qty} × <b>${it.name}</b>${line}</li>`;
+        })
+        .join("");
+
       const confirmHtml = `
         <h2>Quote Request Received – Nilta Flooring</h2>
         <p>Dear ${customerName},</p>
         <p>Thank you for your interest in our flooring products. We have received your quote request with the following items:</p>
         <ul>
-          ${items
-            .map((item) => `<li>${item.qty} × ${item.name || item.id}</li>`)
-            .join("")}
+          ${listHtml}
         </ul>
+        ${
+          total !== null
+            ? `<p><b>Estimated total:</b> $${total.toFixed(2)} CAD</p>`
+            : ""
+        }
         <p>We will review your request and contact you with pricing and availability.</p>
         <p>Kind regards,<br/>Nilta Flooring</p>
       `;
@@ -876,31 +956,74 @@ app.post("/api/order", async (req, res) => {
 });
 
 // ------------- STRIPE CHECKOUT (creates session) -------------
+// ✅ Replace ONLY your /api/create-checkout-session route with this MongoDB version.
+// It builds Stripe line_items from your Mongo Product collection (not PRODUCT_CATALOG).
+
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
     const { items } = req.body;
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
+    if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: "No items provided" });
     }
 
-    const line_items = items.map((item) => {
-      const product = PRODUCT_CATALOG[item.id];
+    // Expect items like: [{ id: "<mongo_id>", qty: 2 }, ...]
+    const ids = items.map((it) => String(it.id || "")).filter(Boolean);
+
+    if (ids.length !== items.length) {
+      return res.status(400).json({ error: "Each item must have an id" });
+    }
+
+    // Fetch active products from DB
+    const products = await Product.find({
+      _id: { $in: ids },
+      isActive: true,
+    });
+
+    const byId = new Map(products.map((p) => [String(p._id), p]));
+
+    // Build line_items for Stripe
+    const line_items = items.map((it) => {
+      const product = byId.get(String(it.id));
       if (!product) {
-        throw new Error(`Unknown product: ${item.id}`);
+        throw new Error(`Unknown or inactive product: ${it.id}`);
+      }
+
+      const qty = Number(it.qty);
+      if (!Number.isFinite(qty) || qty <= 0) {
+        throw new Error(`Invalid qty for product ${it.id}`);
+      }
+
+      // IMPORTANT:
+      // If your Mongo "price" is already in cents (e.g. 12312 means $123.12),
+      // then use: const unit_amount = Number(product.price);
+      //
+      // If your Mongo "price" is in dollars (e.g. 123.12), then use:
+      // const unit_amount = Math.round(Number(product.price) * 100);
+      //
+      // From your example "price": 12312 looks like cents, so we’ll treat it as cents:
+      const unit_amount = Number(product.price);
+
+      if (!Number.isFinite(unit_amount) || unit_amount < 0) {
+        throw new Error(`Invalid price for product ${it.id}`);
       }
 
       return {
         price_data: {
           currency: "cad",
-          unit_amount: product.unitAmount,
+          unit_amount, // cents
           product_data: {
             name: product.name,
+            description: product.description || undefined,
           },
         },
-        quantity: item.qty,
+        quantity: qty,
       };
     });
+
+    if (!process.env.CLIENT_URL) {
+      throw new Error("Missing CLIENT_URL in .env");
+    }
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -920,11 +1043,10 @@ app.post("/api/create-checkout-session", async (req, res) => {
     return res.json({ url: session.url });
   } catch (err) {
     console.error("Error creating checkout session:", err);
-    return res
-      .status(500)
-      .json({ error: "Failed to create checkout session" });
+    return res.status(500).json({ error: err.message });
   }
 });
+
 
 /**
  * Public products endpoint for Store page
