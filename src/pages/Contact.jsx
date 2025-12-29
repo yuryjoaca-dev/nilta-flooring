@@ -19,12 +19,12 @@ import {
   Loader2,
   Sparkles,
 } from "lucide-react";
+import { API_BASE } from "../config/api";
 
 const ACCENT = "#8F2841";
 
 export default function Contact() {
   // ---------- Hours (Edmonton local time) ----------
-  // Requested:
   // Mon–Fri: 8:30 AM – 6:00 PM
   // Sat: 9:00 AM – 4:00 PM
   // Sun: Closed
@@ -132,10 +132,30 @@ export default function Contact() {
     if (Object.keys(v).length) return;
 
     setSending(true);
+    setErrors({}); // clear any previous submit errors
 
-    // Simulate API call
-    setTimeout(() => {
-      setSending(false);
+    try {
+      const res = await fetch(`${API_BASE}/api/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      let data = null;
+      try {
+        data = await res.json();
+      } catch {
+        // if backend returns no json
+      }
+
+      if (!res.ok) {
+        const msg =
+          data?.error ||
+          data?.message ||
+          "Failed to send message. Please try again or call us.";
+        throw new Error(msg);
+      }
+
       setToastOpen(true);
       setForm({
         name: "",
@@ -145,7 +165,14 @@ export default function Contact() {
         timeline: "",
         message: "",
       });
-    }, 1100);
+    } catch (err) {
+      setErrors((prev) => ({
+        ...prev,
+        submit: err?.message || "Failed to send message.",
+      }));
+    } finally {
+      setSending(false);
+    }
   };
 
   // Auto-hide success toast
@@ -162,7 +189,9 @@ export default function Contact() {
     <main className="pt-16 min-h-screen bg-[#050507] text-white">
       {/* SEO */}
       <Helmet>
-        <title>Contact Us | Nilta Flooring – Edmonton Flooring Supply & Installation</title>
+        <title>
+          Contact Us | Nilta Flooring – Edmonton Flooring Supply & Installation
+        </title>
         <meta
           name="description"
           content="Ready to transform your floors? Contact Nilta Flooring in Edmonton, AB. Fast, transparent estimates for residential and commercial flooring."
@@ -256,9 +285,9 @@ export default function Contact() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.12 }}
           >
-            We’d love to hear about your project. Share a few details—like the size
-            of the area, your current floors, and your timeline—and we’ll get back
-            to you within one business day with next steps.
+            We’d love to hear about your project. Share a few details—like the
+            size of the area, your current floors, and your timeline—and we’ll
+            get back to you within one business day with next steps.
           </motion.p>
 
           <motion.div
@@ -298,16 +327,30 @@ export default function Contact() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.22 }}
           >
-            <Pill icon={<ShieldCheck className="h-4 w-4" />} text="Licensed & insured" />
-            <Pill icon={<ClipboardCheck className="h-4 w-4" />} text="Clear scopes & estimates" />
-            <Pill icon={<HardHat className="h-4 w-4" />} text="Friendly, tidy crews" />
+            <Pill
+              icon={<ShieldCheck className="h-4 w-4" />}
+              text="Licensed & insured"
+            />
+            <Pill
+              icon={<ClipboardCheck className="h-4 w-4" />}
+              text="Clear scopes & estimates"
+            />
+            <Pill
+              icon={<HardHat className="h-4 w-4" />}
+              text="Friendly, tidy crews"
+            />
           </motion.div>
         </div>
       </section>
 
       {/* BREADCRUMBS + JSON-LD */}
       <section className="max-w-7xl mx-auto px-6 py-4">
-        <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Contact", to: "/contact" }]} />
+        <Breadcrumbs
+          items={[
+            { label: "Home", to: "/" },
+            { label: "Contact", to: "/contact" },
+          ]}
+        />
       </section>
       <BreadcrumbLD
         items={[
@@ -324,7 +367,11 @@ export default function Contact() {
             <div className="font-semibold text-lg md:text-xl">How to reach us</div>
           </div>
           <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <InfoCard icon={<MapPin className="h-5 w-5" />} title="Address" text={ADDRESS_DISPLAY} />
+            <InfoCard
+              icon={<MapPin className="h-5 w-5" />}
+              title="Address"
+              text={ADDRESS_DISPLAY}
+            />
             <InfoCard
               icon={<Phone className="h-5 w-5" />}
               title="Phone"
@@ -346,10 +393,7 @@ export default function Contact() {
           </div>
         </div>
 
-        <p className="text-white/55 text-xs mt-3">
-          Side note: for Google “opening hours” and address search display, update your Google Business Profile (GBP)
-          listing to match the hours/address above.
-        </p>
+        
       </section>
 
       {/* HOURS + STATUS */}
@@ -367,7 +411,7 @@ export default function Contact() {
                     : "bg-red-500/20 text-red-300 border-red-500/40"
                 }`}
               >
-                {isOpen ? "Open now" : "Closed"}
+                {isOpen ? "Open" : "Closed"}
               </span>
             </div>
 
@@ -387,10 +431,14 @@ export default function Contact() {
                   <div
                     key={d.idx}
                     className={`rounded-xl border p-4 ${
-                      active ? "border-[#8F2841]/70 bg-[#8F2841]/15" : "border-white/10 bg-white/[0.02]"
+                      active
+                        ? "border-[#8F2841]/70 bg-[#8F2841]/15"
+                        : "border-white/10 bg-white/[0.02]"
                     }`}
                   >
-                    <div className="font-semibold text-sm md:text-base">{d.label}</div>
+                    <div className="font-semibold text-sm md:text-base">
+                      {d.label}
+                    </div>
                     <div className="text-white/75 text-sm mt-1">
                       {slot ? `${slot.open} – ${slot.close}` : "Closed"}
                     </div>
@@ -470,7 +518,8 @@ export default function Contact() {
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl">
             <div className="font-semibold text-lg">Nilta Flooring</div>
             <p className="text-white/75 mt-2 text-sm md:text-base leading-relaxed">
-              Your trusted Edmonton partner for quality floors that stand the test of time.
+              Your trusted Edmonton partner for quality floors that stand the test
+              of time.
             </p>
 
             <div className="mt-4 flex flex-wrap gap-2">
@@ -494,9 +543,12 @@ export default function Contact() {
 
         {/* FORM */}
         <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl">
-          <div className="text-xl md:text-2xl font-semibold">Request a free estimate</div>
+          <div className="text-xl md:text-2xl font-semibold">
+            Request a free estimate
+          </div>
           <p className="text-white/75 text-sm mt-1">
-            Single room or entire property—share your scope and we’ll send a tailored estimate and timeline.
+            Single room or entire property—share your scope and we’ll send a
+            tailored estimate and timeline.
           </p>
 
           <form className="mt-6 grid gap-4" onSubmit={handleSubmit} noValidate>
@@ -591,7 +643,9 @@ export default function Contact() {
                     <option value="" className="text-neutral-900">
                       Select timeline…
                     </option>
-                    <option className="text-neutral-900">As soon as possible</option>
+                    <option className="text-neutral-900">
+                      As soon as possible
+                    </option>
                     <option className="text-neutral-900">1–3 months</option>
                     <option className="text-neutral-900">3–6 months</option>
                     <option className="text-neutral-900">6+ months</option>
@@ -617,6 +671,13 @@ export default function Contact() {
                 />
               }
             />
+
+            {/* Submit error message */}
+            {errors.submit && (
+              <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                {errors.submit}
+              </div>
+            )}
 
             <div className="flex flex-wrap gap-3 items-center">
               <TextArrowButton type="submit" disabled={sending} aria-busy={sending}>
@@ -645,9 +706,12 @@ export default function Contact() {
       <section className="border-t border-white/10 bg-black/70">
         <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <div className="text-xl md:text-2xl font-semibold">Want to chat instead?</div>
+            <div className="text-xl md:text-2xl font-semibold">
+              Want to chat instead?
+            </div>
             <div className="text-white/70 text-sm md:text-base">
-              Give us a call at {PHONE_MAIN}, and we’ll happily walk you through the process.
+              Give us a call at {PHONE_MAIN}, and we’ll happily walk you through
+              the process.
             </div>
           </div>
           <a

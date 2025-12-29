@@ -16,6 +16,7 @@ import Store from "./pages/Store.jsx";
 import TermsAndConditions from "./pages/Terms&Conditions.jsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
 import RefundPolicy from "./pages/RefundPolicy.jsx";
+import CookieConsent from "./pages/CookieConsent";
 import CookiePolicy from "./pages/CookiePolicy.jsx";
 import AdminLayout from "./pages/admin/AdminLayout.jsx";
 import { API_BASE } from "./config/api";
@@ -35,7 +36,7 @@ function AppShell() {
   return (
     <>
       <ScrollToTop />
-
+        <CookieConsent />
       <div className="min-h-screen bg-neutral-950 text-white flex flex-col">
         {!isAdminRoute && <Header />}
 

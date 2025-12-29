@@ -59,5 +59,110 @@ export const POSTS = [
     category: "Guides",
     readTime: 6,
     author: "Nilta Flooring Team",
+    
   },
+  {
+  title: "How Much Does Flooring Cost in Edmonton? (2026 Guide)",
+  slug: "flooring-cost-edmonton-2026-guide",
+  date: "2025-12-28",
+  author: "Vladimir",
+  category: "Guides",
+  readTime: 10,
+  image: "/blog/how-much-does-flooring-cost-in-edmonton.jpg",
+  excerpt:
+    "Real-world price ranges for vinyl, laminate, hardwood, and tile—plus the hidden costs that change your total and how to budget confidently.",
+  content: `
+## Quick answer
+Flooring costs in Edmonton usually depend on **material + prep + installation**. A “cheap” product can become expensive if the subfloor needs work, stairs are involved, or you want premium trims and transitions.
+
+Below are **practical ranges** to help you budget with fewer surprises.
+
+---
+
+## What affects the final price the most
+**1) Subfloor prep**
+- Leveling compound, patching, moisture mitigation, squeak fixes
+- This can be the difference between a smooth install and ongoing issues later
+
+**2) Room shape + stairs**
+- More cuts = more labor
+- Stairs are typically priced separately because they’re detail-heavy
+
+**3) Removing old flooring**
+- Carpet, glue-down, tile removal, and disposal add time and dump fees
+
+**4) Finishing details**
+- Baseboards, shoe molding, transitions, stair noses, reducers
+- These often get missed in “quick quotes”
+
+---
+
+## Typical Edmonton price ranges (material + installation)
+These are ballpark ranges to help you plan. Your home’s condition can move the number up or down.
+
+### Luxury Vinyl Plank (LVP)
+**Best for:** basements, busy homes, rentals  
+**Typical range:** mid budget, strong durability  
+What changes cost:
+- Core type (SPC/WPC), wear layer, underlay, stair nosing
+
+### Laminate
+**Best for:** dry areas, great visuals for the price  
+What changes cost:
+- Water resistance rating, thickness, underlay choice
+
+### Engineered Hardwood / Hardwood
+**Best for:** premium feel, resale value  
+What changes cost:
+- Species, plank width, installation method, acclimation, stairs
+
+### Tile
+**Best for:** bathrooms, entries, commercial wear zones  
+What changes cost:
+- Large format tile, waterproofing, uncoupling membrane, grout type
+
+> Want a fast estimate? Measure your square footage and list: flooring type, stairs (yes/no), and whether the floor is currently level.
+
+---
+
+## Hidden costs people forget (and how to plan)
+**Underlay & moisture barriers**  
+Not always included. Basements often need extra moisture protection.
+
+**Trim + baseboards**  
+Replacing baseboards looks cleaner than reinstalling old ones.
+
+**Transitions**  
+Doorways and mixed flooring areas need the right transitions for a safe, finished look.
+
+**Furniture moving**  
+Some installs include it, some don’t. Clarify up front.
+
+---
+
+## How to get a quote that matches the final invoice
+Use this checklist when you request pricing:
+
+- Total square feet (approx is fine)
+- Flooring type (LVP, laminate, hardwood, tile)
+- Basement or above grade?
+- Stairs? How many?
+- Existing flooring to remove?
+- Any dips/uneven spots?
+- Timeline and access (occupied home, pets, etc.)
+
+The more details you share, the closer the estimate will match the final cost.
+
+---
+
+## Want a free estimate?
+Send us:
+- room sizes (or total sq ft)
+- photos of the current floors
+- your preferred timeline
+
+We’ll reply within one business day with next steps and a clear, written scope.
+`,
+}
+
 ];

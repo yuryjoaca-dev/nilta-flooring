@@ -1,20 +1,17 @@
-// src/components/Header.jsx
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Hammer } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 const NAV = [
-   
   { label: "Home Page", href: "/" },
   { label: "Projects", href: "/projects" },
   { label: "Residential", href: "/residential" },
   { label: "Commercial", href: "/commercial" },
   { label: "Products", href: "/store" },
-  { label: "Guide & Tips ", href: "/blog" },
+  { label: "Guide & Tips", href: "/blog" },
   { label: "About Us", href: "/about" },
   { label: "Contact", href: "/contact" },
-
 ];
 
 export default function Header() {
@@ -30,10 +27,14 @@ export default function Header() {
     <header className="fixed top-0 inset-x-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/70 border-b border-white/5">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
+          
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 font-semibold tracking-wide">
-            <Hammer className="h-6 w-6 text-red-500" />
-            <span>Nilta Flooring</span>
+          <Link to="/" className="flex items-center gap-3">
+            <img
+              src="/logo/nilta-logo.webp"
+              alt="Nilta Flooring"
+              className="h-9 w-auto object-contain"
+            />
           </Link>
 
           {/* Desktop nav */}
@@ -42,10 +43,11 @@ export default function Header() {
               <Link
                 key={item.label}
                 to={item.href}
-                className={`relative transition-colors ${isActive(item.href)
-                  ? "text-white"
-                  : "text-white/70 hover:text-white"
-                  }`}
+                className={`relative transition-colors ${
+                  isActive(item.href)
+                    ? "text-white"
+                    : "text-white/70 hover:text-white"
+                }`}
               >
                 {item.label}
                 {isActive(item.href) && (
@@ -55,7 +57,7 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Mobile hamburger */}
+          {/* Mobile menu button */}
           <button
             aria-label="Open menu"
             onClick={() => setOpen(true)}
@@ -66,7 +68,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile drawer */}
+      {/* Mobile menu */}
       <AnimatePresence>
         {open && (
           <motion.aside
@@ -77,10 +79,11 @@ export default function Header() {
             className="fixed top-0 right-0 h-screen w-[88vw] max-w-sm bg-neutral-900/95 backdrop-blur-xl shadow-2xl z-50"
           >
             <div className="p-4 flex items-center justify-between">
-              <div className="flex items-center gap-2 font-semibold">
-                <Hammer className="h-5 w-5 text-red-500" />
-                <span>Menu</span>
-              </div>
+              <img
+                src="/logo/logo.webp"
+                alt="Nilta Flooring"
+                className="h-8 w-auto"
+              />
               <button
                 aria-label="Close menu"
                 onClick={() => setOpen(false)}

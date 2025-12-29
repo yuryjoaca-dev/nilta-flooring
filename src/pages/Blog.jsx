@@ -47,7 +47,15 @@ export default function Blog() {
     })),
   };
 
-  // ---- data flow
+  // --- Always show the newest GUIDE (independent of filters/search)
+  const mostRecentGuide = useMemo(() => {
+    const guides = [...POSTS]
+      .filter((p) => (p.category || "").toLowerCase() === "guides")
+      .sort((a, b) => (a.date < b.date ? 1 : -1));
+    return guides[0] || null;
+  }, []);
+
+  // ---- data flow (filters/search control the grid only)
   const filtered = useMemo(() => {
     let list = [...POSTS].sort((a, b) => (a.date < b.date ? 1 : -1)); // newest first
     if (cat !== "All") list = list.filter((p) => p.category === cat);
@@ -65,7 +73,9 @@ export default function Blog() {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const shown = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
-  const featured = filtered[0] || POSTS[0];
+
+  // Fallback if no guides exist for any reason:
+  const mostRecentCard = mostRecentGuide || filtered[0] || POSTS[0];
 
   return (
     <main className="pt-16 min-h-screen bg-neutral-950 text-white">
@@ -281,8 +291,8 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* FEATURED ARTICLE */}
-      {featured && (
+      {/* MOST RECENT GUIDE */}
+      {mostRecentCard && (
         <section className="max-w-7xl mx-auto px-6 pb-6">
           <motion.article
             className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] grid lg:grid-cols-[1.1fr,1fr] shadow-xl"
@@ -291,33 +301,33 @@ export default function Blog() {
             viewport={{ once: true }}
           >
             <Link
-              to={`/blog/${featured.slug}`}
+              to={`/blog/${mostRecentCard.slug}`}
               className="relative block max-h-[340px]"
             >
               <img
-                src={featured.image}
-                alt={featured.title}
+                src={mostRecentCard.image}
+                alt={mostRecentCard.title}
                 className="h-full w-full object-cover min-h-[260px] lg:min-h-[340px] transition-transform duration-700 hover:scale-105"
               />
               <span className="absolute top-3 left-3 rounded-full bg-black/70 backdrop-blur px-3 py-1 text-xs border border-white/20">
-                Featured · {featured.category}
+                Most Recent Guide · {mostRecentCard.category}
               </span>
             </Link>
             <div className="p-6 flex flex-col">
               <div className="text-white/60 text-xs">
-                {prettyDate(featured.date)} • {featured.readTime} min read
+                {prettyDate(mostRecentCard.date)} • {mostRecentCard.readTime} min read
               </div>
               <Link
-                to={`/blog/${featured.slug}`}
+                to={`/blog/${mostRecentCard.slug}`}
                 className="mt-2 font-semibold text-2xl md:text-3xl hover:text-[#F2C4D0] transition-colors"
               >
-                {featured.title}
+                {mostRecentCard.title}
               </Link>
               <p className="text-white/80 mt-3 text-sm md:text-base">
-                {featured.excerpt}
+                {mostRecentCard.excerpt}
               </p>
               <div className="mt-auto pt-4">
-                <TextArrowLink to={`/blog/${featured.slug}`}>
+                <TextArrowLink to={`/blog/${mostRecentCard.slug}`}>
                   Read article
                 </TextArrowLink>
               </div>

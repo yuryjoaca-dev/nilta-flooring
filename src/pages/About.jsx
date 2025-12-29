@@ -385,10 +385,7 @@ export default function About() {
           ))}
         </div>
 
-        <p className="text-white/55 text-xs mt-4">
-          Tip: replace the photo paths in the TEAM array below with your real image files
-          (e.g. /team/ahmet.webp).
-        </p>
+        
       </section>
 
       {/* CAPABILITIES STRIP */}
@@ -478,7 +475,7 @@ const TEAM = [
     name: "Ahmet",
     role: "Founder",
     focus: "20+ years of flooring expertise",
-    photo: "/team/ahmet.webp",
+    photo: "/about/avatar.jpg",
     blurb:
       "Built Nilta on craftsmanship and care—focused on prep, planning, and clean finishes that hold up over time.",
   },
@@ -486,7 +483,7 @@ const TEAM = [
     name: "Vladimir",
     role: "Project Manager",
     focus: "Scheduling, coordination & client updates",
-    photo: "/team/vladimir.webp",
+    photo: "/about/avatar.jpg",
     blurb:
       "Keeps timelines honest, materials organized, and communication clear—so projects run smoothly from start to finish.",
   },
@@ -494,7 +491,7 @@ const TEAM = [
     name: "Andrii",
     role: "Project Manager",
     focus: "Quality checks, site readiness & finishing",
-    photo: "/team/andrii.webp",
+    photo: "/about/avatar.jpg",
     blurb:
       "Focused on the details that matter: proper prep, clean transitions, and a tidy, confident handover.",
   },

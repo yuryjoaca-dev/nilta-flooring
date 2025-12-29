@@ -5,23 +5,62 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { POSTS } from "../data/blog.js";
 
+const ACCENT = "#8F2841";
+
 export default function BlogPost() {
   const { slug } = useParams();
 
-  const postIndex = useMemo(
-    () => POSTS.findIndex((p) => p.slug === slug),
-    [slug]
-  );
-  const post = postIndex >= 0 ? POSTS[postIndex] : null;
+  // newest-first order (matches Blog.jsx sorting)
+  const orderedPosts = useMemo(() => {
+    return [...POSTS].sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, []);
 
-  // Prev/Next based on current order in POSTS
-  const prevPost = postIndex > 0 ? POSTS[postIndex - 1] : null;
+  const postIndex = useMemo(
+    () => orderedPosts.findIndex((p) => p.slug === slug),
+    [slug, orderedPosts]
+  );
+  const post = postIndex >= 0 ? orderedPosts[postIndex] : null;
+
+  const prevPost = postIndex > 0 ? orderedPosts[postIndex - 1] : null;
   const nextPost =
-    postIndex >= 0 && postIndex < POSTS.length - 1 ? POSTS[postIndex + 1] : null;
+    postIndex >= 0 && postIndex < orderedPosts.length - 1
+      ? orderedPosts[postIndex + 1]
+      : null;
+
+  // Blog-only fonts
+  useEffect(() => {
+    const id = "blog-fonts-playfair-inter";
+    if (!document.getElementById(id)) {
+      const link = document.createElement("link");
+      link.id = id;
+      link.rel = "stylesheet";
+      link.href =
+        "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600&display=swap";
+      document.head.appendChild(link);
+    }
+
+    const root = document.documentElement;
+    const prevSerif = root.style.getPropertyValue("--blog-serif");
+    const prevSans = root.style.getPropertyValue("--blog-sans");
+
+    root.style.setProperty(
+      "--blog-serif",
+      '"Playfair Display", ui-serif, Georgia, serif'
+    );
+    root.style.setProperty(
+      "--blog-sans",
+      'Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial'
+    );
+
+    return () => {
+      root.style.setProperty("--blog-serif", prevSerif || "");
+      root.style.setProperty("--blog-sans", prevSans || "");
+    };
+  }, []);
 
   if (!post) {
     return (
-      <main className="pt-16 min-h-screen bg-neutral-950 text-white">
+      <main className="pt-16 min-h-screen bg-[#050507] text-white">
         <div className="max-w-3xl mx-auto px-6 py-20 text-center">
           <div className="text-3xl font-bold">Article not found</div>
           <p className="text-white/70 mt-2">
@@ -29,7 +68,7 @@ export default function BlogPost() {
           </p>
           <Link
             to="/blog"
-            className="inline-block mt-6 rounded-full border border-white/15 px-4 py-2 hover:bg-white/5"
+            className="inline-block mt-6 rounded-full border border-white/15 bg-white/[0.03] px-5 py-2 hover:bg-white/10 transition"
           >
             Back to Guide & Tips
           </Link>
@@ -38,17 +77,25 @@ export default function BlogPost() {
     );
   }
 
-  const SITE_URL = "https://nilta.ca"; // swap to your real domain
+  const SITE_URL = "https://nilta.ca";
   const canonicalUrl = `${SITE_URL}/blog/${post.slug}`;
 
-  // Optional: support `post.body` as plain text OR as structured sections
-  // If you only add `post.body` (string), this will render nicely with headings/bullets based on simple parsing.
-  // Best: pass `post.sections` (array) for full control.
   const hasStructured = Array.isArray(post.sections) && post.sections.length > 0;
+  const hasBody = typeof post.body === "string" && post.body.trim().length > 0;
+  const hasContent =
+    typeof post.content === "string" && post.content.trim().length > 0;
+
+  const dateLabel = new Date(post.date).toLocaleDateString("en-CA", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 
   return (
-    <main className="pt-16 min-h-screen bg-neutral-950 text-white">
-      {/* SEO */}
+    <main
+      className="pt-16 min-h-screen bg-[#050507] text-white"
+      style={{ fontFamily: "var(--blog-sans)" }}
+    >
       <Helmet>
         <title>{post.title} | Nilta Flooring • Guide & Tips</title>
         <meta name="description" content={post.excerpt} />
@@ -61,58 +108,89 @@ export default function BlogPost() {
 
       <ProgressBar />
 
-      {/* Hero */}
-      <section className="relative h-[46vh] overflow-hidden">
-        <motion.img
-          src={post.image}
-          alt={post.title}
-          className="absolute inset-0 h-full w-full object-cover opacity-70"
-          initial={{ scale: 1.05 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1 }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black" />
-        <div className="relative z-10 max-w-5xl mx-auto h-full px-6 flex flex-col justify-end pb-10">
-          <div className="text-white/70 text-sm">
-            {new Date(post.date).toLocaleDateString("en-CA", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}{" "}
-            • {post.readTime} min • {post.category}
-          </div>
+      {/* HERO */}
+      <section className="relative overflow-hidden">
+        <div className="relative h-[54vh] md:h-[60vh]">
+          <motion.img
+            src={post.image}
+            alt={post.title}
+            className="absolute inset-0 h-full w-full object-cover"
+            initial={{ scale: 1.08 }}
+            animate={{ scale: 1.02 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+          />
 
-          <motion.h1
-            className="text-3xl md:text-5xl font-extrabold mt-2"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            {post.title}
-          </motion.h1>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/35 to-[#050507]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.07),transparent_56%)] pointer-events-none" />
+        </div>
 
-          <div className="text-white/70 text-sm mt-2">
-            By {post.author || "the Nilta Flooring Team"}
+        <div className="relative -mt-24 md:-mt-28">
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="rounded-3xl border border-white/10 bg-white/[0.05] backdrop-blur-xl shadow-2xl p-6 md:p-8">
+              <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                <span className="inline-flex items-center rounded-full border border-white/15 bg-black/30 px-3 py-1 text-[11px] tracking-wide text-white/85">
+                  {post.category}
+                </span>
+                <span className="text-white/60 text-xs">•</span>
+                <span className="text-white/75 text-xs tracking-wide">
+                  {dateLabel}
+                </span>
+                <span className="text-white/60 text-xs">•</span>
+                <span className="text-white/75 text-xs tracking-wide">
+                  {post.readTime} min read
+                </span>
+
+                <span className="ml-auto text-white/60 text-xs">
+                  By {post.author || "the Nilta Flooring Team"}
+                </span>
+              </div>
+
+              <h1
+                className="mt-4 text-3xl md:text-6xl font-bold leading-[1.05] tracking-[-0.02em]"
+                style={{ fontFamily: "var(--blog-serif)" }}
+              >
+                {post.title}
+              </h1>
+
+              <p className="mt-4 text-white/80 text-sm md:text-base leading-[1.9] max-w-3xl">
+                {post.excerpt}
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-2">
+                <Link
+                  to="/blog"
+                  className="inline-flex items-center rounded-full border border-white/15 bg-white/[0.03] px-5 py-2 text-sm font-semibold hover:bg-white/10 transition"
+                >
+                  ← Back to Guide & Tips
+                </Link>
+                <Link
+                  to="/contact"
+                  className="inline-flex items-center rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg transition"
+                  style={{ background: ACCENT }}
+                >
+                  Request an estimate
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Layout: content + right rail */}
+      {/* CONTENT */}
       <section className="max-w-6xl mx-auto px-6 py-10 grid lg:grid-cols-[1fr_320px] gap-8">
-        {/* Article */}
-        <ArticleContent post={post} structured={hasStructured} />
-
-        {/* Right rail */}
+        <ArticleContent
+          post={post}
+          structured={hasStructured}
+          hasBody={hasBody}
+          hasContent={hasContent}
+        />
         <aside className="hidden lg:block">
           <RightRail post={post} canonicalUrl={canonicalUrl} />
         </aside>
       </section>
 
-      {/* Prev / Next */}
       <NavFence prevPost={prevPost} nextPost={nextPost} />
-
-      {/* Related posts */}
-      <RelatedPosts currentSlug={post.slug} />
+      <RelatedPosts currentSlug={post.slug} orderedPosts={orderedPosts} />
     </main>
   );
 }
@@ -136,93 +214,150 @@ function ProgressBar() {
   }, []);
 
   return (
-    <div className="fixed top-16 left-0 right-0 z-40 h-1 bg-white/5">
+    <div className="fixed top-16 left-0 right-0 z-40 h-[2px] bg-white/5">
       <div
-        className="h-full bg-red-500 transition-[width] duration-150"
-        style={{ width: `${pct}%` }}
+        className="h-full transition-[width] duration-150"
+        style={{
+          width: `${pct}%`,
+          background:
+            "linear-gradient(90deg, rgba(143,40,65,0.0), rgba(143,40,65,0.85), rgba(242,196,208,0.9))",
+        }}
         aria-hidden
       />
     </div>
   );
 }
 
-function ArticleContent({ post, structured }) {
+function ArticleContent({ post, structured, hasBody, hasContent }) {
   const articleRef = useRef(null);
-  const [toc, setToc] = useState([]);
-
-  // Simple image zoom
   const [zoomSrc, setZoomSrc] = useState(null);
 
-  // Build TOC from h2/h3 in the rendered content
   useEffect(() => {
     const root = articleRef.current;
     if (!root) return;
     const headings = Array.from(root.querySelectorAll("h2, h3"));
-    const out = headings.map((el) => {
+    headings.forEach((el) => {
       const id = el.textContent
         ?.toLowerCase()
         .replace(/[^a-z0-9\s]/g, "")
         .trim()
         .replace(/\s+/g, "-");
       if (id && !el.id) el.id = id;
-      return { id, text: el.textContent || "", level: el.tagName.toLowerCase() };
     });
-    setToc(out);
   }, [post.slug]);
 
-  // Content rendering:
-  // - If you add `post.sections`: render them with headings, paragraphs, and bullet lists.
-  // - Else if you add `post.body` (string): render with simple parsing (paragraphs + headings).
-  // - Else fallback to the old demo blocks (but you should remove them once posts have body/sections).
   return (
     <article className="min-w-0">
-      <div
-        ref={articleRef}
-        className="prose prose-invert prose-headings:scroll-mt-24 max-w-none"
-      >
-        {/* Intro */}
-        <p className="text-white/85 text-lg">{post.excerpt}</p>
+      <div className="rounded-3xl border border-white/10 bg-white/[0.03] shadow-2xl p-6 md:p-8">
+        {/* Blog-only typography upgrades */}
+        <style>{`
+          .blog-article h2, .blog-article h3 {
+            font-family: var(--blog-serif) !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.01em;
+          }
+          .blog-article h2 {
+            position: relative;
+            padding-top: 8px;
+          }
+          .blog-article h2::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 1px;
+            width: 72px;
+            background: linear-gradient(90deg, rgba(143,40,65,0.95), rgba(242,196,208,0.55));
+            opacity: 0.9;
+          }
 
-        {/* ✅ NEW: Render real post content if provided */}
-        {structured ? (
-          <StructuredSections sections={post.sections} />
-        ) : post.body ? (
-          <BodyText body={post.body} />
-        ) : (
-          <FallbackDemo post={post} onZoom={() => setZoomSrc(post.image)} />
-        )}
+          /* Premium bullet list card */
+          .blog-article .lux-list {
+            border: 1px solid rgba(255,255,255,0.10);
+            background: rgba(255,255,255,0.03);
+            border-radius: 18px;
+            padding: 14px 16px;
+            margin: 18px 0;
+          }
+          .blog-article .lux-list ul { 
+            list-style: none; 
+            padding-left: 0;
+            margin: 0;
+          }
+          .blog-article .lux-list li {
+            display: flex;
+            gap: 10px;
+            padding: 10px 0;
+            color: rgba(255,255,255,0.82);
+          }
+          .blog-article .lux-list li + li {
+            border-top: 1px solid rgba(255,255,255,0.08);
+          }
+          .blog-article .lux-dot {
+            margin-top: 8px;
+            height: 7px;
+            width: 7px;
+            border-radius: 999px;
+            background: #F2C4D0;
+            box-shadow: 0 0 0 4px rgba(143,40,65,0.15);
+            flex: 0 0 7px;
+          }
 
-        <div className="mt-10 flex flex-wrap gap-2">
-          <Link
-            to="/blog"
-            className="rounded-full border border-white/15 px-4 py-2 hover:bg-white/5"
-          >
-            ← Back to Guide & Tips
-          </Link>
-          <Link
-            to="/contact"
-            className="rounded-full border border-white/15 px-4 py-2 hover:bg-white/5"
-          >
-            Contact Nilta Flooring
-          </Link>
+          /* Callout style for > lines */
+          .blog-article .lux-callout {
+            border: 1px solid rgba(143,40,65,0.35);
+            background: rgba(143,40,65,0.10);
+            border-radius: 18px;
+            padding: 14px 16px;
+            margin: 18px 0;
+            color: rgba(255,255,255,0.85);
+          }
+
+          /* Slightly nicer HR */
+          .blog-article hr {
+            border-color: rgba(255,255,255,0.10);
+            margin: 34px 0;
+          }
+        `}</style>
+
+        <div
+          ref={articleRef}
+          className={[
+            "prose prose-invert max-w-none blog-article",
+            "prose-headings:scroll-mt-28",
+            "prose-h2:mt-12 prose-h2:mb-4 prose-h2:text-2xl md:prose-h2:text-3xl",
+            "prose-h3:mt-10 prose-h3:mb-3 prose-h3:text-xl md:prose-h3:text-2xl",
+            "prose-p:text-white/80 prose-p:leading-[1.95] prose-p:text-[15px] md:prose-p:text-[16px]",
+            "prose-strong:text-white prose-strong:font-semibold",
+            "prose-a:text-[#F2C4D0] hover:prose-a:text-white prose-a:underline prose-a:underline-offset-4",
+          ].join(" ")}
+        >
+          {structured ? (
+            <StructuredSections sections={post.sections} />
+          ) : hasBody ? (
+            <BodyText body={post.body} />
+          ) : hasContent ? (
+            <MarkdownishText content={post.content} />
+          ) : (
+            <FallbackDemo post={post} onZoom={() => setZoomSrc(post.image)} />
+          )}
+
+          <div className="mt-10 flex flex-wrap gap-2">
+            <Link
+              to="/blog"
+              className="rounded-full border border-white/15 bg-white/[0.03] px-5 py-2 hover:bg-white/10 transition no-underline"
+            >
+              ← Back to Guide & Tips
+            </Link>
+            <Link
+              to="/contact"
+              className="rounded-full border border-white/15 bg-white/[0.03] px-5 py-2 hover:bg-white/10 transition no-underline"
+            >
+              Contact Nilta Flooring
+            </Link>
+          </div>
         </div>
       </div>
-
-      {/* Right-rail TOC for mobile (collapsible) */}
-      {toc.length > 0 && (
-        <details className="lg:hidden mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-          <summary className="cursor-pointer font-semibold">On this page</summary>
-          <ul className="mt-3 space-y-2 text-sm text-white/80">
-            {toc.map((h) => (
-              <li key={h.id} className={h.level === "h3" ? "ml-3" : ""}>
-                <a href={`#${h.id}`} className="hover:text-red-500">
-                  {h.text}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </details>
-      )}
 
       {/* Lightbox */}
       {zoomSrc && (
@@ -233,7 +368,7 @@ function ArticleContent({ post, structured }) {
           <img
             src={zoomSrc}
             alt="Zoomed"
-            className="max-h-[85vh] max-w-[92vw] rounded-xl shadow-2xl"
+            className="max-h-[85vh] max-w-[92vw] rounded-2xl shadow-2xl border border-white/10"
           />
         </div>
       )}
@@ -241,7 +376,7 @@ function ArticleContent({ post, structured }) {
   );
 }
 
-/* ---------- Content render helpers ---------- */
+/* ---------- Content helpers ---------- */
 
 function StructuredSections({ sections }) {
   return (
@@ -252,10 +387,17 @@ function StructuredSections({ sections }) {
         if (s.type === "p") return <p key={idx}>{s.text}</p>;
         if (s.type === "ul")
           return (
-            <ul key={idx}>
-              {Array.isArray(s.items) &&
-                s.items.map((it, i) => <li key={i}>{it}</li>)}
-            </ul>
+            <div key={idx} className="lux-list">
+              <ul>
+                {Array.isArray(s.items) &&
+                  s.items.map((it, i) => (
+                    <li key={i}>
+                      <span className="lux-dot" />
+                      <span>{it}</span>
+                    </li>
+                  ))}
+              </ul>
+            </div>
           );
         if (s.type === "hr") return <hr key={idx} />;
         return null;
@@ -264,10 +406,6 @@ function StructuredSections({ sections }) {
   );
 }
 
-/**
- * If you store content as a single string `post.body`,
- * this turns it into paragraphs and simple "Heading:" blocks.
- */
 function BodyText({ body }) {
   const lines = String(body || "")
     .split("\n")
@@ -287,21 +425,16 @@ function BodyText({ body }) {
       flush();
       continue;
     }
-
-    // Treat lines ending with ":" as headings (like "Innovative Lighting:")
     if (line.endsWith(":") && line.length <= 80) {
       flush();
       blocks.push({ type: "h2", text: line.replace(/:$/, "") });
       continue;
     }
-
-    // Simple divider markers
     if (line === "---" || line === "----" || line === "⸻") {
       flush();
       blocks.push({ type: "hr" });
       continue;
     }
-
     buffer.push(line);
   }
   flush();
@@ -317,44 +450,149 @@ function BodyText({ body }) {
   );
 }
 
-/* Old example content (kept as fallback so the page never looks empty) */
+function renderInline(text) {
+  // Simple **bold** support
+  const parts = String(text || "").split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, idx) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={idx}>{part.slice(2, -2)}</strong>;
+    }
+    return <React.Fragment key={idx}>{part}</React.Fragment>;
+  });
+}
+
+function MarkdownishText({ content }) {
+  const lines = String(content || "")
+    .split("\n")
+    .map((l) => l.trim());
+
+  const blocks = [];
+  let para = [];
+  let ul = [];
+
+  const flushPara = () => {
+    const text = para.join(" ").trim();
+    if (text) blocks.push({ type: "p", text });
+    para = [];
+  };
+
+  const flushUl = () => {
+    if (ul.length) blocks.push({ type: "ul", items: ul });
+    ul = [];
+  };
+
+  for (const line of lines) {
+    if (!line) {
+      flushUl();
+      flushPara();
+      continue;
+    }
+
+    // hr
+    if (line === "---" || line === "----" || line === "⸻") {
+      flushUl();
+      flushPara();
+      blocks.push({ type: "hr" });
+      continue;
+    }
+
+    // callout: > text
+    if (line.startsWith("> ")) {
+      flushUl();
+      flushPara();
+      blocks.push({ type: "callout", text: line.replace(/^>\s+/, "") });
+      continue;
+    }
+
+    // headings
+    if (line.startsWith("### ")) {
+      flushUl();
+      flushPara();
+      blocks.push({ type: "h3", text: line.replace(/^###\s+/, "") });
+      continue;
+    }
+    if (line.startsWith("## ")) {
+      flushUl();
+      flushPara();
+      blocks.push({ type: "h2", text: line.replace(/^##\s+/, "") });
+      continue;
+    }
+
+    // bullets
+    if (line.startsWith("- ") || line.startsWith("• ")) {
+      flushPara();
+      ul.push(line.replace(/^(-\s+|•\s+)/, ""));
+      continue;
+    }
+
+    flushUl();
+    para.push(line);
+  }
+
+  flushUl();
+  flushPara();
+
+  return (
+    <>
+      {blocks.map((b, idx) => {
+        if (b.type === "h2") return <h2 key={idx}>{b.text}</h2>;
+        if (b.type === "h3") return <h3 key={idx}>{b.text}</h3>;
+        if (b.type === "hr") return <hr key={idx} />;
+        if (b.type === "callout")
+          return (
+            <div key={idx} className="lux-callout">
+              {renderInline(b.text)}
+            </div>
+          );
+        if (b.type === "ul")
+          return (
+            <div key={idx} className="lux-list">
+              <ul>
+                {b.items.map((it, i) => (
+                  <li key={i}>
+                    <span className="lux-dot" />
+                    <span>{renderInline(it)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        return <p key={idx}>{renderInline(b.text)}</p>;
+      })}
+    </>
+  );
+}
+
 function FallbackDemo({ post, onZoom }) {
   return (
     <>
       <h2>What’s inside</h2>
-      <ul>
-        <li>Moisture testing & choosing the right underlay</li>
-        <li>Subfloor levelling, patching, & prep</li>
-        <li>Product picks: LVP, laminate, engineered hardwood, and tile</li>
-        <li>Trims, transitions & tidy handover</li>
-      </ul>
+      <div className="lux-list">
+        <ul>
+          <li>
+            <span className="lux-dot" />
+            <span>Moisture testing & choosing the right underlay</span>
+          </li>
+          <li>
+            <span className="lux-dot" />
+            <span>Subfloor levelling, patching, & prep</span>
+          </li>
+          <li>
+            <span className="lux-dot" />
+            <span>Product picks: LVP, laminate, engineered hardwood, and tile</span>
+          </li>
+          <li>
+            <span className="lux-dot" />
+            <span>Trims, transitions & tidy handover</span>
+          </li>
+        </ul>
+      </div>
 
-      <h2>Planning & lead times</h2>
-      <p>
-        For most Edmonton projects, material lead times range from same-week
-        pickup to 2–3 weeks for special orders. We plan installs around delivery
-        windows, crew availability, and site prep to keep your project
-        predictable.
-      </p>
-
-      <h3>Moisture & substrate checks</h3>
-      <p>
-        We test for moisture, inspect deflection, and propose a substrate plan—
-        self-level, patch, or repair—so seams stay tight and floors feel solid.
-      </p>
-
-      <h3>Choosing the right product</h3>
-      <p>
-        High-traffic kitchens and basements often benefit from waterproof LVP;
-        bedrooms and main areas may lean toward laminate or engineered hardwood.
-        Tile shines in bathrooms and entries for durability and clean lines.
-      </p>
-
-      <figure className="my-6">
+      <figure className="my-8">
         <img
           src={post.image}
           alt={post.title}
-          className="rounded-xl border border-white/10 cursor-zoom-in"
+          className="rounded-2xl border border-white/10 cursor-zoom-in shadow-xl"
           onClick={onZoom}
         />
         <figcaption className="text-white/60 text-sm mt-2">
@@ -362,13 +600,10 @@ function FallbackDemo({ post, onZoom }) {
         </figcaption>
       </figure>
 
-      <h2>Key takeaways</h2>
-      <p>
-        Clear scope, realistic timelines, and proactive communication reduce risk
-        and keep installations on schedule. With moisture-smart prep and the
-        right product, you’ll get floors that look great, feel quiet underfoot,
-        and last.
-      </p>
+      <div className="lux-callout">
+        **Pro tip:** Ask for the quote to list **prep**, **materials**, and **installation**
+        separately—so you know exactly what you’re paying for.
+      </div>
     </>
   );
 }
@@ -376,7 +611,6 @@ function FallbackDemo({ post, onZoom }) {
 function RightRail({ post, canonicalUrl }) {
   const [toc, setToc] = useState([]);
 
-  // pull headings from document so the rail updates
   useEffect(() => {
     const root = document.querySelector("article .prose");
     if (!root) return;
@@ -387,7 +621,7 @@ function RightRail({ post, canonicalUrl }) {
         text: el.textContent || "",
         level: el.tagName.toLowerCase(),
       }))
-      .filter((h) => h.id); // avoid empty ids
+      .filter((h) => h.id);
     setToc(out);
   }, [post.slug]);
 
@@ -396,28 +630,23 @@ function RightRail({ post, canonicalUrl }) {
     if (navigator.share) {
       try {
         await navigator.share(data);
-      } catch {
-        // user cancelled
-      }
+      } catch {}
     } else {
       try {
         await navigator.clipboard.writeText(canonicalUrl);
-        alert("Link copied to clipboard.");
-      } catch {
-        // noop
-      }
+      } catch {}
     }
   };
 
   return (
     <div className="sticky top-28 space-y-4">
-      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-xl">
+      <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 shadow-2xl">
         <div className="font-semibold">On this page</div>
         <ul className="mt-3 space-y-2 text-sm text-white/80">
           {toc.length === 0 && <li className="text-white/50">—</li>}
           {toc.map((h) => (
             <li key={h.id} className={h.level === "h3" ? "ml-3" : ""}>
-              <a href={`#${h.id}`} className="hover:text-red-500">
+              <a href={`#${h.id}`} className="hover:text-[#F2C4D0] transition">
                 {h.text}
               </a>
             </li>
@@ -425,20 +654,21 @@ function RightRail({ post, canonicalUrl }) {
         </ul>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-xl">
-        <div className="font-semibold">Share</div>
+      <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 shadow-2xl">
+        <div className="font-semibold">Actions</div>
         <div className="mt-3 flex flex-wrap gap-2">
           <button
             onClick={share}
-            className="rounded-full border border-white/15 px-4 py-2 text-sm hover:bg-white/5"
+            className="rounded-full border border-white/15 bg-white/[0.03] px-4 py-2 text-sm hover:bg-white/10 transition"
           >
             Share / Copy link
           </button>
           <Link
             to="/contact"
-            className="rounded-full border border-red-500/70 px-4 py-2 text-sm hover:bg-red-600/10 hover:border-red-600"
+            className="rounded-full px-4 py-2 text-sm font-semibold text-white transition"
+            style={{ background: ACCENT }}
           >
-            Contact Nilta Flooring
+            Contact
           </Link>
         </div>
       </div>
@@ -452,86 +682,88 @@ function NavFence({ prevPost, nextPost }) {
   return (
     <section className="border-t border-white/10">
       <div className="max-w-6xl mx-auto px-6 py-10 grid md:grid-cols-2 gap-6">
-        {prevPost && (
-          <Link
-            to={`/blog/${prevPost.slug}`}
-            className="group rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden"
-          >
-            <div className="relative h-40">
-              <img
-                src={prevPost.image}
-                alt={prevPost.title}
-                className="absolute inset-0 h-full w-full object-cover opacity-80 transition group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-              <div className="absolute bottom-3 left-3 text-sm text-white/70">
-                Previous
-              </div>
-            </div>
-            <div className="p-4 font-semibold group-hover:text-red-500 transition">
-              {prevPost.title}
-            </div>
-          </Link>
-        )}
-
-        {nextPost && (
-          <Link
-            to={`/blog/${nextPost.slug}`}
-            className="group rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden"
-          >
-            <div className="relative h-40">
-              <img
-                src={nextPost.image}
-                alt={nextPost.title}
-                className="absolute inset-0 h-full w-full object-cover opacity-80 transition group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-              <div className="absolute bottom-3 left-3 text-sm text-white/70">
-                Next
-              </div>
-            </div>
-            <div className="p-4 font-semibold group-hover:text-red-500 transition">
-              {nextPost.title}
-            </div>
-          </Link>
-        )}
+        {prevPost && <NavCard label="Previous" post={prevPost} />}
+        {nextPost && <NavCard label="Next" post={nextPost} />}
       </div>
     </section>
   );
 }
 
-function RelatedPosts({ currentSlug }) {
+function NavCard({ label, post }) {
+  return (
+    <Link
+      to={`/blog/${post.slug}`}
+      className="group rounded-3xl border border-white/10 bg-white/[0.03] overflow-hidden shadow-2xl hover:border-white/20 transition"
+    >
+      <div className="relative h-44">
+        <img
+          src={post.image}
+          alt={post.title}
+          className="absolute inset-0 h-full w-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
+        <div className="absolute bottom-3 left-3 text-xs tracking-wide text-white/70">
+          {label}
+        </div>
+      </div>
+      <div className="p-5">
+        <div className="text-white/60 text-xs">
+          {new Date(post.date).toLocaleDateString("en-CA", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })}{" "}
+          • {post.readTime} min
+        </div>
+        <div className="mt-1 font-semibold group-hover:text-[#F2C4D0] transition">
+          {post.title}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function RelatedPosts({ currentSlug, orderedPosts }) {
   const related = useMemo(() => {
-    // simple: take 3 most recent excluding current
-    return POSTS.filter((p) => p.slug !== currentSlug).slice(0, 3);
-  }, [currentSlug]);
+    return orderedPosts.filter((p) => p.slug !== currentSlug).slice(0, 3);
+  }, [currentSlug, orderedPosts]);
 
   if (related.length === 0) return null;
 
   return (
     <section className="max-w-6xl mx-auto px-6 pb-12">
-      <h2 className="text-2xl md:text-3xl font-bold mb-4">Related articles</h2>
+      <div className="flex items-end justify-between gap-3 mb-4">
+        <h2
+          className="text-2xl md:text-3xl font-bold"
+          style={{ fontFamily: "var(--blog-serif)" }}
+        >
+          Related articles
+        </h2>
+        <Link
+          to="/blog"
+          className="text-sm text-white/70 hover:text-[#F2C4D0] transition"
+        >
+          View all →
+        </Link>
+      </div>
+
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {related.map((p, i) => (
-          <motion.article
+        {related.map((p) => (
+          <article
             key={p.slug}
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.35, delay: i * 0.03 }}
-            className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] flex flex-col"
+            className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] shadow-2xl hover:border-white/20 transition"
           >
             <Link to={`/blog/${p.slug}`} className="relative block">
               <img
                 src={p.image}
                 alt={p.title}
-                className="h-40 w-full object-cover transition hover:scale-105"
+                className="h-44 w-full object-cover transition-transform duration-700 hover:scale-105"
               />
-              <span className="absolute top-3 left-3 rounded-full bg-black/60 backdrop-blur px-3 py-1 text-xs border border-white/10">
+              <span className="absolute top-3 left-3 rounded-full bg-black/55 backdrop-blur px-3 py-1 text-xs border border-white/15">
                 {p.category}
               </span>
             </Link>
-            <div className="p-4">
+            <div className="p-5">
               <div className="text-white/60 text-xs">
                 {new Date(p.date).toLocaleDateString("en-CA", {
                   year: "numeric",
@@ -542,13 +774,15 @@ function RelatedPosts({ currentSlug }) {
               </div>
               <Link
                 to={`/blog/${p.slug}`}
-                className="font-semibold hover:text-red-500 transition"
+                className="mt-1 block font-semibold hover:text-[#F2C4D0] transition"
               >
                 {p.title}
               </Link>
-              <p className="text-white/75 text-sm mt-1">{p.excerpt}</p>
+              <p className="text-white/75 text-sm mt-2 line-clamp-3">
+                {p.excerpt}
+              </p>
             </div>
-          </motion.article>
+          </article>
         ))}
       </div>
     </section>
