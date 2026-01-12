@@ -40,8 +40,8 @@ mongoose
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, "uploads");
+// ✅ Ensure uploads directory exists (use process.cwd for reliability)
+const uploadsDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -75,9 +75,13 @@ const PRODUCT_CATALOG = {
   },
 };
 
-// --- Email helper ---
-function createTransporter() {
-  return nodemailer.createTransport({
+// --- Email helper (cached transporter) ---
+let _transporter = null;
+
+function getTransporter() {
+  if (_transporter) return _transporter;
+
+  _transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST, // e.g. "smtp.gmail.com"
     port: Number(process.env.SMTP_PORT) || 587,
     secure: process.env.SMTP_SECURE === "true", // true for 465, false for 587
@@ -86,6 +90,18 @@ function createTransporter() {
       pass: process.env.SMTP_PASS,
     },
   });
+
+  return _transporter;
+}
+
+// Escape user input for safe HTML emails (prevents HTML injection)
+function escapeHtml(str = "") {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 // CORS
@@ -95,24 +111,47 @@ app.use(
       "http://localhost:5173",
       "http://localhost:3000",
       "https://nilta-flooring-41kr.vercel.app",
+      "https://nilta.ca",
+      "https://www.nilta.ca",
     ],
     credentials: true,
   })
 );
 
-// Security middleware
-app.use(helmet());
+// ✅ Helmet: allow cross-origin for images/assets (fixes blocked /uploads on different origin)
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 
 // Basic API rate limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 app.use("/api", apiLimiter);
 
-// Static files for uploaded images
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Stricter limiter for contact form (anti-spam)
+const contactLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10, // 10 requests / 15 min / IP
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
+// ✅ Static files for uploaded images (serve the SAME folder multer writes to)
+app.use(
+  "/uploads",
+  express.static(uploadsDir, {
+    setHeaders(res) {
+      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+      res.setHeader("Access-Control-Allow-Origin", "*");
+    },
+  })
+);
 
 // --- STRIPE WEBHOOK (must come BEFORE express.json) ---
 app.post(
@@ -143,11 +182,13 @@ app.post(
       // Format shipping address nicely for HTML
       const formattedAddress = address
         ? `
-      ${address.line1 || ""}${address.line2 ? ", " + address.line2 : ""}<br/>
-      ${address.city || ""}${address.state ? ", " + address.state : ""} ${
-            address.postal_code || ""
+      ${escapeHtml(address.line1 || "")}${
+            address.line2 ? ", " + escapeHtml(address.line2) : ""
           }<br/>
-      ${address.country || ""}
+      ${escapeHtml(address.city || "")}${
+            address.state ? ", " + escapeHtml(address.state) : ""
+          } ${escapeHtml(address.postal_code || "")}<br/>
+      ${escapeHtml(address.country || "")}
     `
         : "No address available";
 
@@ -165,7 +206,7 @@ app.post(
         }
       }
 
-      const transporter = createTransporter();
+      const transporter = getTransporter();
 
       // Build rows with qty, unit price and line total
       let subtotal = 0;
@@ -173,7 +214,7 @@ app.post(
       const itemsRowsHtml = items
         .map((item, index) => {
           const product = PRODUCT_CATALOG[item.id];
-          const label = product?.name || item.id;
+          const label = escapeHtml(product?.name || item.id);
           const unitAmountCents = product?.unitAmount ?? 0;
           const unitPrice = unitAmountCents / 100;
           const qty = item.qty || 1;
@@ -200,13 +241,16 @@ app.post(
       const amountTotal = (session.amount_total || 0) / 100;
       const taxAmount = (session.total_details?.amount_tax || 0) / 100;
 
+      const safeName = escapeHtml(name);
+      const safeEmail = escapeHtml(email || "-");
+
       const adminHtml = `
     <h2>New paid order from Store</h2>
     <p>A new order has been completed via Stripe Checkout.</p>
 
     <h3>Customer details</h3>
-    <p><b>Name:</b> ${name}</p>
-    <p><b>Email:</b> ${email || "-"}</p>
+    <p><b>Name:</b> ${safeName}</p>
+    <p><b>Email:</b> ${safeEmail}</p>
 
     <h3>Shipping address</h3>
     <p>${formattedAddress}</p>
@@ -250,7 +294,7 @@ app.post(
             process.env.SMTP_FROM || process.env.SMTP_USER
           }>`,
           to: process.env.CONTACT_TO,
-          subject: `New paid order - ${name}`,
+          subject: `New paid order - ${safeName}`,
           replyTo: email || undefined,
           html: adminHtml,
         });
@@ -262,7 +306,7 @@ app.post(
         const itemsListHtml = items
           .map((item) => {
             const product = PRODUCT_CATALOG[item.id];
-            const label = product?.name || item.id;
+            const label = escapeHtml(product?.name || item.id);
             const qty = item.qty || 1;
             return `<li>${qty} × ${label}</li>`;
           })
@@ -270,7 +314,7 @@ app.post(
 
         const customerHtml = `
       <h2>Order Confirmation – Nilta Flooring</h2>
-      <p>Dear ${name},</p>
+      <p>Dear ${safeName},</p>
       <p>Thank you for your order with Nilta Flooring. We have received your payment and your order is now being processed.</p>
       <p><b>Summary of your order:</b></p>
       <ul>
@@ -399,6 +443,15 @@ const AdminUser = mongoose.model("AdminUser", adminUserSchema);
 const adminLoginSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(6).required(),
+});
+
+const contactSchema = Joi.object({
+  name: Joi.string().trim().min(2).max(80).required(),
+  email: Joi.string().trim().email().max(120).required(),
+  phone: Joi.string().trim().allow("", null).max(40),
+  type: Joi.string().trim().allow("", null).max(60),
+  timeline: Joi.string().trim().allow("", null).max(60),
+  message: Joi.string().trim().min(5).max(1000).required(),
 });
 
 function generateAdminToken(admin) {
@@ -687,15 +740,18 @@ app.get("/", (req, res) => {
 });
 
 // ------------- CONTACT PAGE AUTOMATION -------------
-app.post("/api/contact", async (req, res) => {
+app.post("/api/contact", contactLimiter, async (req, res) => {
   try {
-    const { name, email, phone, type, timeline, message } = req.body;
+    const { error, value } = contactSchema.validate(req.body, {
+      abortEarly: true,
+      stripUnknown: true,
+    });
 
-    if (!name || !email || !message) {
-      return res
-        .status(400)
-        .json({ error: "Name, email and message are required." });
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
     }
+
+    const { name, email, phone, type, timeline, message } = value;
 
     // Save/update customer in database
     try {
@@ -708,17 +764,24 @@ app.post("/api/contact", async (req, res) => {
       console.error("Failed to upsert customer from /api/contact:", err.message);
     }
 
-    const transporter = createTransporter();
+    const transporter = getTransporter();
 
-    // Email to admin
+    // Escape all user-provided fields for safe HTML emails
+    const safeName = escapeHtml(name);
+    const safeEmail = escapeHtml(email);
+    const safePhone = escapeHtml(phone || "-");
+    const safeType = escapeHtml(type || "-");
+    const safeTimeline = escapeHtml(timeline || "-");
+    const safeMessage = escapeHtml(message || "").replace(/\n/g, "<br/>");
+
     const adminHtml = `
       <h2>New quote / contact request from website</h2>
-      <p><b>Name:</b> ${name}</p>
-      <p><b>Email:</b> ${email}</p>
-      <p><b>Phone:</b> ${phone || "-"} </p>
-      <p><b>Project type:</b> ${type || "-"} </p>
-      <p><b>Timeline:</b> ${timeline || "-"} </p>
-      <p><b>Message:</b><br/>${(message || "").replace(/\n/g, "<br/>")}</p>
+      <p><b>Name:</b> ${safeName}</p>
+      <p><b>Email:</b> ${safeEmail}</p>
+      <p><b>Phone:</b> ${safePhone}</p>
+      <p><b>Project type:</b> ${safeType}</p>
+      <p><b>Timeline:</b> ${safeTimeline}</p>
+      <p><b>Message:</b><br/>${safeMessage}</p>
     `;
 
     await transporter.sendMail({
@@ -726,24 +789,23 @@ app.post("/api/contact", async (req, res) => {
         process.env.SMTP_FROM || process.env.SMTP_USER
       }>`,
       to: process.env.CONTACT_TO,
-      subject: `New website quote request from ${name}`,
-      replyTo: email,
+      subject: `New website quote request from ${safeName}`,
+      replyTo: email, // validated by Joi
       html: adminHtml,
     });
 
-    // Formal confirmation to customer
     const customerHtml = `
       <h2>Quote Request Received – Nilta Flooring</h2>
-      <p>Dear ${name},</p>
+      <p>Dear ${safeName},</p>
       <p>Thank you for reaching out to Nilta Flooring. We have received your request and our team will review the details of your project.</p>
       <p><b>Summary of your request:</b></p>
       <ul>
-        <li><b>Project type:</b> ${type || "-"}</li>
-        <li><b>Timeline:</b> ${timeline || "-"}</li>
-        <li><b>Phone:</b> ${phone || "-"}</li>
+        <li><b>Project type:</b> ${safeType}</li>
+        <li><b>Timeline:</b> ${safeTimeline}</li>
+        <li><b>Phone:</b> ${safePhone}</li>
       </ul>
       <p><b>Your message:</b></p>
-      <p>${(message || "").replace(/\n/g, "<br/>")}</p>
+      <p>${safeMessage}</p>
       <p>We will contact you as soon as possible with more information and next steps.</p>
       <p>Kind regards,<br/>Nilta Flooring</p>
     `;
@@ -757,10 +819,10 @@ app.post("/api/contact", async (req, res) => {
       html: customerHtml,
     });
 
-    res.json({ ok: true });
+    return res.json({ ok: true });
   } catch (err) {
     console.error("Error in /api/contact:", err);
-    res.status(500).json({ error: "Failed to send emails." });
+    return res.status(500).json({ error: "Failed to send emails." });
   }
 });
 
@@ -831,7 +893,7 @@ app.post("/api/order", async (req, res) => {
     const total =
       totalFromBody !== null ? totalFromBody : computedTotal || null;
 
-    const transporter = createTransporter();
+    const transporter = getTransporter();
 
     // -------- Email rows --------
     const itemsRowsHtml = items
@@ -845,10 +907,12 @@ app.post("/api/order", async (req, res) => {
           <tr>
             <td style="padding:6px 10px;border:1px solid #ddd;">${index + 1}</td>
             <td style="padding:6px 10px;border:1px solid #ddd;">
-              <div style="font-weight:600;">${item.name}</div>
+              <div style="font-weight:600;">${escapeHtml(item.name)}</div>
               ${
                 item.description
-                  ? `<div style="margin-top:4px;color:#666;font-size:12px;">${item.description}</div>`
+                  ? `<div style="margin-top:4px;color:#666;font-size:12px;">${escapeHtml(
+                      item.description
+                    )}</div>`
                   : ""
               }
             </td>
@@ -866,11 +930,11 @@ app.post("/api/order", async (req, res) => {
       <h2>New quote request from Store (unpaid)</h2>
 
       <h3>Customer details</h3>
-      <p><b>Name:</b> ${customerName}</p>
-      <p><b>Email:</b> ${customerEmail || "-"}</p>
-      <p><b>Phone:</b> ${customerPhone || "-"}</p>
+      <p><b>Name:</b> ${escapeHtml(customerName)}</p>
+      <p><b>Email:</b> ${escapeHtml(customerEmail || "-")}</p>
+      <p><b>Phone:</b> ${escapeHtml(customerPhone || "-")}</p>
       <p><b>Notes:</b><br/>${
-        customerNotes ? customerNotes.replace(/\n/g, "<br/>") : "-"
+        customerNotes ? escapeHtml(customerNotes).replace(/\n/g, "<br/>") : "-"
       }</p>
 
       <h3>Requested products</h3>
@@ -907,7 +971,7 @@ app.post("/api/order", async (req, res) => {
         process.env.SMTP_FROM || process.env.SMTP_USER
       }>`,
       to: process.env.CONTACT_TO,
-      subject: `New quote request from Store - ${customerName}`,
+      subject: `New quote request from Store - ${escapeHtml(customerName)}`,
       replyTo: customerEmail || undefined,
       html: adminHtml,
     });
@@ -918,13 +982,13 @@ app.post("/api/order", async (req, res) => {
         .map((it) => {
           const line =
             it.lineTotal !== null ? ` — $${it.lineTotal.toFixed(2)} CAD` : "";
-          return `<li>${it.qty} × <b>${it.name}</b>${line}</li>`;
+          return `<li>${it.qty} × <b>${escapeHtml(it.name)}</b>${line}</li>`;
         })
         .join("");
 
       const confirmHtml = `
         <h2>Quote Request Received – Nilta Flooring</h2>
-        <p>Dear ${customerName},</p>
+        <p>Dear ${escapeHtml(customerName)},</p>
         <p>Thank you for your interest in our flooring products. We have received your quote request with the following items:</p>
         <ul>
           ${listHtml}
@@ -956,9 +1020,6 @@ app.post("/api/order", async (req, res) => {
 });
 
 // ------------- STRIPE CHECKOUT (creates session) -------------
-// ✅ Replace ONLY your /api/create-checkout-session route with this MongoDB version.
-// It builds Stripe line_items from your Mongo Product collection (not PRODUCT_CATALOG).
-
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
     const { items } = req.body;
@@ -994,13 +1055,6 @@ app.post("/api/create-checkout-session", async (req, res) => {
         throw new Error(`Invalid qty for product ${it.id}`);
       }
 
-      // IMPORTANT:
-      // If your Mongo "price" is already in cents (e.g. 12312 means $123.12),
-      // then use: const unit_amount = Number(product.price);
-      //
-      // If your Mongo "price" is in dollars (e.g. 123.12), then use:
-      // const unit_amount = Math.round(Number(product.price) * 100);
-      //
       // From your example "price": 12312 looks like cents, so we’ll treat it as cents:
       const unit_amount = Number(product.price);
 
@@ -1046,7 +1100,6 @@ app.post("/api/create-checkout-session", async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
-
 
 /**
  * Public products endpoint for Store page

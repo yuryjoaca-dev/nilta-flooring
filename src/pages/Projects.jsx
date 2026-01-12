@@ -299,7 +299,7 @@ export default function Projects() {
             className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]"
           >
             <img
-              src="https://images.unsplash.com/photo-1483058712412-4245e9b90334?q=80&w=1600&auto=format&fit=crop"
+              src="/projects/comercial.jpg"
               alt="Commercial flooring montage"
               className="h-96 w-full object-cover transition-transform duration-700 hover:scale-105"
             />

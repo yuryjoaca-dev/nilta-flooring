@@ -22,6 +22,129 @@ import {
 import { API_BASE } from "../config/api";
 
 const ACCENT = "#8F2841";
+const EDMONTON_TZ = "America/Edmonton";
+
+function parseHHMM(hhmm) {
+  const [h, m] = String(hhmm || "00:00").split(":").map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+
+function getEdmontonParts(date = new Date()) {
+  // Use formatToParts so we can reliably extract weekday/hour/minute in Edmonton time
+  const timeParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: EDMONTON_TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+
+  const dayParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: EDMONTON_TZ,
+    weekday: "long",
+  }).formatToParts(date);
+
+  const get = (parts, type) => parts.find((p) => p.type === type)?.value;
+
+  const hour = Number(get(timeParts, "hour"));
+  const minute = Number(get(timeParts, "minute"));
+  const weekday = String(get(dayParts, "weekday") || "");
+
+  const weekdayToIdx = {
+    Sunday: 0,
+    Monday: 1,
+    Tuesday: 2,
+    Wednesday: 3,
+    Thursday: 4,
+    Friday: 5,
+    Saturday: 6,
+  };
+
+  const todayIdx = weekdayToIdx[weekday] ?? new Date().getDay();
+  return { hour, minute, weekday, todayIdx };
+}
+
+function buildOpenStatus({ HOURS, hour, minute, todayIdx, weekday }) {
+  const nowMin = hour * 60 + minute;
+  const slot = HOURS[todayIdx];
+
+  let isOpen = false;
+  let statusText = "Closed";
+  let detailText = "";
+
+  if (slot) {
+    const oMin = parseHHMM(slot.open);
+    const cMin = parseHHMM(slot.close);
+
+    // Open if now in [open, close)
+    isOpen = nowMin >= oMin && nowMin < cMin;
+
+    if (isOpen) {
+      statusText = "Open";
+      detailText = `Closes at ${slot.close}`;
+    } else {
+      statusText = "Closed";
+      // If it's before opening today
+      if (nowMin < oMin) {
+        detailText = `Opens at ${slot.open}`;
+      } else {
+        // After closing: find next opening day
+        let nextIdx = (todayIdx + 1) % 7;
+        let steps = 0;
+        while (!HOURS[nextIdx] && steps < 7) {
+          nextIdx = (nextIdx + 1) % 7;
+          steps += 1;
+        }
+        const nextSlot = HOURS[nextIdx];
+        if (nextSlot) {
+          const dayNames = [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+          ];
+          detailText = `Opens ${dayNames[nextIdx]} at ${nextSlot.open}`;
+        } else {
+          detailText = "";
+        }
+      }
+    }
+  } else {
+    statusText = "Closed";
+    // Find next opening day (if today is closed)
+    let nextIdx = (todayIdx + 1) % 7;
+    let steps = 0;
+    while (!HOURS[nextIdx] && steps < 7) {
+      nextIdx = (nextIdx + 1) % 7;
+      steps += 1;
+    }
+    const nextSlot = HOURS[nextIdx];
+    if (nextSlot) {
+      const dayNames = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+      detailText = `Opens ${dayNames[nextIdx]} at ${nextSlot.open}`;
+    }
+  }
+
+  const timeFmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: EDMONTON_TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const nowStr = `${weekday} • ${timeFmt.format(new Date())} (Edmonton)`;
+
+  return { isOpen, statusText, detailText, nowStr };
+}
 
 export default function Contact() {
   // ---------- Hours (Edmonton local time) ----------
@@ -45,44 +168,30 @@ export default function Contact() {
   const PHONE_OFFICE = "1-780-761-9500";
   const EMAIL = "info@nilta.ca";
 
-  // ---------- Local time + open/closed ----------
-  const { nowStr, isOpen, todayIdx } = useMemo(() => {
-    const now = new Date();
-
-    const timeFmt = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "America/Edmonton",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-    const dayFmt = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "America/Edmonton",
-      weekday: "long",
-    });
-
-    const [h, m] = timeFmt.format(now).split(":").map(Number);
-
-    const w = new Date(
-      now.toLocaleString("en-CA", { timeZone: "America/Edmonton" })
-    ).getDay(); // 0..6
-
-    const slot = HOURS[w];
-    let open = false;
-    if (slot) {
-      const [oh, om] = slot.open.split(":").map(Number);
-      const [ch, cm] = slot.close.split(":").map(Number);
-      const nowMin = h * 60 + m;
-      const oMin = oh * 60 + om;
-      const cMin = ch * 60 + cm;
-      open = nowMin >= oMin && nowMin <= cMin;
-    }
-
+  // ---------- Local time + open/closed (LIVE, updates) ----------
+  const [status, setStatus] = useState(() => {
+    const { hour, minute, weekday, todayIdx } = getEdmontonParts(new Date());
     return {
-      nowStr: `${dayFmt.format(now)} • ${timeFmt.format(now)} (Edmonton)`,
-      isOpen: open,
-      todayIdx: w,
+      todayIdx,
+      ...buildOpenStatus({ HOURS, hour, minute, todayIdx, weekday }),
     };
+  });
+
+  useEffect(() => {
+    const tick = () => {
+      const { hour, minute, weekday, todayIdx } = getEdmontonParts(new Date());
+      setStatus({
+        todayIdx,
+        ...buildOpenStatus({ HOURS, hour, minute, todayIdx, weekday }),
+      });
+    };
+
+    tick();
+    const id = setInterval(tick, 30 * 1000); // update every 30 seconds
+    return () => clearInterval(id);
   }, []);
+
+  const { nowStr, isOpen, todayIdx, statusText, detailText } = status;
 
   const mapEmbedSrc = useMemo(() => {
     const q = encodeURIComponent(`Nilta Flooring, ${ADDRESS_QUERY}`);
@@ -145,7 +254,7 @@ export default function Contact() {
       try {
         data = await res.json();
       } catch {
-        // if backend returns no json
+        // ignore
       }
 
       if (!res.ok) {
@@ -392,8 +501,6 @@ export default function Contact() {
             />
           </div>
         </div>
-
-        
       </section>
 
       {/* HOURS + STATUS */}
@@ -404,15 +511,21 @@ export default function Contact() {
               <div className="flex items-center gap-2 font-semibold">
                 <Clock className="h-5 w-5" /> Our hours of operation (Edmonton)
               </div>
-              <span
-                className={`text-xs rounded-full px-2 py-0.5 border ${
-                  isOpen
-                    ? "bg-green-500/20 text-green-300 border-green-500/40"
-                    : "bg-red-500/20 text-red-300 border-red-500/40"
-                }`}
-              >
-                {isOpen ? "Open" : "Closed"}
-              </span>
+
+              <div className="flex items-center gap-2">
+                <span
+                  className={`text-xs rounded-full px-2 py-0.5 border ${
+                    isOpen
+                      ? "bg-green-500/20 text-green-300 border-green-500/40"
+                      : "bg-red-500/20 text-red-300 border-red-500/40"
+                  }`}
+                >
+                  {statusText}
+                </span>
+                {detailText ? (
+                  <span className="text-xs text-white/60">{detailText}</span>
+                ) : null}
+              </div>
             </div>
 
             <div className="mt-4 grid sm:grid-cols-2 gap-3">
@@ -504,7 +617,9 @@ export default function Contact() {
                 Open in Google Maps
               </a>
             </div>
-            <div className="aspect-[16/9] w-full">
+
+            {/* ✅ Taller map to match symmetry */}
+            <div className="w-full h-[360px] md:h-[460px]">
               <iframe
                 title="Nilta Flooring Map"
                 src={mapEmbedSrc}

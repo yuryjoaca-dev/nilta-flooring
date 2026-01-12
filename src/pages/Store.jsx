@@ -76,9 +76,17 @@ const FALLBACK_PRODUCTS = [
 function normalizeImageUrl(raw) {
   if (!raw) return "/store-products/oak-laminate-natural.webp";
   if (raw.startsWith("http")) return raw;
-  const path = raw.startsWith("/") ? raw : `/${raw}`;
-  return `${API_BASE}${path}`;
+
+  // ✅ if DB stores "/uploads/...", force backend host
+  if (raw.startsWith("/uploads/") || raw.startsWith("uploads/")) {
+    const p = raw.startsWith("/") ? raw : `/${raw}`;
+    return `${API_BASE}${p}`;
+  }
+
+  // keep frontend assets
+  return raw.startsWith("/") ? raw : `/${raw}`;
 }
+
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
@@ -141,8 +149,8 @@ export default function Store() {
               p.salePrice && p.salePrice < p.price
                 ? "On sale"
                 : p.stock === 0
-                ? "Sold out"
-                : undefined,
+                  ? "Sold out"
+                  : undefined,
             pricePerSqm: p.salePrice || p.price,
             stock: p.stock ?? 0,
           };
@@ -442,11 +450,10 @@ export default function Store() {
                 <button
                   key={cat}
                   onClick={() => setCategoryFilter(cat)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
-                    categoryFilter === cat
-                      ? "border-red-500 bg-red-600/80"
-                      : "border-white/15 bg-white/5 hover:border-white/30"
-                  }`}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${categoryFilter === cat
+                    ? "border-red-500 bg-red-600/80"
+                    : "border-white/15 bg-white/5 hover:border-white/30"
+                    }`}
                 >
                   {cat}
                 </button>
@@ -568,7 +575,7 @@ export default function Store() {
           {cartItems.length === 0 ? (
             <p className="text-sm text-white/70">
               Your cart is currently empty. Add a few products to get started, or
-              send us a quote request or proceed with payment.
+              send us a quote request.
             </p>
           ) : (
             <>
@@ -612,13 +619,7 @@ export default function Store() {
             </>
           )}
 
-          <div className="mt-3 text-xs text-white/60 space-y-1">
-            <p>
-              For larger projects, requesting a quote is usually the best first
-              step—we’ll review your needs, confirm quantities, and help ensure
-              the right product selection.
-            </p>
-          </div>
+
 
           <div className="mt-3 flex flex-col gap-2">
             <button
@@ -633,14 +634,7 @@ export default function Store() {
               />
             </button>
 
-            <button
-              onClick={handleStripeCheckout}
-              disabled={paying || cartItems.length === 0}
-              className="group inline-flex items-center justify-center rounded-full border border-white/30 px-5 py-2 font-semibold text-sm text-white/90 hover:bg-white/10 transition disabled:opacity-60 disabled:pointer-events-none"
-            >
-              <CreditCard className="mr-2 h-4 w-4" />
-              {paying ? "Starting payment..." : "Pay now (Canada only)"}
-            </button>
+
           </div>
 
           <Link to="/contact" className="text-xs text-white/70 underline mt-2">
