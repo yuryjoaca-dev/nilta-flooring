@@ -3,7 +3,6 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
-import Stripe from "stripe";
 import mongoose from "mongoose";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -20,21 +19,14 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- Stripe setup ---
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
 // --- Mongoose setup ---
 const MONGO_URI =
   process.env.MONGO_URI || "mongodb://127.0.0.1:27017/nilta-fixed";
 
 mongoose
   .connect(MONGO_URI)
-  .then(() => {
-    console.log("MongoDB connected");
-  })
-  .catch((err) => {
-    console.error("MongoDB connection error:", err.message);
-  });
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err.message));
 
 // --- ESM __dirname helper ---
 const __filename = fileURLToPath(import.meta.url);
@@ -45,35 +37,6 @@ const uploadsDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
-
-// Simple in-memory product catalog (CAD, amounts in cents)
-// unitAmount = price per m² in CAD * 100
-const PRODUCT_CATALOG = {
-  "tile-01": {
-    name: "Ceramic Floor Tile – Light Grey",
-    unitAmount: 349, // 3.49 CAD / m²
-  },
-  "tile-02": {
-    name: "Porcelain Tile – Concrete Look",
-    unitAmount: 429, // 4.29 CAD / m²
-  },
-  "lam-01": {
-    name: "Oak Laminate – Natural",
-    unitAmount: 299, // 2.99 CAD / m²
-  },
-  "lam-02": {
-    name: "Walnut Laminate – Dark",
-    unitAmount: 319, // 3.19 CAD / m²
-  },
-  "hard-01": {
-    name: "Engineered Hardwood – Smoked Oak",
-    unitAmount: 899, // 8.99 CAD / m²
-  },
-  "hard-02": {
-    name: "Engineered Hardwood – Natural Oak",
-    unitAmount: 849, // 8.49 CAD / m²
-  },
-};
 
 // --- Email helper (cached transporter) ---
 let _transporter = null;
@@ -118,14 +81,14 @@ app.use(
   })
 );
 
-// ✅ Helmet: allow cross-origin for images/assets (fixes blocked /uploads on different origin)
+// ✅ Helmet: allow cross-origin for images/assets
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
   })
 );
 
-// Basic API rate limiting
+// Rate limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,
@@ -137,7 +100,7 @@ app.use("/api", apiLimiter);
 // Stricter limiter for contact form (anti-spam)
 const contactLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10, // 10 requests / 15 min / IP
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -153,204 +116,7 @@ app.use(
   })
 );
 
-// --- STRIPE WEBHOOK (must come BEFORE express.json) ---
-app.post(
-  "/api/stripe/webhook",
-  express.raw({ type: "application/json" }),
-  async (req, res) => {
-    const sig = req.headers["stripe-signature"];
-
-    let event;
-    try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        process.env.STRIPE_WEBHOOK_SECRET
-      );
-    } catch (err) {
-      console.error("Webhook signature verification failed:", err.message);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object;
-
-      const email = session.customer_details?.email;
-      const name = session.customer_details?.name || "Customer";
-      const address = session.customer_details?.address;
-
-      // Format shipping address nicely for HTML
-      const formattedAddress = address
-        ? `
-      ${escapeHtml(address.line1 || "")}${
-            address.line2 ? ", " + escapeHtml(address.line2) : ""
-          }<br/>
-      ${escapeHtml(address.city || "")}${
-            address.state ? ", " + escapeHtml(address.state) : ""
-          } ${escapeHtml(address.postal_code || "")}<br/>
-      ${escapeHtml(address.country || "")}
-    `
-        : "No address available";
-
-      // Items saved as metadata JSON from /api/create-checkout-session
-      let items = [];
-      const metadataItems = session.metadata?.items;
-      if (metadataItems) {
-        try {
-          const parsed = JSON.parse(metadataItems);
-          if (Array.isArray(parsed)) {
-            items = parsed;
-          }
-        } catch (e) {
-          console.error("Failed to parse metadata items JSON:", e.message);
-        }
-      }
-
-      const transporter = getTransporter();
-
-      // Build rows with qty, unit price and line total
-      let subtotal = 0;
-
-      const itemsRowsHtml = items
-        .map((item, index) => {
-          const product = PRODUCT_CATALOG[item.id];
-          const label = escapeHtml(product?.name || item.id);
-          const unitAmountCents = product?.unitAmount ?? 0;
-          const unitPrice = unitAmountCents / 100;
-          const qty = item.qty || 1;
-          const lineTotal = unitPrice * qty;
-
-          subtotal += lineTotal;
-
-          return `
-        <tr>
-          <td style="padding:4px 8px;border:1px solid #ddd;">${index + 1}</td>
-          <td style="padding:4px 8px;border:1px solid #ddd;">${label}</td>
-          <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;">${qty}</td>
-          <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;">$${unitPrice.toFixed(
-            2
-          )}</td>
-          <td style="padding:4px 8px;border:1px solid #ddd;text-align:right;">$${lineTotal.toFixed(
-            2
-          )}</td>
-        </tr>
-      `;
-        })
-        .join("");
-
-      const amountTotal = (session.amount_total || 0) / 100;
-      const taxAmount = (session.total_details?.amount_tax || 0) / 100;
-
-      const safeName = escapeHtml(name);
-      const safeEmail = escapeHtml(email || "-");
-
-      const adminHtml = `
-    <h2>New paid order from Store</h2>
-    <p>A new order has been completed via Stripe Checkout.</p>
-
-    <h3>Customer details</h3>
-    <p><b>Name:</b> ${safeName}</p>
-    <p><b>Email:</b> ${safeEmail}</p>
-
-    <h3>Shipping address</h3>
-    <p>${formattedAddress}</p>
-
-    <h3>Ordered products</h3>
-    <table style="border-collapse:collapse;border:1px solid #ddd;min-width:480px;">
-      <thead>
-        <tr>
-          <th style="padding:4px 8px;border:1px solid #ddd;text-align:left;">#</th>
-          <th style="padding:4px 8px;border:1px solid #ddd;text-align:left;">Product</th>
-          <th style="padding:4px 8px;border:1px solid #ddd;text-align:right;">Qty</th>
-          <th style="padding:4px 8px;border:1px solid #ddd;text-align:right;">Unit price (CAD)</th>
-          <th style="padding:4px 8px;border:1px solid #ddd;text-align:right;">Line total (CAD)</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${
-          itemsRowsHtml ||
-          `
-          <tr>
-            <td colspan="5" style="padding:4px 8px;border:1px solid #ddd;">No item details found in metadata.</td>
-          </tr>
-        `
-        }
-      </tbody>
-    </table>
-
-    <p><b>Subtotal (products only):</b> $${subtotal.toFixed(2)} CAD</p>
-    <p><b>Tax (from Stripe):</b> $${taxAmount.toFixed(2)} CAD</p>
-    <p><b>Total charged (from Stripe):</b> $${amountTotal.toFixed(2)} CAD</p>
-
-    <p style="margin-top:16px;">
-      This order was paid in full through Stripe. Please follow up with the customer to confirm
-      delivery and installation details.
-    </p>
-  `;
-
-      try {
-        await transporter.sendMail({
-          from: `"Nilta Flooring Store" <${
-            process.env.SMTP_FROM || process.env.SMTP_USER
-          }>`,
-          to: process.env.CONTACT_TO,
-          subject: `New paid order - ${safeName}`,
-          replyTo: email || undefined,
-          html: adminHtml,
-        });
-      } catch (e) {
-        console.error("Failed to send admin order email:", e.message);
-      }
-
-      if (email) {
-        const itemsListHtml = items
-          .map((item) => {
-            const product = PRODUCT_CATALOG[item.id];
-            const label = escapeHtml(product?.name || item.id);
-            const qty = item.qty || 1;
-            return `<li>${qty} × ${label}</li>`;
-          })
-          .join("");
-
-        const customerHtml = `
-      <h2>Order Confirmation – Nilta Flooring</h2>
-      <p>Dear ${safeName},</p>
-      <p>Thank you for your order with Nilta Flooring. We have received your payment and your order is now being processed.</p>
-      <p><b>Summary of your order:</b></p>
-      <ul>
-        ${itemsListHtml || "<li>Your selected flooring products</li>"}
-      </ul>
-      <p>The total amount charged was <b>$${amountTotal.toFixed(
-        2
-      )} CAD</b>, including applicable taxes.</p>
-      <p>Our team will contact you shortly to confirm delivery and installation details.</p>
-      <p>If you have any questions, please feel free to reply to this email.</p>
-      <p>Kind regards,<br/>Nilta Flooring</p>
-    `;
-
-        try {
-          await transporter.sendMail({
-            from: `"Nilta Flooring" <${
-              process.env.SMTP_FROM || process.env.SMTP_USER
-            }>`,
-            to: email,
-            subject: "Your order has been received – Nilta Flooring",
-            html: customerHtml,
-          });
-        } catch (e) {
-          console.error(
-            "Failed to send customer order confirmation email:",
-            e.message
-          );
-        }
-      }
-    }
-
-    res.json({ received: true });
-  }
-);
-
-// After webhook:
+// After any raw endpoints:
 app.use(express.json());
 
 // --- Admin panel models (Mongoose) ---
@@ -567,7 +333,9 @@ app.post(
       }
 
       const normalizedSku =
-        typeof sku === "string" && sku.trim().length > 0 ? sku.trim() : undefined;
+        typeof sku === "string" && sku.trim().length > 0
+          ? sku.trim()
+          : undefined;
 
       const parsedPrice = Number(price);
       const parsedStock = Number(stock);
@@ -785,12 +553,11 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
     `;
 
     await transporter.sendMail({
-      from: `"Nilta Flooring Website" <${
-        process.env.SMTP_FROM || process.env.SMTP_USER
-      }>`,
+      from: `"Nilta Flooring Website" <${process.env.SMTP_FROM || process.env.SMTP_USER
+        }>`,
       to: process.env.CONTACT_TO,
       subject: `New website quote request from ${safeName}`,
-      replyTo: email, // validated by Joi
+      replyTo: email,
       html: adminHtml,
     });
 
@@ -811,9 +578,8 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
     `;
 
     await transporter.sendMail({
-      from: `"Nilta Flooring" <${
-        process.env.SMTP_FROM || process.env.SMTP_USER
-      }>`,
+      from: `"Nilta Flooring" <${process.env.SMTP_FROM || process.env.SMTP_USER
+        }>`,
       to: email,
       subject: "We have received your quote request – Nilta Flooring",
       html: customerHtml,
@@ -863,35 +629,32 @@ app.post("/api/order", async (req, res) => {
       }
     }
 
-    // -------- Normalize items (support old + new payloads) --------
+    // -------- Normalize items --------
     const items = itemsRaw.map((it) => {
       const name = String(it.name || it.id || "Unknown product").trim();
       const description = String(it.description || "").trim();
 
       const qty = Number(it.qty ?? it.quantity ?? 0) || 0;
 
-      // Allow optional pricing sent by frontend
-      const unitPrice =
-        typeof it.unitPrice === "number" ? it.unitPrice : null;
+      const unitPrice = typeof it.unitPrice === "number" ? it.unitPrice : null;
 
       const lineTotal =
         typeof it.lineTotal === "number"
           ? it.lineTotal
           : unitPrice !== null
-          ? unitPrice * qty
-          : null;
+            ? unitPrice * qty
+            : null;
 
       return { name, description, qty, unitPrice, lineTotal };
     });
 
-    // total (optional); if not provided, compute if possible
+    // total (optional)
     const totalFromBody = typeof body.total === "number" ? body.total : null;
     const computedTotal = items.reduce(
       (sum, it) => sum + (it.lineTotal || 0),
       0
     );
-    const total =
-      totalFromBody !== null ? totalFromBody : computedTotal || null;
+    const total = totalFromBody !== null ? totalFromBody : computedTotal || null;
 
     const transporter = getTransporter();
 
@@ -908,17 +671,15 @@ app.post("/api/order", async (req, res) => {
             <td style="padding:6px 10px;border:1px solid #ddd;">${index + 1}</td>
             <td style="padding:6px 10px;border:1px solid #ddd;">
               <div style="font-weight:600;">${escapeHtml(item.name)}</div>
-              ${
-                item.description
-                  ? `<div style="margin-top:4px;color:#666;font-size:12px;">${escapeHtml(
-                      item.description
-                    )}</div>`
-                  : ""
-              }
+              ${item.description
+            ? `<div style="margin-top:4px;color:#666;font-size:12px;">${escapeHtml(
+              item.description
+            )}</div>`
+            : ""
+          }
             </td>
-            <td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">${
-              item.qty
-            }</td>
+            <td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">${item.qty
+          }</td>
             <td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">${unit}</td>
             <td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">${line}</td>
           </tr>
@@ -933,8 +694,7 @@ app.post("/api/order", async (req, res) => {
       <p><b>Name:</b> ${escapeHtml(customerName)}</p>
       <p><b>Email:</b> ${escapeHtml(customerEmail || "-")}</p>
       <p><b>Phone:</b> ${escapeHtml(customerPhone || "-")}</p>
-      <p><b>Notes:</b><br/>${
-        customerNotes ? escapeHtml(customerNotes).replace(/\n/g, "<br/>") : "-"
+      <p><b>Notes:</b><br/>${customerNotes ? escapeHtml(customerNotes).replace(/\n/g, "<br/>") : "-"
       }</p>
 
       <h3>Requested products</h3>
@@ -944,8 +704,8 @@ app.post("/api/order", async (req, res) => {
             <th style="padding:6px 10px;border:1px solid #ddd;text-align:left;">#</th>
             <th style="padding:6px 10px;border:1px solid #ddd;text-align:left;">Product</th>
             <th style="padding:6px 10px;border:1px solid #ddd;text-align:right;">Qty</th>
-            <th style="padding:6px 10px;border:1px solid #ddd;text-align:right;">Unit price (CAD)</th>
-            <th style="padding:6px 10px;border:1px solid #ddd;text-align:right;">Line total (CAD)</th>
+            <th style="padding:6px 10px;border:1px solid #ddd;text-align:right;">Unit price</th>
+            <th style="padding:6px 10px;border:1px solid #ddd;text-align:right;">Line total</th>
           </tr>
         </thead>
         <tbody>
@@ -953,12 +713,11 @@ app.post("/api/order", async (req, res) => {
         </tbody>
       </table>
 
-      ${
-        total !== null
-          ? `<p style="margin-top:12px;"><b>Total (estimated):</b> $${total.toFixed(
-              2
-            )} CAD</p>`
-          : `<p style="margin-top:12px;color:#666;"><i>Total not provided.</i></p>`
+      ${total !== null
+        ? `<p style="margin-top:12px;"><b>Total (estimated):</b> $${total.toFixed(
+          2
+        )}</p>`
+        : `<p style="margin-top:12px;color:#666;"><i>Total not provided.</i></p>`
       }
 
       <p style="margin-top:12px;color:#666;font-size:12px;">
@@ -967,9 +726,8 @@ app.post("/api/order", async (req, res) => {
     `;
 
     await transporter.sendMail({
-      from: `"Nilta Flooring Store" <${
-        process.env.SMTP_FROM || process.env.SMTP_USER
-      }>`,
+      from: `"Nilta Flooring Store" <${process.env.SMTP_FROM || process.env.SMTP_USER
+        }>`,
       to: process.env.CONTACT_TO,
       subject: `New quote request from Store - ${escapeHtml(customerName)}`,
       replyTo: customerEmail || undefined,
@@ -981,7 +739,7 @@ app.post("/api/order", async (req, res) => {
       const listHtml = items
         .map((it) => {
           const line =
-            it.lineTotal !== null ? ` — $${it.lineTotal.toFixed(2)} CAD` : "";
+            it.lineTotal !== null ? ` — $${it.lineTotal.toFixed(2)}` : "";
           return `<li>${it.qty} × <b>${escapeHtml(it.name)}</b>${line}</li>`;
         })
         .join("");
@@ -993,19 +751,17 @@ app.post("/api/order", async (req, res) => {
         <ul>
           ${listHtml}
         </ul>
-        ${
-          total !== null
-            ? `<p><b>Estimated total:</b> $${total.toFixed(2)} CAD</p>`
-            : ""
+        ${total !== null
+          ? `<p><b>Estimated total:</b> $${total.toFixed(2)}</p>`
+          : ""
         }
         <p>We will review your request and contact you with pricing and availability.</p>
         <p>Kind regards,<br/>Nilta Flooring</p>
       `;
 
       await transporter.sendMail({
-        from: `"Nilta Flooring" <${
-          process.env.SMTP_FROM || process.env.SMTP_USER
-        }>`,
+        from: `"Nilta Flooring" <${process.env.SMTP_FROM || process.env.SMTP_USER
+          }>`,
         to: customerEmail,
         subject: "We have received your quote request – Nilta Flooring",
         html: confirmHtml,
@@ -1016,88 +772,6 @@ app.post("/api/order", async (req, res) => {
   } catch (err) {
     console.error("Error in /api/order:", err);
     res.status(500).json({ error: "Failed to send order emails." });
-  }
-});
-
-// ------------- STRIPE CHECKOUT (creates session) -------------
-app.post("/api/create-checkout-session", async (req, res) => {
-  try {
-    const { items } = req.body;
-
-    if (!Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ error: "No items provided" });
-    }
-
-    // Expect items like: [{ id: "<mongo_id>", qty: 2 }, ...]
-    const ids = items.map((it) => String(it.id || "")).filter(Boolean);
-
-    if (ids.length !== items.length) {
-      return res.status(400).json({ error: "Each item must have an id" });
-    }
-
-    // Fetch active products from DB
-    const products = await Product.find({
-      _id: { $in: ids },
-      isActive: true,
-    });
-
-    const byId = new Map(products.map((p) => [String(p._id), p]));
-
-    // Build line_items for Stripe
-    const line_items = items.map((it) => {
-      const product = byId.get(String(it.id));
-      if (!product) {
-        throw new Error(`Unknown or inactive product: ${it.id}`);
-      }
-
-      const qty = Number(it.qty);
-      if (!Number.isFinite(qty) || qty <= 0) {
-        throw new Error(`Invalid qty for product ${it.id}`);
-      }
-
-      // From your example "price": 12312 looks like cents, so we’ll treat it as cents:
-      const unit_amount = Number(product.price);
-
-      if (!Number.isFinite(unit_amount) || unit_amount < 0) {
-        throw new Error(`Invalid price for product ${it.id}`);
-      }
-
-      return {
-        price_data: {
-          currency: "cad",
-          unit_amount, // cents
-          product_data: {
-            name: product.name,
-            description: product.description || undefined,
-          },
-        },
-        quantity: qty,
-      };
-    });
-
-    if (!process.env.CLIENT_URL) {
-      throw new Error("Missing CLIENT_URL in .env");
-    }
-
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      line_items,
-      success_url: `${process.env.CLIENT_URL}/store?success=true`,
-      cancel_url: `${process.env.CLIENT_URL}/store?canceled=true`,
-      automatic_tax: { enabled: true },
-      billing_address_collection: "required",
-      shipping_address_collection: {
-        allowed_countries: ["CA"],
-      },
-      metadata: {
-        items: JSON.stringify(items),
-      },
-    });
-
-    return res.json({ url: session.url });
-  } catch (err) {
-    console.error("Error creating checkout session:", err);
-    return res.status(500).json({ error: err.message });
   }
 });
 
