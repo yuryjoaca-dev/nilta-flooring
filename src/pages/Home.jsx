@@ -373,7 +373,7 @@ export default function Home() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="absolute -bottom-20 -right-2 -left-0 bg-[#8F2841] text-white px-4 py-3 rounded-2xl shadow-lg text-sm">
+              <div className="classname mt-4 md:mt-o relative md:absolute md:-bottom-20 md:-right-2 md:left-0 bg-[#8F2841] text-white px-4 py-3 rounded-2xl shadow-lg text-sm">
                 <div className="font-semibold">Over 100+ floors installed</div>
                 <div className="text-xs text-pink-100">
                   Residential &amp; light commercial projects completed.

@@ -9,15 +9,54 @@ import rateLimit from "express-rate-limit";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import multer from "multer";
-import path from "path";
-import fs from "fs";
-import { fileURLToPath } from "url";
 import Joi from "joi";
+import { v2 as cloudinary } from "cloudinary";
+import mongoSanitize from "express-mongo-sanitize";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Important for correct IPs behind proxies (Hostinger/Cloudflare)
+app.set("trust proxy", 1);
+
+// --- Cloudinary setup ---
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Your requested folder paths:
+const CLOUDINARY_PRODUCTS_FOLDER = "nilta/products";
+const CLOUDINARY_GALLERY_FOLDER = "nilta/Gallery Photos";
+
+async function uploadToCloudinary(file, folder) {
+  if (!file?.buffer) throw new Error("Missing file buffer");
+
+  const result = await new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder, resource_type: "image" },
+      (error, result) => (error ? reject(error) : resolve(result))
+    );
+    stream.end(file.buffer);
+  });
+
+  return {
+    url: result.secure_url,
+    publicId: result.public_id,
+  };
+}
+
+async function safeDestroyCloudinary(publicId) {
+  if (!publicId) return;
+  try {
+    await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
+  } catch (err) {
+    console.error("Cloudinary destroy failed:", publicId, err?.message || err);
+  }
+}
 
 // --- Mongoose setup ---
 const MONGO_URI =
@@ -28,16 +67,6 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err.message));
 
-// --- ESM __dirname helper ---
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// ✅ Ensure uploads directory exists (use process.cwd for reliability)
-const uploadsDir = path.join(process.cwd(), "uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
 // --- Email helper (cached transporter) ---
 let _transporter = null;
 
@@ -45,9 +74,9 @@ function getTransporter() {
   if (_transporter) return _transporter;
 
   _transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST, // e.g. "smtp.gmail.com"
+    host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_SECURE === "true", // true for 465, false for 587
+    secure: process.env.SMTP_SECURE === "true",
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
@@ -57,7 +86,7 @@ function getTransporter() {
   return _transporter;
 }
 
-// Escape user input for safe HTML emails (prevents HTML injection)
+// Escape user input for safe HTML emails
 function escapeHtml(str = "") {
   return String(str)
     .replace(/&/g, "&amp;")
@@ -81,7 +110,7 @@ app.use(
   })
 );
 
-// ✅ Helmet: allow cross-origin for images/assets
+// Helmet
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
@@ -105,21 +134,39 @@ const contactLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// ✅ Static files for uploaded images (serve the SAME folder multer writes to)
+// 🔐 Extra strict limiter just for admin login
+const adminLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// JSON
+app.use(express.json());
+
+// NoSQL injection protection
 app.use(
-  "/uploads",
-  express.static(uploadsDir, {
-    setHeaders(res) {
-      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-      res.setHeader("Access-Control-Allow-Origin", "*");
-    },
+  mongoSanitize({
+    replaceWith: "_",
   })
 );
 
-// After any raw endpoints:
-app.use(express.json());
+// --- Multer config (memory storage for Cloudinary) ---
+function imageFileFilter(req, file, cb) {
+  if (!file.mimetype.startsWith("image/")) {
+    return cb(new Error("Only image files are allowed"), false);
+  }
+  cb(null, true);
+}
 
-// --- Admin panel models (Mongoose) ---
+const upload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: imageFileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+});
+
+// --- Schemas / Models ---
 const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
@@ -149,8 +196,11 @@ const productSchema = new mongoose.Schema(
       default: "Other",
     },
 
+    // Cloudinary
     mainImage: { type: String },
     images: [{ type: String }],
+    mainImagePublicId: { type: String },
+    imagePublicIds: [{ type: String }],
 
     isActive: { type: Boolean, default: true },
   },
@@ -162,6 +212,16 @@ const customerSchema = new mongoose.Schema(
     name: { type: String, trim: true },
     email: { type: String, lowercase: true, trim: true },
     phone: { type: String },
+
+    // Optional (your UI shows address; safe to keep optional)
+    address: {
+      line1: String,
+      line2: String,
+      city: String,
+      state: String,
+      postalCode: String,
+      country: String,
+    },
   },
   { timestamps: true }
 );
@@ -183,19 +243,45 @@ const adminUserSchema = new mongoose.Schema(
 const galleryImageSchema = new mongoose.Schema(
   {
     url: { type: String, required: true },
+    publicId: { type: String, required: true }, // needed for delete from Cloudinary
     category: {
       type: String,
       enum: [
-        "Residential",
-        "Kitchen",
-        "Bathroom",
-        "Living Room",
-        "Basement",
-        "Exterior",
+        "Whole-House Flooring",
+        "Kitchen Flooring",
+        "Bathroom Tile & LVP",
+        "Stairs & Transitions",
+        "Basement Flooring", // REMOVE this line if you don’t want basement
         "Commercial",
       ],
+
       required: true,
     },
+  },
+  { timestamps: true }
+);
+
+const orderSchema = new mongoose.Schema(
+  {
+    customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
+    customer: {
+      name: String,
+      email: String,
+      phone: String,
+      notes: String,
+    },
+    items: [
+      {
+        name: String,
+        description: String,
+        quantity: Number,
+        unitPrice: Number,
+        lineTotal: Number,
+      },
+    ],
+    total: Number,
+    status: { type: String, default: "quote-request" },
+    paymentStatus: { type: String, default: "unpaid" },
   },
   { timestamps: true }
 );
@@ -204,8 +290,9 @@ const GalleryImage = mongoose.model("GalleryImage", galleryImageSchema);
 const Product = mongoose.model("Product", productSchema);
 const Customer = mongoose.model("Customer", customerSchema);
 const AdminUser = mongoose.model("AdminUser", adminUserSchema);
+const Order = mongoose.model("Order", orderSchema);
 
-// --- Admin auth helpers ---
+// --- Validation ---
 const adminLoginSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(6).required(),
@@ -220,6 +307,7 @@ const contactSchema = Joi.object({
   message: Joi.string().trim().min(5).max(1000).required(),
 });
 
+// --- Auth helpers ---
 function generateAdminToken(admin) {
   return jwt.sign(
     { id: admin._id, role: "admin" },
@@ -254,50 +342,21 @@ function requireAdmin(req, res, next) {
   }
 }
 
-// --- Multer config for product images ---
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadsDir);
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
-  },
-});
-
-function imageFileFilter(req, file, cb) {
-  if (!file.mimetype.startsWith("image/")) {
-    return cb(new Error("Only image files are allowed"), false);
-  }
-  cb(null, true);
-}
-
-const upload = multer({
-  storage,
-  fileFilter: imageFileFilter,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
-});
-
-// --- Admin routes ---
+// ------------------- ADMIN ROUTES -------------------
 
 // Login
-app.post("/api/admin/login", async (req, res) => {
+app.post("/api/admin/login", adminLoginLimiter, async (req, res) => {
   try {
     const { error, value } = adminLoginSchema.validate(req.body);
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
+    if (error) return res.status(400).json({ message: error.details[0].message });
+
     const { email, password } = value;
 
     const admin = await AdminUser.findOne({ email });
-    if (!admin) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
+    if (!admin) return res.status(401).json({ message: "Invalid credentials" });
 
     const isValid = await bcrypt.compare(password, admin.passwordHash);
-    if (!isValid) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
+    if (!isValid) return res.status(401).json({ message: "Invalid credentials" });
 
     const token = generateAdminToken(admin);
     res.json({ token });
@@ -307,7 +366,7 @@ app.post("/api/admin/login", async (req, res) => {
   }
 });
 
-// CRUD products
+// Products
 app.get("/api/admin/products", requireAdmin, async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
@@ -318,24 +377,20 @@ app.get("/api/admin/products", requireAdmin, async (req, res) => {
   }
 });
 
-// ✅ CREATE product (supports multipart/form-data with optional image)
 app.post(
   "/api/admin/products",
   requireAdmin,
   upload.single("image"),
   async (req, res) => {
     try {
-      const { name, description, price, stock, sku, isActive, category } =
-        req.body;
+      const { name, description, price, stock, sku, isActive, category } = req.body;
 
       if (!name || price == null || stock == null) {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
       const normalizedSku =
-        typeof sku === "string" && sku.trim().length > 0
-          ? sku.trim()
-          : undefined;
+        typeof sku === "string" && sku.trim().length > 0 ? sku.trim() : undefined;
 
       const parsedPrice = Number(price);
       const parsedStock = Number(stock);
@@ -345,11 +400,15 @@ app.post(
 
       let mainImage;
       let images = [];
+      let mainImagePublicId;
+      let imagePublicIds = [];
 
       if (req.file) {
-        const imageUrl = `/uploads/${req.file.filename}`;
-        mainImage = imageUrl;
-        images = [imageUrl];
+        const uploaded = await uploadToCloudinary(req.file, CLOUDINARY_PRODUCTS_FOLDER);
+        mainImage = uploaded.url;
+        images = [uploaded.url];
+        mainImagePublicId = uploaded.publicId;
+        imagePublicIds = [uploaded.publicId];
       }
 
       const product = await Product.create({
@@ -362,6 +421,8 @@ app.post(
         category: category || "Other",
         mainImage,
         images,
+        mainImagePublicId,
+        imagePublicIds,
       });
 
       res.status(201).json(product);
@@ -380,7 +441,6 @@ app.post(
   }
 );
 
-// ✅ UPDATE product (supports multipart/form-data with optional image)
 app.put(
   "/api/admin/products/:id",
   requireAdmin,
@@ -392,17 +452,13 @@ app.put(
 
       if (updates.price != null) {
         const p = Number(updates.price);
-        if (Number.isNaN(p)) {
-          return res.status(400).json({ message: "Price must be a number" });
-        }
+        if (Number.isNaN(p)) return res.status(400).json({ message: "Price must be a number" });
         updates.price = p;
       }
 
       if (updates.stock != null) {
         const s = Number(updates.stock);
-        if (Number.isNaN(s)) {
-          return res.status(400).json({ message: "Stock must be a number" });
-        }
+        if (Number.isNaN(s)) return res.status(400).json({ message: "Stock must be a number" });
         updates.stock = s;
       }
 
@@ -416,9 +472,11 @@ app.put(
       }
 
       if (req.file) {
-        const imageUrl = `/uploads/${req.file.filename}`;
-        updates.mainImage = imageUrl;
-        updates.images = [imageUrl];
+        const uploaded = await uploadToCloudinary(req.file, CLOUDINARY_PRODUCTS_FOLDER);
+        updates.mainImage = uploaded.url;
+        updates.images = [uploaded.url];
+        updates.mainImagePublicId = uploaded.publicId;
+        updates.imagePublicIds = [uploaded.publicId];
       }
 
       const product = await Product.findByIdAndUpdate(id, updates, {
@@ -426,10 +484,7 @@ app.put(
         runValidators: true,
       });
 
-      if (!product) {
-        return res.status(404).json({ message: "Product not found" });
-      }
-
+      if (!product) return res.status(404).json({ message: "Product not found" });
       res.json(product);
     } catch (err) {
       console.error("Error in PUT /api/admin/products/:id:", err);
@@ -449,10 +504,19 @@ app.put(
 app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const deleted = await Product.findByIdAndDelete(id);
-    if (!deleted) {
-      return res.status(404).json({ message: "Product not found" });
+
+    const product = await Product.findById(id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    const ids = new Set();
+    if (product.mainImagePublicId) ids.add(product.mainImagePublicId);
+    if (Array.isArray(product.imagePublicIds)) {
+      for (const pid of product.imagePublicIds) if (pid) ids.add(pid);
     }
+
+    await Product.findByIdAndDelete(id);
+    await Promise.all([...ids].map((pid) => safeDestroyCloudinary(pid)));
+
     res.status(204).end();
   } catch (err) {
     console.error("Error in DELETE /api/admin/products/:id:", err);
@@ -460,7 +524,7 @@ app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
   }
 });
 
-// ✅ Upload product image (legacy endpoint - still works, also sets mainImage)
+// Legacy product image upload (still works)
 app.post(
   "/api/admin/products/:id/images",
   requireAdmin,
@@ -468,22 +532,21 @@ app.post(
   async (req, res) => {
     try {
       const { id } = req.params;
-      if (!req.file) {
-        return res.status(400).json({ message: "No image uploaded" });
-      }
+      if (!req.file) return res.status(400).json({ message: "No image uploaded" });
 
       const product = await Product.findById(id);
-      if (!product) {
-        return res.status(404).json({ message: "Product not found" });
-      }
+      if (!product) return res.status(404).json({ message: "Product not found" });
 
-      const imageUrl = `/uploads/${req.file.filename}`;
+      const uploaded = await uploadToCloudinary(req.file, CLOUDINARY_PRODUCTS_FOLDER);
 
-      product.mainImage = product.mainImage || imageUrl;
-      product.images = [imageUrl, ...(product.images || [])];
+      product.mainImage = product.mainImage || uploaded.url;
+      product.images = [uploaded.url, ...(product.images || [])];
+
+      product.mainImagePublicId = product.mainImagePublicId || uploaded.publicId;
+      product.imagePublicIds = [uploaded.publicId, ...(product.imagePublicIds || [])];
 
       await product.save();
-      res.json({ mainImage: product.mainImage, images: product.images });
+      res.json(product);
     } catch (err) {
       console.error("Error in POST /api/admin/products/:id/images:", err);
       res.status(500).json({ message: "Server error" });
@@ -491,23 +554,153 @@ app.post(
   }
 );
 
-// List customers (read-only for now)
+// ✅ FIX #1: Admin Gallery endpoint (your frontend calls /api/admin/gallery)
+app.get("/api/admin/gallery", requireAdmin, async (req, res) => {
+  try {
+    const { category } = req.query;
+
+    const filter = category ? { category } : {};
+    const images = await GalleryImage.find(filter).sort({ createdAt: -1 });
+
+    res.json(images);
+  } catch (err) {
+    console.error("Error in GET /api/admin/gallery:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+// Optional: upload a gallery image from admin (multipart/form-data: image + category)
+app.post(
+  "/api/admin/gallery",
+  requireAdmin,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const { category } = req.body;
+      if (!category) return res.status(400).json({ message: "Category is required" });
+      if (!req.file) return res.status(400).json({ message: "Image is required" });
+
+      const uploaded = await uploadToCloudinary(req.file, CLOUDINARY_GALLERY_FOLDER);
+
+      const img = await GalleryImage.create({
+        url: uploaded.url,
+        publicId: uploaded.publicId,
+        category,
+      });
+
+      res.status(201).json(img);
+    } catch (err) {
+      console.error("Error in POST /api/admin/gallery:", err);
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
+
+// Optional: delete gallery image (also deletes Cloudinary asset)
+app.delete("/api/admin/gallery/:id", requireAdmin, async (req, res) => {
+  try {
+    const img = await GalleryImage.findById(req.params.id);
+    if (!img) return res.status(404).json({ message: "Not found" });
+
+    await GalleryImage.findByIdAndDelete(req.params.id);
+    await safeDestroyCloudinary(img.publicId);
+
+    res.status(204).end();
+  } catch (err) {
+    console.error("Error in DELETE /api/admin/gallery/:id:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ✅ FIX #2: Customers list should include ordersCount + lastOrderDate (your UI expects them)
 app.get("/api/admin/customers", requireAdmin, async (req, res) => {
   try {
-    const customers = await Customer.find().sort({ createdAt: -1 });
-    res.json(customers);
+    const customers = await Customer.find().sort({ createdAt: -1 }).lean();
+
+    // Aggregate order stats per customerId
+    const stats = await Order.aggregate([
+      { $match: { customerId: { $ne: null } } },
+      {
+        $group: {
+          _id: "$customerId",
+          ordersCount: { $sum: 1 },
+          lastOrderDate: { $max: "$createdAt" },
+        },
+      },
+    ]);
+
+    const statsMap = new Map(stats.map((s) => [String(s._id), s]));
+
+    const withStats = customers.map((c) => {
+      const s = statsMap.get(String(c._id));
+      return {
+        ...c,
+        ordersCount: s?.ordersCount || 0,
+        lastOrderDate: s?.lastOrderDate || null,
+      };
+    });
+
+    res.json(withStats);
   } catch (err) {
     console.error("Error in GET /api/admin/customers:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// Simple health check
+// ✅ DELETE customer + all orders (CASCADE DELETE)
+app.delete("/api/admin/customers/:id", requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1) delete all orders for this customer
+    await Order.deleteMany({ customerId: id });
+
+    // 2) delete customer
+    const deletedCustomer = await Customer.findByIdAndDelete(id);
+
+    if (!deletedCustomer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    return res.status(204).end();
+  } catch (err) {
+    console.error("Error in DELETE /api/admin/customers/:id:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+// ✅ FIX #2: Customer orders endpoint (your UI calls /api/admin/customers/:id/orders)
+app.get("/api/admin/customers/:id/orders", requireAdmin, async (req, res) => {
+  try {
+    const orders = await Order.find({ customerId: req.params.id }).sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (err) {
+    console.error("Error in GET /api/admin/customers/:id/orders:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Optional: admin orders list
+app.get("/api/admin/orders", requireAdmin, async (req, res) => {
+  try {
+    const orders = await Order.find().sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (err) {
+    console.error("Error in GET /api/admin/orders:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ------------------- PUBLIC ROUTES -------------------
+
+// health check
 app.get("/", (req, res) => {
   res.send("Nilta Flooring backend is running");
 });
 
-// ------------- CONTACT PAGE AUTOMATION -------------
+// Contact (email)
 app.post("/api/contact", contactLimiter, async (req, res) => {
   try {
     const { error, value } = contactSchema.validate(req.body, {
@@ -515,9 +708,7 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
       stripUnknown: true,
     });
 
-    if (error) {
-      return res.status(400).json({ error: error.details[0].message });
-    }
+    if (error) return res.status(400).json({ error: error.details[0].message });
 
     const { name, email, phone, type, timeline, message } = value;
 
@@ -534,7 +725,6 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
 
     const transporter = getTransporter();
 
-    // Escape all user-provided fields for safe HTML emails
     const safeName = escapeHtml(name);
     const safeEmail = escapeHtml(email);
     const safePhone = escapeHtml(phone || "-");
@@ -553,8 +743,7 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
     `;
 
     await transporter.sendMail({
-      from: `"Nilta Flooring Website" <${process.env.SMTP_FROM || process.env.SMTP_USER
-        }>`,
+      from: `"Nilta Flooring Website" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
       to: process.env.CONTACT_TO,
       subject: `New website quote request from ${safeName}`,
       replyTo: email,
@@ -578,8 +767,7 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
     `;
 
     await transporter.sendMail({
-      from: `"Nilta Flooring" <${process.env.SMTP_FROM || process.env.SMTP_USER
-        }>`,
+      from: `"Nilta Flooring" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
       to: email,
       subject: "We have received your quote request – Nilta Flooring",
       html: customerHtml,
@@ -592,18 +780,18 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
   }
 });
 
-// ------------- STORE QUOTE (non-paid) – OPTIONAL -------------
+// Store quote / order (now SAVES to DB + emails)
 app.post("/api/order", async (req, res) => {
   try {
     const body = req.body || {};
     const itemsRaw = Array.isArray(body.items) ? body.items : [];
     const customerRaw = body.customer || {};
 
-    if (!itemsRaw || itemsRaw.length === 0) {
+    if (itemsRaw.length === 0) {
       return res.status(400).json({ error: "No items in order." });
     }
 
-    // -------- Normalize customer --------
+    // Normalize customer
     const firstName = String(customerRaw.firstName || "").trim();
     const lastName = String(customerRaw.lastName || "").trim();
 
@@ -616,10 +804,11 @@ app.post("/api/order", async (req, res) => {
     const customerPhone = String(customerRaw.phone || "").trim();
     const customerNotes = String(customerRaw.notes || "").trim();
 
-    // Save/update customer in database (name/email/phone)
+    // Upsert customer
+    let customerDoc = null;
     if (customerEmail) {
       try {
-        await Customer.findOneAndUpdate(
+        customerDoc = await Customer.findOneAndUpdate(
           { email: customerEmail },
           { name: customerName, email: customerEmail, phone: customerPhone },
           { upsert: true, new: true, setDefaultsOnInsert: true }
@@ -629,12 +818,12 @@ app.post("/api/order", async (req, res) => {
       }
     }
 
-    // -------- Normalize items --------
+    // Normalize items (store quantity for your AdminCustomers UI)
     const items = itemsRaw.map((it) => {
       const name = String(it.name || it.id || "Unknown product").trim();
       const description = String(it.description || "").trim();
 
-      const qty = Number(it.qty ?? it.quantity ?? 0) || 0;
+      const quantity = Number(it.quantity ?? it.qty ?? 0) || 0;
 
       const unitPrice = typeof it.unitPrice === "number" ? it.unitPrice : null;
 
@@ -642,23 +831,34 @@ app.post("/api/order", async (req, res) => {
         typeof it.lineTotal === "number"
           ? it.lineTotal
           : unitPrice !== null
-            ? unitPrice * qty
+            ? unitPrice * quantity
             : null;
 
-      return { name, description, qty, unitPrice, lineTotal };
+      return { name, description, quantity, unitPrice, lineTotal };
     });
 
-    // total (optional)
     const totalFromBody = typeof body.total === "number" ? body.total : null;
-    const computedTotal = items.reduce(
-      (sum, it) => sum + (it.lineTotal || 0),
-      0
-    );
-    const total = totalFromBody !== null ? totalFromBody : computedTotal || null;
+    const computedTotal = items.reduce((sum, it) => sum + (it.lineTotal || 0), 0);
+    const total = totalFromBody !== null ? totalFromBody : computedTotal || 0;
 
+    // ✅ Save order to DB (this is what fixes "Failed to load orders")
+    await Order.create({
+      customerId: customerDoc?._id,
+      customer: {
+        name: customerName,
+        email: customerEmail,
+        phone: customerPhone,
+        notes: customerNotes,
+      },
+      items,
+      total,
+      status: "quote-request",
+      paymentStatus: "unpaid",
+    });
+
+    // Email
     const transporter = getTransporter();
 
-    // -------- Email rows --------
     const itemsRowsHtml = items
       .map((item, index) => {
         const unit =
@@ -678,8 +878,7 @@ app.post("/api/order", async (req, res) => {
             : ""
           }
             </td>
-            <td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">${item.qty
-          }</td>
+            <td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">${item.quantity}</td>
             <td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">${unit}</td>
             <td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">${line}</td>
           </tr>
@@ -713,12 +912,7 @@ app.post("/api/order", async (req, res) => {
         </tbody>
       </table>
 
-      ${total !== null
-        ? `<p style="margin-top:12px;"><b>Total (estimated):</b> $${total.toFixed(
-          2
-        )}</p>`
-        : `<p style="margin-top:12px;color:#666;"><i>Total not provided.</i></p>`
-      }
+      <p style="margin-top:12px;"><b>Total (estimated):</b> $${Number(total).toFixed(2)}</p>
 
       <p style="margin-top:12px;color:#666;font-size:12px;">
         Note: This is an unpaid quote request. Final pricing may change based on exact product specs, availability, measurements, and installation details.
@@ -726,21 +920,18 @@ app.post("/api/order", async (req, res) => {
     `;
 
     await transporter.sendMail({
-      from: `"Nilta Flooring Store" <${process.env.SMTP_FROM || process.env.SMTP_USER
-        }>`,
+      from: `"Nilta Flooring Store" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
       to: process.env.CONTACT_TO,
       subject: `New quote request from Store - ${escapeHtml(customerName)}`,
       replyTo: customerEmail || undefined,
       html: adminHtml,
     });
 
-    // Customer confirmation email
     if (customerEmail) {
       const listHtml = items
         .map((it) => {
-          const line =
-            it.lineTotal !== null ? ` — $${it.lineTotal.toFixed(2)}` : "";
-          return `<li>${it.qty} × <b>${escapeHtml(it.name)}</b>${line}</li>`;
+          const line = it.lineTotal !== null ? ` — $${it.lineTotal.toFixed(2)}` : "";
+          return `<li>${it.quantity} × <b>${escapeHtml(it.name)}</b>${line}</li>`;
         })
         .join("");
 
@@ -748,20 +939,14 @@ app.post("/api/order", async (req, res) => {
         <h2>Quote Request Received – Nilta Flooring</h2>
         <p>Dear ${escapeHtml(customerName)},</p>
         <p>Thank you for your interest in our flooring products. We have received your quote request with the following items:</p>
-        <ul>
-          ${listHtml}
-        </ul>
-        ${total !== null
-          ? `<p><b>Estimated total:</b> $${total.toFixed(2)}</p>`
-          : ""
-        }
+        <ul>${listHtml}</ul>
+        <p><b>Estimated total:</b> $${Number(total).toFixed(2)}</p>
         <p>We will review your request and contact you with pricing and availability.</p>
         <p>Kind regards,<br/>Nilta Flooring</p>
       `;
 
       await transporter.sendMail({
-        from: `"Nilta Flooring" <${process.env.SMTP_FROM || process.env.SMTP_USER
-          }>`,
+        from: `"Nilta Flooring" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
         to: customerEmail,
         subject: "We have received your quote request – Nilta Flooring",
         html: confirmHtml,
@@ -775,16 +960,10 @@ app.post("/api/order", async (req, res) => {
   }
 });
 
-/**
- * Public products endpoint for Store page
- * Returns active products for the storefront.
- */
+// Public products endpoint
 app.get("/api/products", async (req, res) => {
   try {
-    const products = await Product.find({ isActive: true }).sort({
-      createdAt: -1,
-    });
-
+    const products = await Product.find({ isActive: true }).sort({ createdAt: -1 });
     res.json(products);
   } catch (err) {
     console.error("Error in GET /api/products:", err);
@@ -792,10 +971,7 @@ app.get("/api/products", async (req, res) => {
   }
 });
 
-/**
- * Public gallery endpoint used by Residential / Commercial pages.
- * Optional query ?category=Residential|Kitchen|Bathroom|Basement|Exterior|Commercial
- */
+// Public gallery endpoint (used by Residential / Commercial pages)
 app.get("/api/gallery", async (req, res) => {
   try {
     const { category } = req.query;

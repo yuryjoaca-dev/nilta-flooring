@@ -1,27 +1,24 @@
+// src/pages/admin/AdminGallery.jsx
 import React, { useEffect, useState } from "react";
-
-import { API_BASE } from "../../config/api"; // ajustezi path-ul
-
-fetch(`${API_BASE}/api/admin/gallery`)
-
+import { API_BASE } from "../../config/api";
 
 function getToken() {
   return localStorage.getItem("adminToken");
 }
 
+// ✅ Must match backend enum exactly
 const CATEGORIES = [
-  "Whole House ",
-  "Kitchen",
-  "Bathroom",
-  "Livig Room",
-  "Basement",
-  "Exterior",
+  "Whole-House Flooring",
+  "Kitchen Flooring",
+  "Bathroom Tile & LVP",
+  "Basement Flooring",
+  "Stairs & Transitions",
   "Commercial",
 ];
 
 export default function AdminGallery() {
   const [images, setImages] = useState([]);
-  const [category, setCategory] = useState("Residential");
+  const [category, setCategory] = useState("Whole-House Flooring");
   const [file, setFile] = useState(null);
   const [dragOver, setDragOver] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -31,6 +28,8 @@ export default function AdminGallery() {
   async function fetchImages(cat = category) {
     try {
       setLoading(true);
+      setError("");
+
       const res = await fetch(
         `${API_BASE}/api/admin/gallery?category=${encodeURIComponent(cat)}`,
         {
@@ -39,9 +38,14 @@ export default function AdminGallery() {
           },
         }
       );
-      if (!res.ok) throw new Error("Failed");
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Failed");
+      }
+
       const data = await res.json();
-      setImages(data);
+      setImages(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error(e);
       setError("Failed to load gallery images");
@@ -51,20 +55,21 @@ export default function AdminGallery() {
   }
 
   useEffect(() => {
-    fetchImages();
+    fetchImages("Whole-House Flooring");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function onDrop(e) {
     e.preventDefault();
     setDragOver(false);
-    const f = e.dataTransfer.files[0];
+    const f = e.dataTransfer.files?.[0];
     if (f && f.type.startsWith("image/")) {
       setFile(f);
     }
   }
 
   function onFileChange(e) {
-    const f = e.target.files[0];
+    const f = e.target.files?.[0];
     if (f && f.type.startsWith("image/")) {
       setFile(f);
     }
@@ -76,8 +81,10 @@ export default function AdminGallery() {
       alert("Select or drop an image first.");
       return;
     }
+
     setUploading(true);
     setError("");
+
     try {
       const fd = new FormData();
       fd.append("image", file);
@@ -91,20 +98,25 @@ export default function AdminGallery() {
         body: fd,
       });
 
-      if (!res.ok) throw new Error("Upload failed");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Upload failed");
+      }
+
       const img = await res.json();
       setImages((prev) => [img, ...prev]);
       setFile(null);
     } catch (e) {
       console.error(e);
-      setError("Upload failed");
+      setError(e.message || "Upload failed");
     } finally {
       setUploading(false);
     }
   }
 
   async function handleDelete(id) {
-    if (!confirm("Delete this image?")) return;
+    if (!window.confirm("Delete this image?")) return;
+
     try {
       const res = await fetch(`${API_BASE}/api/admin/gallery/${id}`, {
         method: "DELETE",
@@ -112,11 +124,16 @@ export default function AdminGallery() {
           Authorization: `Bearer ${getToken()}`,
         },
       });
-      if (!res.ok) throw new Error("Failed");
+
+      if (!res.ok && res.status !== 204) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Could not delete image.");
+      }
+
       setImages((prev) => prev.filter((img) => img._id !== id));
     } catch (e) {
       console.error(e);
-      alert("Could not delete image.");
+      alert(e.message || "Could not delete image.");
     }
   }
 
@@ -139,8 +156,8 @@ export default function AdminGallery() {
             onDragLeave={() => setDragOver(false)}
             onDrop={onDrop}
             className={`flex flex-col items-center justify-center h-44 rounded-2xl border-2 border-dashed text-sm cursor-pointer transition ${dragOver
-              ? "border-amber-500 bg-amber-500/5"
-              : "border-neutral-700 bg-neutral-900/60 hover:border-neutral-500"
+                ? "border-amber-500 bg-amber-500/5"
+                : "border-neutral-700 bg-neutral-900/60 hover:border-neutral-500"
               }`}
             onClick={() =>
               document.getElementById("gallery-file-input")?.click()
@@ -171,10 +188,13 @@ export default function AdminGallery() {
                 className="w-full rounded-lg bg-neutral-900 border border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
                 {CATEGORIES.map((cat) => (
-                  <option key={cat}>{cat}</option>
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
                 ))}
               </select>
             </div>
+
             <button
               type="submit"
               disabled={uploading}
@@ -182,6 +202,7 @@ export default function AdminGallery() {
             >
               {uploading ? "Uploading..." : "Upload image"}
             </button>
+
             {error && <p className="text-xs text-red-400">{error}</p>}
           </div>
         </div>
@@ -204,6 +225,7 @@ export default function AdminGallery() {
             <p className="text-xs text-neutral-500">Loading images...</p>
           )}
         </div>
+
         {images.length === 0 ? (
           <p className="text-xs text-neutral-500">
             No images uploaded yet for this category.
@@ -216,7 +238,7 @@ export default function AdminGallery() {
                 className="relative rounded-xl overflow-hidden border border-neutral-800 bg-neutral-900/70 group"
               >
                 <img
-                  src={API_BASE + img.url}
+                  src={img.url} // ✅ Cloudinary URL
                   alt={img.category}
                   className="w-full h-32 object-cover"
                 />

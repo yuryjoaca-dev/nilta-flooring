@@ -1,4 +1,4 @@
-// src/commercial/Commercial.jsx
+// src/pages/Commercial.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
@@ -19,7 +19,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-fetch(`${API_BASE}/api/gallery?category=Commercial`);
+// ✅ Remove the buggy top-level fetch (no auth / runs on import)
 
 const FALLBACK_GALLERY = [
   "/commercial/1.jpg",
@@ -34,6 +34,7 @@ export default function Commercial() {
   const heroImg =
     "https://images.unsplash.com/photo-1483058712412-4245e9b90334?q=80&w=1600&auto=format&fit=crop";
   const heroVideo = "/video/commercial.mp4";
+
   const [galleryImages, setGalleryImages] = useState([]);
   const [galleryError, setGalleryError] = useState("");
 
@@ -42,16 +43,25 @@ export default function Commercial() {
   useEffect(() => {
     async function loadGallery() {
       try {
-        const res = await fetch(`${API_BASE}/api/gallery?category=Commercial`);
+        setGalleryError("");
+
+        const res = await fetch(
+          `${API_BASE}/api/gallery?category=${encodeURIComponent("Commercial")}`
+        );
         if (!res.ok) throw new Error("Failed to load commercial gallery");
+
         const data = await res.json();
-        const urls = data.map((img) => `${API_BASE}${img.url}`);
+
+        // ✅ Cloudinary returns full URLs already -> use img.url directly
+        const urls = Array.isArray(data) ? data.map((img) => img.url) : [];
         setGalleryImages(urls);
       } catch (err) {
         console.error("Failed to load commercial gallery", err);
         setGalleryError("Showing demo photos – could not load gallery.");
+        setGalleryImages([]);
       }
     }
+
     loadGallery();
   }, []);
 
@@ -178,6 +188,7 @@ export default function Commercial() {
           ]}
         />
       </section>
+
       <BreadcrumbLD
         items={[
           { label: "Home", url: "https://example.com/" },
@@ -214,9 +225,7 @@ export default function Commercial() {
 
           <p className="text-white/80 mt-3 text-sm md:text-base max-w-2xl">
             Below, you’ll see a few examples of commercial projects we’ve
-            completed around Edmonton and areas. We simply want to show how
-            thoughtful planning and a friendly, well-executed approach makes a
-            difference in busy places.
+            completed around Edmonton and areas.
           </p>
         </motion.div>
 
@@ -244,7 +253,7 @@ export default function Commercial() {
         </motion.div>
       </section>
 
-      {/* GALLERY – clickable with lightbox */}
+      {/* GALLERY */}
       <section className="max-w-7xl mx-auto px-6 pb-10">
         <h3 className="text-2xl md:text-3xl font-bold">
           Commercial project snapshots
@@ -283,121 +292,6 @@ export default function Commercial() {
         </div>
       </section>
 
-      {/* SECTORS + HOW WE RUN JOBS */}
-      <section className="max-w-7xl mx-auto px-6 pb-12 grid lg:grid-cols-2 gap-8 items-start">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl"
-        >
-          <h3 className="text-2xl font-bold">Sectors & typical scope</h3>
-          <p className="text-white/75 text-sm md:text-base mt-2">
-            Our Edmonton commercial flooring services are carefully planned
-            around the way each space functions and the level of daily traffic
-            it supports.
-          </p>
-          <div className="mt-4 grid sm:grid-cols-2 gap-3 text-white/85 text-sm">
-            <FeatureItem
-              icon={<Store />}
-              text="Retail units, corridors, and common areas"
-            />
-            <FeatureItem icon={<Landmark />} text="Mall common areas and lobbies" />
-            <FeatureItem icon={<Building2 />} text="Office tenant improvements" />
-            <FeatureItem
-              icon={<HardHat />}
-              text="Showrooms and industrial offices"
-            />
-            <FeatureItem
-              icon={<ClipboardCheck />}
-              text="Moisture testing and substrate preparation"
-            />
-            <FeatureItem icon={<Timer />} text="Night work and phased installations" />
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl"
-        >
-          <h3 className="text-2xl font-bold">How we run commercial projects</h3>
-          <ol className="mt-4 space-y-4 text-sm md:text-base text-white/80">
-            <li>
-              <span className="font-semibold">1. Scope &amp; site review</span>
-              <div className="text-white/75 mt-1 text-sm">
-                We take the time to review drawings, site conditions, and project
-                details carefully, ensuring everything is clearly understood
-                before pricing is finalized.
-              </div>
-            </li>
-            <li>
-              <span className="font-semibold">2. Planning &amp; coordination</span>
-              <div className="text-white/75 mt-1 text-sm">
-                Phasing, access, freight, and safety are thoughtfully coordinated
-                with your team to align seamlessly with your schedules and
-                operations.
-              </div>
-            </li>
-            <li>
-              <span className="font-semibold">3. Installation</span>
-              <div className="text-white/75 mt-1 text-sm">
-                Our crews work around your hours of operation, maintaining clean
-                job sites each day and keeping you informed with clear,
-                consistent progress updates.
-              </div>
-            </li>
-            <li>
-              <span className="font-semibold">4. Close-out</span>
-              <div className="text-white/75 mt-1 text-sm">
-                We complete final walkthroughs, handle touch-ups, and provide
-                maintenance guidance to support long-term durability.
-              </div>
-            </li>
-          </ol>
-        </motion.div>
-      </section>
-
-      {/* KPI / BENEFITS STRIP */}
-      <section className="bg-black/75 border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-6 py-10 grid sm:grid-cols-3 gap-5 text-sm">
-          <Benefit
-            icon={<Gauge className="h-5 w-5" />}
-            title="Schedule awareness"
-            text="We understand the importance of timing, with experience in night work, phased installations, and meeting opening deadlines."
-          />
-          <Benefit
-            icon={<ClipboardCheck className="h-5 w-5" />}
-            title="Clear communication"
-            text="Scopes, change orders, and punch lists are kept organized, transparent, and easy to follow at every stage."
-          />
-          <Benefit
-            icon={<HardHat className="h-5 w-5" />}
-            title="Site readiness"
-            text="Safety, access, and coordination carefully managed in partnership with property managers and general contractors."
-          />
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="bg-black/80 border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <div className="text-xl md:text-2xl font-semibold">
-              Planning a commercial flooring project in Edmonton, the surrounding
-              area, or out of province?
-            </div>
-            <div className="text-white/70 text-sm md:text-base">
-              Send us your drawings or photos along with your timelines, and
-              we’ll help guide you with suitable product options and a clear,
-              realistic installation schedule.
-            </div>
-          </div>
-          <TextArrowLink to="/contact">Start a commercial conversation</TextArrowLink>
-        </div>
-      </section>
-
       {/* LIGHTBOX */}
       {lightboxIdx !== null && (
         <Lightbox
@@ -433,11 +327,8 @@ function Lightbox({ src, index, total, onClose, onPrev, onNext }) {
     const delta = endX - startXRef.current;
 
     if (Math.abs(delta) > 50) {
-      if (delta < 0) {
-        onNext(); // swipe left -> next
-      } else {
-        onPrev(); // swipe right -> prev
-      }
+      if (delta < 0) onNext();
+      else onPrev();
     }
     startXRef.current = null;
   };
@@ -451,9 +342,8 @@ function Lightbox({ src, index, total, onClose, onPrev, onNext }) {
     >
       <div
         className="relative max-w-[95vw] max-h-[95vh] flex items-center justify-center"
-        onClick={(e) => e.stopPropagation()} // don’t close when clicking image
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Left arrow */}
         <button
           type="button"
           onClick={onPrev}
@@ -463,7 +353,6 @@ function Lightbox({ src, index, total, onClose, onPrev, onNext }) {
           <ChevronLeft className="h-5 w-5 text-white" />
         </button>
 
-        {/* Image */}
         <motion.img
           key={src}
           src={src}
@@ -474,7 +363,6 @@ function Lightbox({ src, index, total, onClose, onPrev, onNext }) {
           className="max-h-[90vh] max-w-[90vw] rounded-xl shadow-2xl object-contain"
         />
 
-        {/* Right arrow */}
         <button
           type="button"
           onClick={onNext}
@@ -484,21 +372,11 @@ function Lightbox({ src, index, total, onClose, onPrev, onNext }) {
           <ChevronRight className="h-5 w-5 text-white" />
         </button>
 
-        {/* Index indicator */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs text-white/80 bg-black/60 px-3 py-1 rounded-full border border-white/20">
           {index + 1} / {total}
         </div>
       </div>
     </div>
-  );
-}
-
-/* --- small components --- */
-function Badge({ text }) {
-  return (
-    <span className="inline-flex items-center rounded-full border border-white/15 bg-white/[0.03] px-3 py-1 text-xs text-white/80">
-      {text}
-    </span>
   );
 }
 
@@ -512,29 +390,6 @@ function Highlight({ icon, title, text }) {
         <div className="font-semibold">{title}</div>
         <div className="text-white/75 text-xs mt-0.5">{text}</div>
       </div>
-    </div>
-  );
-}
-
-function FeatureItem({ icon, text }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="grid place-items-center h-8 w-8 rounded-lg bg-white/[0.05] border border-white/10">
-        {icon}
-      </span>
-      <span>{text}</span>
-    </div>
-  );
-}
-
-function Benefit({ icon, title, text }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-xl">
-      <div className="flex items-center gap-2 mb-1">
-        {icon}
-        <div className="font-semibold text-sm md:text-base">{title}</div>
-      </div>
-      <div className="text-white/75 text-xs md:text-sm">{text}</div>
     </div>
   );
 }

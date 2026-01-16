@@ -123,51 +123,43 @@ export default function Residential() {
   const [galleryByCategory, setGalleryByCategory] = useState({});
 
   useEffect(() => {
+    const CATEGORY_TITLES = [
+      "Whole-House Flooring",
+      "Kitchen Flooring",
+      "Bathroom Tile & LVP",
+      "Basement Flooring",
+      "Stairs & Transitions",
+    ];
+
     async function loadGallery() {
       try {
-        // ✅ Fix: use category filter (matches your backend calls in console)
-        const res = await fetch(`${API_BASE}/api/gallery?category=Residential`);
-        if (!res.ok) throw new Error("Failed to load gallery");
-        const data = await res.json();
+        const results = await Promise.all(
+          CATEGORY_TITLES.map(async (cat) => {
+            const res = await fetch(
+              `${API_BASE}/api/gallery?category=${encodeURIComponent(cat)}`
+            );
+            if (!res.ok) return [cat, []];
+            const data = await res.json();
+            const urls = Array.isArray(data) ? data.map((img) => img.url) : [];
+            return [cat, urls];
+          })
+        );
 
-        // If backend returns ONLY Residential images, this will still work.
-        // If backend returns mixed categories, this groups them.
-        const byCategory = {};
-        data.forEach((img) => {
-          if (!byCategory[img.category]) byCategory[img.category] = [];
-          byCategory[img.category].push(`${API_BASE}${img.url}`);
-        });
-
-        setGalleryByCategory(byCategory);
+        const byCat = {};
+        for (const [cat, urls] of results) byCat[cat] = urls;
+        setGalleryByCategory(byCat);
       } catch (err) {
         console.error("Failed to load gallery images", err);
       }
     }
+
     loadGallery();
   }, []);
 
   const services = useMemo(() => {
-    const mapKeyToGalleryCategory = (key) => {
-      switch (key) {
-        case "kitchens":
-          return "Kitchen";
-        case "bathrooms":
-          return "Bathroom";
-        case "basement":
-          return "Basement";
-        case "exterior":
-          return "Exterior";
-        default:
-          return "Residential";
-      }
-    };
-
     return SERVICES.map((service) => {
-      const cat = mapKeyToGalleryCategory(service.key);
-      const imgs = galleryByCategory[cat];
-      if (imgs && imgs.length > 0) {
-        return { ...service, images: imgs };
-      }
+      const imgs = galleryByCategory[service.title]; // ✅ match by title
+      if (imgs && imgs.length > 0) return { ...service, images: imgs };
       return service;
     });
   }, [galleryByCategory]);

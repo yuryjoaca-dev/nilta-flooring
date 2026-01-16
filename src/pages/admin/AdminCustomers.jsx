@@ -1,13 +1,64 @@
-import React, { useEffect, useState } from "react";
-
-import { API_BASE } from "../../config/api"; // ajustezi path-ul
-
-fetch(`${API_BASE}/api/admin/customers`)
-
-
+import React, { useEffect, useMemo, useState } from "react";
+import { API_BASE } from "../../config/api";
 
 function getToken() {
   return localStorage.getItem("adminToken");
+}
+
+function fmtMoney(n) {
+  const num = Number(n || 0);
+  return `$${num.toFixed(2)} CAD`;
+}
+
+function ConfirmModal({
+  open,
+  title = "Confirm",
+  message = "Are you sure?",
+  confirmText = "Yes",
+  cancelText = "No",
+  onConfirm,
+  onCancel,
+  loading = false,
+}) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-[300] flex items-center justify-center px-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/70"
+        onClick={loading ? undefined : onCancel}
+      />
+
+      {/* Modal */}
+      <div className="relative w-full max-w-md rounded-2xl border border-neutral-800 bg-neutral-950 shadow-2xl">
+        <div className="p-5">
+          <h3 className="text-base font-semibold text-white">{title}</h3>
+          <p className="mt-2 text-sm text-neutral-300">{message}</p>
+
+          <div className="mt-5 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={loading}
+              className="px-4 py-2 rounded-lg border border-red-700/70 text-red-200 hover:bg-red-900/30 transition disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {cancelText}
+            </button>
+
+            <button
+              type="button"
+              onClick={onConfirm}
+              disabled={loading}
+              className="px-4 py-2 rounded-lg bg-emerald-500 text-neutral-950 font-semibold hover:bg-emerald-400 transition disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {loading ? "Deleting..." : confirmText}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function AdminCustomers() {
@@ -18,21 +69,25 @@ export default function AdminCustomers() {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [search, setSearch] = useState("");
 
+  // ✅ modal state
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmCustomer, setConfirmCustomer] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
   useEffect(() => {
     fetchCustomers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fetchCustomers() {
     try {
       setLoading(true);
       const res = await fetch(`${API_BASE}/api/admin/customers`, {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error("Failed");
       const data = await res.json();
-      setCustomers(data);
+      setCustomers(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error(e);
       alert("Failed to load customers");
@@ -48,20 +103,58 @@ export default function AdminCustomers() {
       setLoadingOrders(true);
       const res = await fetch(
         `${API_BASE}/api/admin/customers/${cust._id}/orders`,
-        {
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${getToken()}` } }
       );
       if (!res.ok) throw new Error("Failed");
       const data = await res.json();
-      setOrders(data);
+      setOrders(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error(e);
       alert("Failed to load orders");
     } finally {
       setLoadingOrders(false);
+    }
+  }
+
+  function requestDeleteCustomer(customer) {
+    setConfirmCustomer(customer);
+    setConfirmOpen(true);
+  }
+
+  async function confirmDeleteCustomer() {
+    if (!confirmCustomer) return;
+    setDeleting(true);
+
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/admin/customers/${confirmCustomer._id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${getToken()}` },
+        }
+      );
+
+      if (!res.ok && res.status !== 204) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Failed to delete customer");
+      }
+
+      setCustomers((prev) =>
+        prev.filter((c) => c._id !== confirmCustomer._id)
+      );
+
+      if (selected?._id === confirmCustomer._id) {
+        setSelected(null);
+        setOrders([]);
+      }
+
+      setConfirmOpen(false);
+      setConfirmCustomer(null);
+    } catch (e) {
+      console.error(e);
+      alert(e.message || "Failed to delete customer");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -74,13 +167,47 @@ export default function AdminCustomers() {
     );
   });
 
+  const totals = useMemo(() => {
+    const paid = orders.reduce(
+      (sum, o) => sum + (o?.paymentStatus === "paid" ? Number(o.total || 0) : 0),
+      0
+    );
+
+    const toPay = orders.reduce(
+      (sum, o) => sum + (o?.paymentStatus !== "paid" ? Number(o.total || 0) : 0),
+      0
+    );
+
+    return { paid, toPay, grand: paid + toPay };
+  }, [orders]);
+
   return (
-    <div className="grid gap-6 md:grid-cols-[2fr,1.3fr]">
+    <div className="grid gap-6 md:grid-cols-[1.6fr,1.2fr]">
+      {/* ✅ Confirm delete modal */}
+      <ConfirmModal
+        open={confirmOpen}
+        title="Delete customer"
+        message={
+          confirmCustomer
+            ? `Are you sure you want to delete "${confirmCustomer.email}"? This will remove the customer from your admin panel.`
+            : "Are you sure?"
+        }
+        confirmText="Yes,delete"
+        cancelText="No"
+        onCancel={() => {
+          if (deleting) return;
+          setConfirmOpen(false);
+          setConfirmCustomer(null);
+        }}
+        onConfirm={confirmDeleteCustomer}
+        loading={deleting}
+      />
+
       <div className="space-y-4">
         <div>
           <h1 className="text-2xl font-semibold mb-1">Customers</h1>
           <p className="text-sm text-neutral-400">
-            View customer contact details, delivery address and order history.
+            View customer contact details and order history.
           </p>
         </div>
 
@@ -101,12 +228,14 @@ export default function AdminCustomers() {
         </div>
 
         <div className="bg-neutral-900/70 border border-neutral-800 rounded-2xl overflow-hidden">
-          <div className="grid grid-cols-4 text-[11px] uppercase tracking-wide text-neutral-400 border-b border-neutral-800 px-3 py-2">
+          <div className="grid grid-cols-5 text-[11px] uppercase tracking-wide text-neutral-400 border-b border-neutral-800 px-3 py-2">
             <span>Name</span>
             <span>Email</span>
             <span>Orders</span>
             <span>Last purchase</span>
+            <span className="text-right">Actions</span>
           </div>
+
           {loading ? (
             <p className="text-xs text-neutral-400 px-3 py-3">
               Loading customers...
@@ -124,16 +253,27 @@ export default function AdminCustomers() {
                     }`}
                   onClick={() => openCustomer(c)}
                 >
-                  <div className="grid grid-cols-4 gap-2 items-center">
+                  <div className="grid grid-cols-5 gap-2 items-center">
                     <div className="truncate">{c.name || "–"}</div>
-                    <div className="truncate text-neutral-300">
-                      {c.email}
-                    </div>
+                    <div className="truncate text-neutral-300">{c.email}</div>
                     <div>{c.ordersCount || 0}</div>
                     <div className="text-neutral-400">
                       {c.lastOrderDate
                         ? new Date(c.lastOrderDate).toLocaleDateString()
                         : "–"}
+                    </div>
+
+                    <div className="text-right">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          requestDeleteCustomer(c);
+                        }}
+                        className="text-[11px] px-2 py-1 rounded-full border border-red-700/70 text-red-300 hover:bg-red-900/40 transition"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </div>
                 </li>
@@ -143,46 +283,57 @@ export default function AdminCustomers() {
         </div>
       </div>
 
+      {/* DETAILS */}
       <div className="space-y-3">
         <h2 className="text-sm font-semibold text-neutral-200">
           {selected ? "Customer details" : "Select a customer"}
         </h2>
 
         {selected && (
-          <div className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-4 text-xs space-y-3">
+          <div className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-5 text-xs space-y-4">
             <div>
               <p className="text-neutral-400 text-[11px] uppercase mb-1">
                 Contact
               </p>
-              <p className="font-medium text-sm">{selected.name || "–"}</p>
-              <p className="text-neutral-300">{selected.email}</p>
+              <p className="font-medium text-base">{selected.name || "–"}</p>
+              <p className="text-neutral-300 break-all">{selected.email}</p>
               {selected.phone && (
-                <p className="text-neutral-300">
-                  Phone: {selected.phone}
-                </p>
+                <p className="text-neutral-300 mt-1">Phone: {selected.phone}</p>
               )}
             </div>
 
-            <div>
-              <p className="text-neutral-400 text-[11px] uppercase mb-1">
-                Delivery address
+            <div className="rounded-xl border border-neutral-800 bg-neutral-950/30 p-3">
+              <p className="text-neutral-400 text-[11px] uppercase mb-2">
+                Totals
               </p>
-              {selected.address ? (
-                <p className="text-neutral-200">
-                  {selected.address.line1}
-                  {selected.address.line2
-                    ? ", " + selected.address.line2
-                    : ""}
-                  <br />
-                  {[selected.address.city, selected.address.state]
-                    .filter(Boolean)
-                    .join(", ")}{" "}
-                  {selected.address.postalCode}
-                  <br />
-                  {selected.address.country}
-                </p>
+
+              {loadingOrders ? (
+                <p className="text-neutral-500">Loading totals...</p>
               ) : (
-                <p className="text-neutral-500">No address on file.</p>
+                <div className="grid grid-cols-1 gap-1 text-[12px]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-neutral-300">To pay (unpaid/quote)</span>
+                    <span className="text-amber-300 font-semibold">
+                      {fmtMoney(totals.toPay)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-neutral-300">Paid</span>
+                    <span className="text-neutral-200 font-semibold">
+                      {fmtMoney(totals.paid)}
+                    </span>
+                  </div>
+
+                  <div className="border-t border-neutral-800 my-1" />
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-neutral-200 font-semibold">Total</span>
+                    <span className="text-neutral-100 font-semibold">
+                      {fmtMoney(totals.grand)}
+                    </span>
+                  </div>
+                </div>
               )}
             </div>
 
@@ -190,16 +341,17 @@ export default function AdminCustomers() {
               <p className="text-neutral-400 text-[11px] uppercase mb-1">
                 Orders
               </p>
+
               {loadingOrders ? (
                 <p className="text-neutral-500">Loading orders...</p>
               ) : orders.length === 0 ? (
                 <p className="text-neutral-500">No orders yet.</p>
               ) : (
-                <div className="space-y-2 max-h-64 overflow-auto pr-1">
+                <div className="space-y-2 max-h-80 overflow-auto pr-1">
                   {orders.map((o) => (
                     <div
                       key={o._id}
-                      className="border border-neutral-800 rounded-xl p-2"
+                      className="border border-neutral-800 rounded-xl p-3"
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[11px] text-neutral-400">
@@ -213,15 +365,17 @@ export default function AdminCustomers() {
                               : o.paymentStatus || "Unpaid"}
                         </span>
                       </div>
+
                       <p className="text-[11px] text-neutral-300 mb-1">
                         Items:{" "}
                         {o.items
                           ?.map((it) => `${it.quantity}× ${it.name}`)
                           .join(", ")}
                       </p>
-                      {o.total > 0 && (
+
+                      {Number(o.total || 0) > 0 && (
                         <p className="text-[11px] text-amber-300">
-                          Total: ${o.total.toFixed(2)} CAD
+                          Total: {fmtMoney(o.total)}
                         </p>
                       )}
                     </div>

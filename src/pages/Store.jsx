@@ -421,18 +421,7 @@ export default function Store() {
               <ShoppingCart className="h-5 w-5" />
               Products
             </h2>
-            <p className="text-xs text-white/60">
-              Images are for reference only. We’ll confirm exact product details,
-              finishes, and availability before ordering.
-            </p>
           </div>
-
-          {/* JAN NOTICE */}
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-white/80">
-            <span className="font-semibold">IMAGES OF MATERIALS and PRICES</span>{" "}
-            <span className="text-white/70">WILL BE UPDATED IN JAN.</span>
-          </div>
-
           {/* Status */}
           {loadingProducts && (
             <p className="text-sm text-white/70">Loading products...</p>
