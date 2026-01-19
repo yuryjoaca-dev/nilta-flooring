@@ -183,7 +183,7 @@ export default function AdminCustomers() {
 
   return (
     <div className="grid gap-6 md:grid-cols-[1.6fr,1.2fr]">
-      {/* ✅ Confirm delete modal */}
+      {/*  Confirm delete modal */}
       <ConfirmModal
         open={confirmOpen}
         title="Delete customer"

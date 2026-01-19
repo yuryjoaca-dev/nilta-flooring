@@ -14,10 +14,10 @@ export default function ServicePage({
   title,
   subtitle,
   heroImg,
-  features = [],          // [{ icon: "Hammer", title: "...", text: "..." }]
-  process = [],           // ["Step 1 ...", "Step 2 ...", ...]
-  gallery = [],           // [url, url, ...]
-  faqs = []               // [{ q: "...", a: "..." }]
+  features = [],
+  process = [],
+  gallery = [],
+  faqs = []
 }) {
   const [openIdx, setOpenIdx] = useState(null);
 

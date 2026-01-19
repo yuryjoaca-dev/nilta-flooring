@@ -11,13 +11,7 @@ function getToken() {
 }
 
 const CATEGORY_OPTIONS = [
-  "Residential",
-  "Kitchen",
-  "Bathroom",
-  "Living Room",
-  "Basement",
-  "Exterior",
-  "Commercial",
+  "Vinyl Plank",
   "Tile",
   "Laminate",
   "Hardwood",
@@ -51,7 +45,6 @@ export default function AdminProducts() {
       return;
     }
     fetchProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fetchProducts() {
@@ -361,8 +354,8 @@ export default function AdminProducts() {
                   ? "Saving..."
                   : "Creating..."
                 : editing
-                ? "Save changes"
-                : "Create product"}
+                  ? "Save changes"
+                  : "Create product"}
             </button>
           </form>
         </div>

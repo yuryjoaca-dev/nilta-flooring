@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     allowedHosts: ['.ngrok-free.dev'],
 
-    // 🔥 VERY IMPORTANT: this forwards API + uploads to backend automatically
+    //  VERY IMPORTANT: this forwards API + uploads to backend automatically
     proxy: {
       "/api": {
         target: "http://localhost:5000",

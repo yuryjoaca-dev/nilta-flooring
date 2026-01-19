@@ -12,7 +12,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-const SITE_URL = "https://example.com"; // TODO: replace with your real domain
+const SITE_URL = "https://nilta.ca";
 
 export default function Materials() {
   const heroImg =
@@ -172,7 +172,7 @@ export default function Materials() {
           icon={<Layers className="h-6 w-6" />}
           label="Ceramic Tile"
           badge="Tile • Porcelain • Stone"
-          image="/materials/tile-hero.webp" // change to your real image
+          image="/materials/ceramic-tile.webp" // change to your real image
         >
           <p className="text-white/80 text-sm md:text-base">
             Our collection of tile includes a comprehensive selection of{" "}
@@ -195,7 +195,7 @@ export default function Materials() {
           label="Laminate"
           badge="Durable • Budget-Friendly"
           reversed
-          image="/materials/laminate-hero.webp" // change to your real image
+          image="/materials/laminate.webp" // change to your real image
         >
           <p className="text-white/80 text-sm md:text-base">
             Laminate flooring primarily replicates the look and feel of hardwood
@@ -216,7 +216,7 @@ export default function Materials() {
           icon={<BadgeCheck className="h-6 w-6" />}
           label="Hardwood"
           badge="Premium • Natural"
-          image="/materials/hardwood-hero.webp" // change to your real image
+          image="/materials/hardwood.webp" // change to your real image
         >
           <p className="text-white/80 text-sm md:text-base">
             Its many uses make hardwood an indispensable material. For the flooring

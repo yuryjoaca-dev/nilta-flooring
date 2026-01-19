@@ -385,7 +385,7 @@ export default function About() {
           ))}
         </div>
 
-        
+
       </section>
 
       {/* CAPABILITIES STRIP */}
@@ -463,13 +463,6 @@ export default function About() {
 }
 
 /* --- data --- */
-/**
- * Replace these photo paths with your real team images.
- * Recommended: add files like:
- *   /public/team/ahmet.webp
- *   /public/team/vladimir.webp
- *   /public/team/andrii.webp
- */
 const TEAM = [
   {
     name: "Ahmet",
@@ -604,11 +597,10 @@ function GhostLink({ to, label, primary }) {
     <Link
       to={to}
       className={`group inline-flex items-center rounded-full px-4 py-2 text-xs md:text-sm font-semibold transition
-      ${
-        primary
+      ${primary
           ? "border border-[#8F2841]/80 bg-white/[0.03] hover:border-[#8F2841] hover:bg-[#8F2841]/10 text-white/90 hover:text-[#F2C4D0]"
           : "border border-white/15 bg-white/[0.03] hover:border-[#8F2841] hover:bg-[#8F2841]/10 text-white/85 hover:text-[#F2C4D0]"
-      }`}
+        }`}
     >
       <span className="relative">{label}</span>
       <ArrowRight

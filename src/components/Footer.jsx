@@ -12,8 +12,8 @@ const NAV = [
 
 export default function Footer() {
   const address = "12345 Jasper Ave, Edmonton, AB T5M 2S2";
- const mapsUrl =
-  "https://www.google.com/maps/place/Nilta+Flooring/@53.5586217,-113.6048908,42m/data=!3m1!1e3!4m6!3m5!1s0x53a0213143d4e409:0x15831b4db9b30384!8m2!3d53.5582498!4d-113.6045098!16s%2Fg%2F11lkczv91l?entry=ttu";
+  const mapsUrl =
+    "https://www.google.com/maps/place/Nilta+Flooring/@53.5586217,-113.6048908,42m/data=!3m1!1e3!4m6!3m5!1s0x53a0213143d4e409:0x15831b4db9b30384!8m2!3d53.5582498!4d-113.6045098!16s%2Fg%2F11lkczv91l?entry=ttu";
 
 
   return (
@@ -55,7 +55,7 @@ export default function Footer() {
           <div className="font-semibold mb-3">Contact Us</div>
 
           <address className="not-italic text-white/80 space-y-2 text-sm">
-            {/* Address → Google Maps */}
+            {/* Address + Google Maps */}
             <a
               href={mapsUrl}
               target="_blank"
@@ -102,26 +102,35 @@ export default function Footer() {
           <div className="mt-4 flex items-center gap-4">
             <a
               aria-label="Facebook"
-              href="#"
+              href="https://www.facebook.com/YOUR_PAGE"
+              target="_blank"
+              rel="noopener noreferrer"
               className="p-2 rounded-lg hover:bg-white/5 transition"
             >
               <Facebook />
             </a>
+
             <a
               aria-label="Instagram"
-              href="#"
+              href="https://www.instagram.com/niltaflooring/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="p-2 rounded-lg hover:bg-white/5 transition"
             >
               <Instagram />
             </a>
+
             <a
-              aria-label="Twitter"
-              href="#"
+              aria-label="X (Twitter)"
+              href="https://x.com/YOUR_HANDLE"
+              target="_blank"
+              rel="noopener noreferrer"
               className="p-2 rounded-lg hover:bg-white/5 transition"
             >
               <Twitter />
             </a>
           </div>
+
         </div>
       </div>
 
@@ -143,7 +152,7 @@ export default function Footer() {
             </Link>
             <Link to="/cookie-policy" className="hover:text-white/80">
               Cookie Policy
-              </Link>
+            </Link>
           </div>
         </div>
       </div>

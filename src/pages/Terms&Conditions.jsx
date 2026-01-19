@@ -128,11 +128,7 @@ export default function TermsAndConditions() {
             .
           </p>
 
-          <p className="text-xs text-white/50 mt-6">
-            This document is provided for general information and does not
-            constitute legal advice. You may wish to consult a legal
-            professional to review these terms for your specific business needs.
-          </p>
+
         </div>
       </section>
     </main>

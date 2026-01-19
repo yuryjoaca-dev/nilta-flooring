@@ -10,7 +10,7 @@ const ACCENT = "#8F2841";
 export default function BlogPost() {
   const { slug } = useParams();
 
-  // newest-first order (matches Blog.jsx sorting)
+  // newest-first order 
   const orderedPosts = useMemo(() => {
     return [...POSTS].sort((a, b) => new Date(b.date) - new Date(a.date));
   }, []);
@@ -630,11 +630,11 @@ function RightRail({ post, canonicalUrl }) {
     if (navigator.share) {
       try {
         await navigator.share(data);
-      } catch {}
+      } catch { }
     } else {
       try {
         await navigator.clipboard.writeText(canonicalUrl);
-      } catch {}
+      } catch { }
     }
   };
 

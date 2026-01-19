@@ -181,13 +181,7 @@ const productSchema = new mongoose.Schema(
     category: {
       type: String,
       enum: [
-        "Residential",
-        "Kitchen",
-        "Bathroom",
-        "Living Room",
-        "Basement",
-        "Exterior",
-        "Commercial",
+        "Vinyl Plank",
         "Tile",
         "Laminate",
         "Hardwood",

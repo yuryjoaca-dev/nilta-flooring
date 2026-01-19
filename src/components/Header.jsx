@@ -27,7 +27,7 @@ export default function Header() {
     <header className="fixed top-0 inset-x-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/70 border-b border-white/5">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          
+
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
             <img
@@ -43,11 +43,10 @@ export default function Header() {
               <Link
                 key={item.label}
                 to={item.href}
-                className={`relative transition-colors ${
-                  isActive(item.href)
+                className={`relative transition-colors ${isActive(item.href)
                     ? "text-white"
                     : "text-white/70 hover:text-white"
-                }`}
+                  }`}
               >
                 {item.label}
                 {isActive(item.href) && (
@@ -80,7 +79,7 @@ export default function Header() {
           >
             <div className="p-4 flex items-center justify-between">
               <img
-                src="/logo/logo.webp"
+                src="/logo/nilta-logo.webp"
                 alt="Nilta Flooring"
                 className="h-8 w-auto"
               />

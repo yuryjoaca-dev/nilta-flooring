@@ -2,7 +2,6 @@
 import { Link, useLocation } from "react-router-dom";
 
 export default function Breadcrumbs({ items }) {
-  // items: [{label, to}] ordonate
   return (
     <nav className="text-sm text-white/70" aria-label="Breadcrumb">
       <ol className="flex flex-wrap items-center gap-1">

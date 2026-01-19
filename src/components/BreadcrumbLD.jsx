@@ -2,7 +2,6 @@
 import { Helmet } from "react-helmet-async";
 
 export default function BreadcrumbLD({ items }) {
-  // items: [{label, url}] — url absolut sau relativ (ok și relativ pe SPA)
   const data = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

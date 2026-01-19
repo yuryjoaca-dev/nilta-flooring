@@ -62,7 +62,6 @@ export default function Projects() {
           muted
           loop
           playsInline
-          // poster="/images/projects-hero-poster.jpg"
         />
         {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-[#050507]" />
@@ -437,9 +436,8 @@ export default function Projects() {
                 >
                   <span className="font-semibold">{f.q}</span>
                   <ChevronDown
-                    className={`h-5 w-5 transition ${
-                      openIdx === i ? "rotate-180" : ""
-                    }`}
+                    className={`h-5 w-5 transition ${openIdx === i ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
                 {openIdx === i && (
