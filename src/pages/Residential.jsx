@@ -276,9 +276,7 @@ export default function Residential() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            From full-house installs to kitchens, bathrooms, basements and
-            stairs, this page highlights the thoughtful, durable floors we build
-            in homes across Edmonton and the surrounding area.
+            Whole-home installations for room-by-room upgrades, thoughtfully completed with smooth surfaces and clean workmanship, helping create comfortable, peaceful homes for everyday living.
           </motion.p>
 
           <motion.div
@@ -356,6 +354,11 @@ export default function Residential() {
             <li>• Subfloor prep, leveling & moisture testing</li>
             <li>• Stairs, custom stair nosings, trims & clean transitions</li>
             <li>• Clean job sites and clear, realistic timelines</li>
+            <li>• Careful subfloor preparation, levelling, patching, and surface repairs.</li>
+            <li>• Underlay and sound control for added comfort.</li>
+            <li>• Stair nosing and clean transitions.</li>
+            <li>• Product sourcing and scheduling.</li>
+            <li>• Clean, level installation delivered on time.</li>
           </ul>
           <div className="mt-6">
             <Link

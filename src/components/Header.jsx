@@ -9,7 +9,7 @@ const NAV = [
   { label: "Residential", href: "/residential" },
   { label: "Commercial", href: "/commercial" },
   { label: "Products", href: "/store" },
-  { label: "Guide & Tips", href: "/blog" },
+  { label: "Guides & Tips", href: "/blog" },
   { label: "About Us", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];
@@ -44,8 +44,8 @@ export default function Header() {
                 key={item.label}
                 to={item.href}
                 className={`relative transition-colors ${isActive(item.href)
-                    ? "text-white"
-                    : "text-white/70 hover:text-white"
+                  ? "text-white"
+                  : "text-white/70 hover:text-white"
                   }`}
               >
                 {item.label}

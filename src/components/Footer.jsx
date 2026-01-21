@@ -21,18 +21,16 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-6 py-16 grid lg:grid-cols-4 gap-10">
         {/* BRAND */}
         <div className="lg:col-span-2">
-          <Link
-            to="/"
-            className="flex items-center gap-2 font-semibold text-xl"
-          >
-            <Hammer className="h-6 w-6 text-red-500" />
-            Nilta Flooring Inc.
+          <Link to="/" className="inline-flex items-center">
+            <img
+              src="/logo/nilta-logo.webp"
+              alt="Nilta Flooring"
+              className="h-16 md:h-18 w-auto object-contain"
+            />
           </Link>
+
           <p className="mt-4 text-white/70 max-w-md">
-            Edmonton-based flooring company supplying and installing
-            high-quality residential and commercial floors across Alberta,
-            with a focus on thoughtful prep, clean workspaces, and floors
-            built to last.
+            We are a proudly Canadian flooring company, supplying and installing high-quality residential and commercial flooring nationwide, with a focus on thoughtful planning, clean installs, and floors made for everyday life.
           </p>
         </div>
 

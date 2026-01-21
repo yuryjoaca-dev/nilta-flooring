@@ -34,19 +34,19 @@ export default function Projects() {
   const faqs = [
     {
       q: "How accurate are your timelines?",
-      a: "We plan around product lead times and site prep. Most residential installs run 1–5 days; larger or multi-area scopes can take longer depending on prep and selections.",
+      a: "We work hard to provide realistic, reliable timelines from the start. Each project is carefully planned based on scope, materials, and scheduling, and we keep you updated along the way to avoid any surprises. If anything changes, we communicate early and clearly.",
     },
     {
       q: "Do you handle prep and leveling?",
-      a: "Yes. We test for moisture, address subfloor issues, perform leveling/patching as scoped, and recommend the right underlay and trims.",
+      a: "Yes—we take care of all the necessary preparations and levelling to ensure a smooth, long-lasting installation. Proper prep is a key part of how we work, and we make sure surfaces are ready before any flooring goes down, so the finished result looks and feels right.",
     },
     {
       q: "What flooring products do you install?",
-      a: "LVP, laminate, engineered hardwood, and tile. We can supply materials or install client-supplied products if they’re suitable for the space.",
+      a: "We install a wide range of flooring products, including hardwood, luxury vinyl plank (LVP), tile, carpet, and carpet tile. We’ll help you choose the right option based on your space, lifestyle, and how the area is used, ensuring the flooring stays comfortable and performs well over time.",
     },
     {
-      q: "Do you work around business hours?",
-      a: "For commercial spaces, we can phase areas or schedule night shifts to minimize disruption.",
+      q: "Do you work around our hours?",
+      a: "Yes—we do our best to schedule work in a way that minimizes disruption to your home or business. For commercial projects, this can include evening, night, or phased installations as needed. We’ll always coordinate with you in advance to find a schedule that works.",
     },
   ];
 
@@ -94,10 +94,9 @@ export default function Projects() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.12 }}
           >
-            From family basements to busy commercial corridors, this page
-            highlights flooring projects designed and installed to handle
-            Alberta’s climate, daily traffic, and real-world use—without cutting
-            corners.
+            From family basements to busy corridors, we design and install
+            flooring systems that comfortably handle Alberta’s climate, daily
+            foot traffic, and the rhythms of everyday life.
           </motion.p>
 
           <motion.div
@@ -128,28 +127,28 @@ export default function Projects() {
           item={{
             icon: <ShieldCheck className="h-5 w-5" />,
             title: "Licensed & Insured",
-            text: "Alberta-licensed installer with COR-aligned safety practices on every site.",
+            text: "Fully licensed installers work with care and clear safety standards, giving you peace of mind throughout your project.",
           }}
         />
         <Trust
           item={{
             icon: <Timer className="h-5 w-5" />,
             title: "On-Time Delivery",
-            text: "Material lead times, milestones, and schedules planned upfront.",
+            text: "We set clear milestones so your project progresses smoothly from start to finish.",
           }}
         />
         <Trust
           item={{
             icon: <Handshake className="h-5 w-5" />,
             title: "Transparent Quotes",
-            text: "Clear scopes covering prep, materials, trims, and transitions—no surprises.",
+            text: "Clear, detailed scopes covering prep, materials, trims, and transitions, so you know exactly what to expect.",
           }}
         />
         <Trust
           item={{
             icon: <BadgeCheck className="h-5 w-5" />,
             title: "Warranty Coverage",
-            text: "Workmanship warranty backed by manufacturer product guarantees.",
+            text: "Our workmanship warranty, paired with manufacturer product coverage, helps ensure long-term peace of mind.",
           }}
         />
       </section>
@@ -217,7 +216,10 @@ export default function Projects() {
           >
             <h3 className="text-xl font-semibold">What we handle in homes</h3>
             <div className="mt-3 grid sm:grid-cols-2 gap-3 text-white/80">
-              <Li icon={<Ruler />} text="Moisture testing & subfloor preparation" />
+              <Li
+                icon={<Ruler />}
+                text="Moisture testing & subfloor preparation"
+              />
               <Li icon={<Wrench />} text="Self-leveling, patching & repairs" />
               <Li icon={<Layers />} text="Underlay and sound control" />
               <Li icon={<Paintbrush />} text="Stairs, nosings & transitions" />
@@ -237,7 +239,9 @@ export default function Projects() {
             </div>
 
             <div className="mt-auto pt-6">
-              <TextArrowLink to="/residential">Explore featured homes</TextArrowLink>
+              <TextArrowLink to="/residential">
+                Explore featured homes
+              </TextArrowLink>
             </div>
           </motion.div>
         </article>
@@ -254,9 +258,9 @@ export default function Projects() {
             Commercial Flooring
           </h2>
           <p className="text-white/80 mt-2 max-w-3xl">
-            Phased, code-compliant installations for retail, office, hospitality,
-            and light industrial spaces. Night-shift options are available to keep
-            operations moving.
+            Carefully planned flooring installations for retail, office,
+            hospitality, and industrial spaces, with flexible scheduling,
+            including night work, to help your business stay on track.
           </p>
         </header>
 
@@ -268,26 +272,45 @@ export default function Projects() {
             className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"
           >
             <h3 className="text-xl font-semibold">Sectors & capabilities</h3>
+
+            {/* ✅ Updated list per request */}
             <div className="mt-4 grid sm:grid-cols-2 gap-3 text-white/80">
-              <Li icon={<Store />} text="Retail rollouts & refits" />
-              <Li icon={<Landmark />} text="Mall corridors & common areas" />
-              <Li icon={<Factory />} text="Light industrial offices" />
-              <Li icon={<Hotel />} text="Hospitality public spaces" />
-              <Li icon={<Building2 />} text="Office tenant improvements" />
-              <Li icon={<HardHat />} text="Site safety, hoarding & phasing" />
+              <Li icon={<Store />} text="Retail rollouts, refills, and tenant turnovers." />
+              <Li icon={<Landmark />} text="Mall corridors, common areas, and lobbies." />
+              <Li icon={<Factory />} text="Industrial and offices." />
+              <Li icon={<Hotel />} text="Hospitality public spaces, lounges, and corridors." />
+              <Li icon={<Building2 />} text="Office tenant improvements and fit-outs." />
+              <Li icon={<ClipboardCheck />} text="Medical and professional office spaces." />
+              <Li icon={<Layers />} text="Showrooms and sales centers." />
+              <Li icon={<Users />} text="Multi-unit residential common areas." />
+              <Li icon={<BadgeCheck />} text="Education and training facilities." />
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-2">
-              <Pill text="Night-shift scheduling" />
-              <Pill text="Tenant and PM coordination" />
-              <Pill text="Moisture mitigation" />
-              <Pill text="Material staging" />
-              <Pill text="Daily progress reports" />
-              <Pill text="Warranty support" />
+            {/* ✅ New: Project coordination includes */}
+            <div className="mt-6">
+              <div className="text-sm font-semibold text-white/90">
+                Project coordination includes
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {[
+                  "Site safety",
+                  "Phasing",
+                  "Night scheduling",
+                  "Tenant coordination",
+                  "Moisture mitigation",
+                  "Material staging",
+                  "Daily progress reports",
+                  "Warranty support",
+                ].map((t) => (
+                  <Pill key={t} text={t} />
+                ))}
+              </div>
             </div>
 
             <div className="mt-6">
-              <TextArrowLink to="/commercial">See our commercial approach</TextArrowLink>
+              <TextArrowLink to="/commercial">
+                See our commercial approach
+              </TextArrowLink>
             </div>
           </motion.div>
 
@@ -312,26 +335,10 @@ export default function Projects() {
       {/* KPI BAND */}
       <section className="bg-gradient-to-br from-[#8F2841] via-neutral-900 to-black">
         <div className="max-w-7xl mx-auto px-6 py-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <KPI
-            icon={<Gauge className="h-6 w-6" />}
-            value="100%"
-            label="On-Time Installs"
-          />
-          <KPI
-            icon={<Users className="h-6 w-6" />}
-            value="10/10"
-            label="Client Satisfaction"
-          />
-          <KPI
-            icon={<ClipboardCheck className="h-6 w-6" />}
-            value="120+"
-            label="Projects Completed"
-          />
-          <KPI
-            icon={<MapPin className="h-6 w-6" />}
-            value="Edmonton"
-            label="Primary Service Area"
-          />
+          <KPI icon={<Gauge className="h-6 w-6" />} value="100%" label="On-Time Installs" />
+          <KPI icon={<Users className="h-6 w-6" />} value="10/10" label="Client Satisfaction" />
+          <KPI icon={<ClipboardCheck className="h-6 w-6" />} value="120+" label="Projects Completed" />
+          <KPI icon={<MapPin className="h-6 w-6" />} value="Edmonton" label="Primary Service Area" />
         </div>
       </section>
 
@@ -339,26 +346,28 @@ export default function Projects() {
       <section className="max-w-7xl mx-auto px-6 py-14">
         <h2 className="text-2xl md:text-3xl font-bold">How We Work</h2>
         <p className="text-white/75 mt-2 max-w-2xl text-sm md:text-base">
-          A clear, step-by-step process keeps projects moving—whether it’s a
-          single room, a full home refresh, or a phased commercial scope.
+          The flow of a clear step-by-step process keeps everything running
+          smoothly, whether you’re updating one room, refreshing your whole
+          home, or managing a phased commercial project.
         </p>
+
         <div className="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             {
               title: "Discovery & Quote",
-              text: "Site visit, product options, and a clearly defined scope with accurate pricing.",
+              text: "We review your space, discuss suitable product options, and establish a clear scope to ensure accurate, straightforward pricing.",
             },
             {
               title: "Plan & Schedule",
-              text: "Moisture checks, substrate planning, and material logistics aligned with timelines.",
+              text: "We coordinate planning, preparation, and materials on your timeline, making sure everything aligns comfortably with your schedule.",
             },
             {
               title: "Install & Update",
-              text: "Daily cleanups, milestone check-ins, and quality control throughout the install.",
+              text: "We take care of daily clean-ups, keep you updated along the way, and ensure quality at every stage of the install.",
             },
             {
               title: "Handover & Warranty",
-              text: "Final walkthrough, documentation, and warranty support for peace of mind.",
+              text: "We wrap up with a final walkthrough, clear documentation, and warranty support, so you feel confident long after the project is completed.",
             },
           ].map((s, i) => (
             <motion.div
@@ -454,15 +463,33 @@ export default function Projects() {
         <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <div className="text-xl md:text-2xl font-semibold">
-              Ready to talk through your project?
+              Ready to get started?
             </div>
             <div className="text-white/70 text-sm md:text-base">
-              Share your plans, photos, or square footage—we’ll outline options,
-              timelines, and a clear installation path.
+              Share your plans, photos, or square footage, and we’ll help map
+              out options and timing in a way that feels simple and comfortable.
             </div>
           </div>
           <TextArrowLink to="/contact">Request an estimate</TextArrowLink>
         </div>
+      </section>
+
+      {/* ✅ Consistent Nilta description (add near bottom of page) */}
+      <section className="max-w-7xl mx-auto px-6 py-12">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 md:p-8 shadow-xl"
+        >
+          <h3 className="text-xl md:text-2xl font-bold">Nilta Flooring Inc.</h3>
+          <p className="text-white/75 mt-3 text-sm md:text-base max-w-3xl">
+            We are a proudly Canadian flooring company, supplying and installing
+            high-quality residential and commercial flooring nationwide, with a
+            focus on thoughtful planning, clean installs, and floors made for
+            everyday life.
+          </p>
+        </motion.div>
       </section>
     </main>
   );

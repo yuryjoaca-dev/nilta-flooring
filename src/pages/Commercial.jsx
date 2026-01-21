@@ -8,15 +8,14 @@ import BreadcrumbLD from "../components/BreadcrumbLD.jsx";
 import { API_BASE } from "../config/api";
 import {
   Store,
-  Landmark,
   Building2,
   HardHat,
-  ClipboardCheck,
-  Timer,
-  Gauge,
   ArrowRight,
   ChevronLeft,
   ChevronRight,
+  CalendarClock,
+  MessagesSquare,
+  ShieldCheck,
 } from "lucide-react";
 
 // ✅ Remove the buggy top-level fetch (no auth / runs on import)
@@ -209,10 +208,8 @@ export default function Commercial() {
           </h2>
 
           <p className="text-white/80 mt-3 text-sm md:text-base max-w-2xl">
-            We understand that commercial spaces are always full of life.
-            Businesses keep buzzing, shoppers come and go, and we know that
-            timing those installations is just as crucial as choosing the right
-            floors.
+            We simply want to show how thoughtful planning and a friendly,
+            well-executed approach makes a difference in busy spaces.
           </p>
 
           <p className="text-white/80 mt-3 text-sm md:text-base max-w-2xl">
@@ -290,6 +287,113 @@ export default function Commercial() {
             </motion.figure>
           ))}
         </div>
+      </section>
+
+      {/* ✅ NEW: WHAT COMMERCIAL CLIENTS APPRECIATE MOST */}
+      <section className="max-w-7xl mx-auto px-6 pb-10">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 md:p-8 shadow-xl"
+        >
+          <h3 className="text-2xl md:text-3xl font-bold">
+            What Commercial Clients Appreciate Most
+          </h3>
+
+          <div className="mt-5 grid md:grid-cols-3 gap-4">
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 grid place-items-center h-9 w-9 rounded-xl bg-white/[0.05] border border-white/10">
+                  <CalendarClock className="h-5 w-5" />
+                </span>
+                <div>
+                  <div className="font-semibold">Schedule awareness</div>
+                  <p className="text-white/75 text-sm mt-1">
+                    We understand the importance of timing, with experience in
+                    night work, phased installations, and meeting opening
+                    deadlines.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 grid place-items-center h-9 w-9 rounded-xl bg-white/[0.05] border border-white/10">
+                  <MessagesSquare className="h-5 w-5" />
+                </span>
+                <div>
+                  <div className="font-semibold">Clear communication</div>
+                  <p className="text-white/75 text-sm mt-1">
+                    Scopes, change orders, and punch lists are kept organized,
+                    transparent, and easy to follow at every stage.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 grid place-items-center h-9 w-9 rounded-xl bg-white/[0.05] border border-white/10">
+                  <ShieldCheck className="h-5 w-5" />
+                </span>
+                <div>
+                  <div className="font-semibold">Site readiness</div>
+                  <p className="text-white/75 text-sm mt-1">
+                    Safety, access, and coordination carefully managed in
+                    partnership with property managers and general contractors.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 p-5">
+            <p className="text-white/90 font-semibold">
+              Planning a commercial flooring project in Edmonton, surrounding
+              area, or out of province?
+            </p>
+            <p className="text-white/75 text-sm mt-2">
+              Send us your drawings or photos along with your timelines, and
+              we’ll help guide you with suitable product options and a clear,
+              realistic installation schedule.
+            </p>
+
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                to="/contact"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#8F2841] hover:bg-[#a73753] text-white font-semibold shadow-lg transition text-sm md:text-base"
+              >
+                Send drawings / request quote
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                to="/projects"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-white/30 text-white/90 hover:bg-white hover:text-black transition text-sm md:text-base"
+              >
+                View past installs
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ✅ UPDATED: NILTA FLOORING INC. SECTION */}
+      <section className="max-w-7xl mx-auto px-6 pb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 md:p-8 shadow-xl"
+        >
+          <h3 className="text-xl md:text-2xl font-bold">Nilta Flooring Inc.</h3>
+          <p className="text-white/75 mt-3 text-sm md:text-base max-w-3xl">
+            Our flooring company, supplying and installing residential and
+            commercial flooring nationwide, with a practical, detail-driven
+            approach to planning, installation, and lasting performance.
+          </p>
+        </motion.div>
       </section>
 
       {/* LIGHTBOX */}

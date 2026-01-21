@@ -22,7 +22,7 @@ export default function Blog() {
   const blogLd = {
     "@context": "https://schema.org",
     "@type": "Blog",
-    name: "Nilta Flooring • Guide & Tips",
+    name: "Nilta Flooring • Guides & Tips",
     url: pageUrl,
     inLanguage: "en-CA",
     publisher: { "@type": "Organization", name: "Nilta Flooring" },
@@ -148,14 +148,14 @@ export default function Blog() {
         <Breadcrumbs
           items={[
             { label: "Home", to: "/" },
-            { label: "Guide & Tips", to: "/blog" },
+            { label: "Guides & Tips", to: "/blog" },
           ]}
         />
       </section>
       <BreadcrumbLD
         items={[
           { label: "Home", url: `${SITE_URL}/` },
-          { label: "Guide & Tips", url: pageUrl },
+          { label: "Guides & Tips", url: pageUrl },
         ]}
       />
 
@@ -252,11 +252,10 @@ export default function Blog() {
                     setCat(c);
                     setPage(1);
                   }}
-                  className={`rounded-full px-3 py-1 text-xs transition border ${
-                    cat === c
-                      ? "border-[#8F2841] bg-[#8F2841]/25 text-[#F3E9EC]"
-                      : "border-white/15 bg-white/[0.02] text-white/80 hover:bg-white/5"
-                  }`}
+                  className={`rounded-full px-3 py-1 text-xs transition border ${cat === c
+                    ? "border-[#8F2841] bg-[#8F2841]/25 text-[#F3E9EC]"
+                    : "border-white/15 bg-white/[0.02] text-white/80 hover:bg-white/5"
+                    }`}
                 >
                   {c}
                 </button>
@@ -361,11 +360,10 @@ export default function Blog() {
               <button
                 key={n}
                 onClick={() => setPage(n)}
-                className={`h-9 w-9 rounded-xl border text-sm transition ${
-                  page === n
-                    ? "border-[#8F2841] bg-[#8F2841]/30 text-[#F3E9EC]"
-                    : "border-white/15 bg-white/[0.03] text-white/80 hover:bg-white/10"
-                }`}
+                className={`h-9 w-9 rounded-xl border text-sm transition ${page === n
+                  ? "border-[#8F2841] bg-[#8F2841]/30 text-[#F3E9EC]"
+                  : "border-white/15 bg-white/[0.03] text-white/80 hover:bg-white/10"
+                  }`}
               >
                 {n}
               </button>
