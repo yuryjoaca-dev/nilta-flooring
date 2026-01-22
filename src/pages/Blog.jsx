@@ -187,7 +187,10 @@ export default function Blog() {
               now, and you can always return as new questions come up. And
               remember, if you’d rather chat directly, just give us a call.
               We’re more than happy to answer any questions and guide you
-              through the first steps of your project.
+              through the first steps of your project.Flooring insights
+              and practical guidance shaped by hands-on experience across
+              Alberta residential and commercial projects.
+
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">

@@ -474,23 +474,7 @@ export default function Projects() {
         </div>
       </section>
 
-      {/* ✅ Consistent Nilta description (add near bottom of page) */}
-      <section className="max-w-7xl mx-auto px-6 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 md:p-8 shadow-xl"
-        >
-          <h3 className="text-xl md:text-2xl font-bold">Nilta Flooring Inc.</h3>
-          <p className="text-white/75 mt-3 text-sm md:text-base max-w-3xl">
-            We are a proudly Canadian flooring company, supplying and installing
-            high-quality residential and commercial flooring nationwide, with a
-            focus on thoughtful planning, clean installs, and floors made for
-            everyday life.
-          </p>
-        </motion.div>
-      </section>
+
     </main>
   );
 }
