@@ -21,12 +21,12 @@ import {
 // ✅ Remove the buggy top-level fetch (no auth / runs on import)
 
 const FALLBACK_GALLERY = [
-  "/commercial/1.jpg",
-  "/commercial/2.jpg",
-  "/commercial/3.jpg",
-  "/commercial/4.jpg",
-  "/commercial/5.jpg",
-  "/commercial/6.jpg",
+  "/commercial/1.webp",
+  "/commercial/2.webp",
+  "/commercial/3.webp",
+  "/commercial/4.webp",
+  "/commercial/5.webp",
+  "/commercial/6.webp",
 ];
 
 export default function Commercial() {

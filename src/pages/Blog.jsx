@@ -49,10 +49,8 @@ export default function Blog() {
 
   // --- Always show the newest GUIDE (independent of filters/search)
   const mostRecentGuide = useMemo(() => {
-    const guides = [...POSTS]
-      .filter((p) => (p.category || "").toLowerCase() === "guides")
-      .sort((a, b) => (a.date < b.date ? 1 : -1));
-    return guides[0] || null;
+    const sorted = [...POSTS].sort((a, b) => (a.date < b.date ? 1 : -1));
+    return sorted[0] || null;
   }, []);
 
   // ---- data flow (filters/search control the grid only)
@@ -312,7 +310,7 @@ export default function Blog() {
                 className="h-full w-full object-cover min-h-[260px] lg:min-h-[340px] transition-transform duration-700 hover:scale-105"
               />
               <span className="absolute top-3 left-3 rounded-full bg-black/70 backdrop-blur px-3 py-1 text-xs border border-white/20">
-                Most Recent Guide · {mostRecentCard.category}
+                Most Recent  · {mostRecentCard.category}
               </span>
             </Link>
             <div className="p-6 flex flex-col">

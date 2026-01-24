@@ -108,10 +108,11 @@ export default function Home() {
             </div>
           </motion.div>
         </div>
+        <div className="absolute bottom-0 left-0 right-0 h-32 md:h-48 bg-gradient-to-b from-transparent to-[#0f0f10] pointer-events-none" />
       </section>
 
       {/* ✅ NEW: SHOWROOM / STOREFRONT PREVIEW */}
-      <section className="bg-[#0f0f10] py-14 md:py-20 border-t border-white/10">
+      <section className="bg-[#0f0f10] py-14 md:py-20 ">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div className="max-w-2xl">

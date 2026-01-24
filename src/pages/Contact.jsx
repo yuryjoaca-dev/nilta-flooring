@@ -394,9 +394,7 @@ export default function Contact() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.12 }}
           >
-            We’d love to hear about your project. Share a few details—like the
-            size of the area, your current floors, and your timeline—and we’ll
-            get back to you within one business day with next steps.
+            We’d love to hear about your project—whether you’re updating a cozy room or transforming a whole space. Just share a few details—like the size of your area, your current floors, and your timeline—and we’ll get back to you within one business day to discuss the next steps.
           </motion.p>
 
           <motion.div
@@ -500,6 +498,10 @@ export default function Contact() {
               href={`mailto:${EMAIL}`}
             />
           </div>
+          <p className="mt-4 text-white/70 text-sm">
+            For lightning-fast responses, please reach out directly to our Account Manager / Marketing Coordinator at{" "}
+            <a href="tel:+17806957011" className="underline hover:text-[#F2C4D0]">780-695-7011</a>.
+          </p>
         </div>
       </section>
 
@@ -514,11 +516,10 @@ export default function Contact() {
 
               <div className="flex items-center gap-2">
                 <span
-                  className={`text-xs rounded-full px-2 py-0.5 border ${
-                    isOpen
-                      ? "bg-green-500/20 text-green-300 border-green-500/40"
-                      : "bg-red-500/20 text-red-300 border-red-500/40"
-                  }`}
+                  className={`text-xs rounded-full px-2 py-0.5 border ${isOpen
+                    ? "bg-green-500/20 text-green-300 border-green-500/40"
+                    : "bg-red-500/20 text-red-300 border-red-500/40"
+                    }`}
                 >
                   {statusText}
                 </span>
@@ -543,11 +544,10 @@ export default function Contact() {
                 return (
                   <div
                     key={d.idx}
-                    className={`rounded-xl border p-4 ${
-                      active
-                        ? "border-[#8F2841]/70 bg-[#8F2841]/15"
-                        : "border-white/10 bg-white/[0.02]"
-                    }`}
+                    className={`rounded-xl border p-4 ${active
+                      ? "border-[#8F2841]/70 bg-[#8F2841]/15"
+                      : "border-white/10 bg-white/[0.02]"
+                      }`}
                   >
                     <div className="font-semibold text-sm md:text-base">
                       {d.label}
@@ -662,8 +662,8 @@ export default function Contact() {
             Request a free estimate
           </div>
           <p className="text-white/75 text-sm mt-1">
-            Single room or entire property—share your scope and we’ll send a
-            tailored estimate and timeline.
+            We'd love to hear about your project—whether it's a single room or an entire property. Just let us know a bit about your project, and we'll provide a tailored estimate and timeline.
+
           </p>
 
           <form className="mt-6 grid gap-4" onSubmit={handleSubmit} noValidate>
@@ -864,9 +864,8 @@ function InfoCard({ icon, title, text, badge, badgeColor, href }) {
         </div>
         {badge && (
           <span
-            className={`text-xs rounded-full px-2 py-0.5 border ${
-              badgeColor || "border-white/15 text-white/70 bg-white/5"
-            }`}
+            className={`text-xs rounded-full px-2 py-0.5 border ${badgeColor || "border-white/15 text-white/70 bg-white/5"
+              }`}
           >
             {badge}
           </span>

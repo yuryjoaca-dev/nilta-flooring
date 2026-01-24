@@ -139,6 +139,7 @@ export default function Store() {
 
         const mapped = data.map((p) => {
           const rawImage = p.mainImage || (p.images && p.images[0]) || "";
+          const isOnSale = p.salePrice && p.salePrice < p.price;
           return {
             id: p._id,
             name: p.name,
@@ -146,12 +147,14 @@ export default function Store() {
             description: p.description || "",
             image: normalizeImageUrl(rawImage),
             badge:
-              p.salePrice && p.salePrice < p.price
+              isOnSale
                 ? "On sale"
                 : p.stock === 0
                   ? "Sold out"
                   : undefined,
-            pricePerSqm: p.salePrice || p.price,
+            originalPrice: p.price,
+            salePrice: isOnSale ? p.salePrice : null,
+            pricePerSqm: isOnSale ? p.salePrice : p.price,
             stock: p.stock ?? 0,
           };
         });
@@ -504,11 +507,22 @@ export default function Store() {
                     </p>
 
                     {typeof p.pricePerSqm === "number" && (
-                      <p className="text-[11px] text-white/60 mt-1">
+                      <p className="text-[11px] mt-1">
                         From{" "}
-                        <span className="font-semibold">
-                          ${p.pricePerSqm.toFixed(2)} CAD
-                        </span>{" "}
+                        {p.salePrice ? (
+                          <>
+                            <span className="line-through text-white/50 mr-1">
+                              ${p.originalPrice.toFixed(2)}
+                            </span>
+                            <span className="font-semibold text-red-400">
+                              ${p.salePrice.toFixed(2)} CAD
+                            </span>
+                          </>
+                        ) : (
+                          <span className="font-semibold text-white/60">
+                            ${p.pricePerSqm.toFixed(2)} CAD
+                          </span>
+                        )}{" "}
                         per m²
                       </p>
                     )}
@@ -633,17 +647,7 @@ export default function Store() {
         </aside>
       </section>
 
-      {/* FOOTER INFO BLOCK */}
-      <section className="max-w-7xl mx-auto px-6 pb-14">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-          <div className="text-lg font-semibold">Nilta Flooring Inc.</div>
-          <p className="mt-2 text-sm text-white/75 max-w-3xl leading-relaxed">
-            Edmonton-based flooring company supplying and installing high-quality
-            residential and commercial floors, with a focus on thoughtful product
-            selection, clean installs, and long-term performance.
-          </p>
-        </div>
-      </section>
+
 
       {/* ------------------ QUOTE MODAL ------------------ */}
       <AnimatePresence>
