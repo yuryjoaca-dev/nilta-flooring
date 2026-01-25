@@ -479,7 +479,7 @@ const TEAM = [
       "Timea, our Account Manager and Marketing Coordinator, is the cornerstone of seamless operations. With a sharp focus on scheduling, client communication, and coordination, she ensures every detail is executed with precision. Known for her professional approach and swift, effective coordination, Timea keeps projects on track and clients in the know—every time..",
   },
   {
-    name: "Andrii",
+    name: "Ercan",
     role: "Project Manager",
     focus: "Quality checks, site readiness & finishing",
     photo: "/about/avatar-3.JPEG",
