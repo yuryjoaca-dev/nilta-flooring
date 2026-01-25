@@ -11,9 +11,12 @@ import {
   CreditCard,
   X,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { API_BASE } from "../config/api";
+import { getCloudinaryThumbnail, getCloudinaryDetailImage } from "../utils/cloudinary";
 
 // ❌ Removed: top-level fetch (it runs on import and can throw if backend is down)
 
@@ -25,6 +28,7 @@ const FALLBACK_PRODUCTS = [
     category: "Tile",
     description: "Matte finish tile ideal for kitchens and bathrooms.",
     image: "/store-products/ceramic-floor-tile-light-grey.webp",
+    imageDetail: "/store-products/ceramic-floor-tile-light-grey.webp",
     badge: "Popular",
     pricePerSqm: 3.49,
   },
@@ -34,6 +38,7 @@ const FALLBACK_PRODUCTS = [
     category: "Tile",
     description: "Modern concrete-look tile perfect for open spaces.",
     image: "/store-products/porcelai-tile-concrete-look.webp",
+    imageDetail: "/store-products/porcelai-tile-concrete-look.webp",
     badge: "New",
     pricePerSqm: 4.29,
   },
@@ -43,6 +48,7 @@ const FALLBACK_PRODUCTS = [
     category: "Laminate",
     description: "Warm oak tone with durable click-lock installation.",
     image: "/store-products/oak-laminate-natural.webp",
+    imageDetail: "/store-products/oak-laminate-natural.webp",
     badge: "Best value",
     pricePerSqm: 2.99,
   },
@@ -52,6 +58,7 @@ const FALLBACK_PRODUCTS = [
     category: "Laminate",
     description: "Elegant dark laminate for living rooms and offices.",
     image: "/store-products/walnut-laminate-dark.webp",
+    imageDetail: "/store-products/walnut-laminate-dark.webp",
     pricePerSqm: 3.19,
   },
   {
@@ -60,6 +67,7 @@ const FALLBACK_PRODUCTS = [
     category: "Hardwood",
     description: "Premium engineered hardwood for main living areas.",
     image: "/store-products/engineered-hardwood-smoked-oak.webp",
+    imageDetail: "/store-products/engineered-hardwood-smoked-oak.webp",
     badge: "Premium",
     pricePerSqm: 8.99,
   },
@@ -69,6 +77,7 @@ const FALLBACK_PRODUCTS = [
     category: "Hardwood",
     description: "Timeless natural oak look with a matte finish.",
     image: "/store-products/engineered-hardwood-natural-oak.webp",
+    imageDetail: "/store-products/engineered-hardwood-natural-oak.webp",
     pricePerSqm: 8.48,
   },
 ];
@@ -104,6 +113,11 @@ export default function Store() {
   const [paying, setPaying] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 6;
+
+  // -------- Product detail modal state --------
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   // -------- Quote modal state --------
   const [quoteOpen, setQuoteOpen] = useState(false);
@@ -139,13 +153,15 @@ export default function Store() {
 
         const mapped = data.map((p) => {
           const rawImage = p.mainImage || (p.images && p.images[0]) || "";
+          const normalizedUrl = normalizeImageUrl(rawImage);
           const isOnSale = p.salePrice && p.salePrice < p.price;
           return {
             id: p._id,
             name: p.name,
             category: p.category || "Tile",
             description: p.description || "",
-            image: normalizeImageUrl(rawImage),
+            image: getCloudinaryThumbnail(normalizedUrl),
+            imageDetail: normalizedUrl, // Keep original URL for detail view
             badge:
               isOnSale
                 ? "On sale"
@@ -217,6 +233,17 @@ export default function Store() {
       return matchesCategory && matchesSearch;
     });
   }, [products, categoryFilter, search]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categoryFilter, search]);
 
   const cartItems = products.filter((p) => cart[p.id]);
 
@@ -416,7 +443,7 @@ export default function Store() {
       </section>
 
       {/* CONTENT */}
-      <section className="max-w-7xl mx-auto px-6 py-10 grid lg:grid-cols-[2fr,1fr] gap-8">
+      <section className="max-w-7xl mx-auto px-6 py-10 grid lg:grid-cols-[2fr,1fr] gap-8 relative">
         {/* PRODUCT GRID SIDE */}
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between mb-2">
@@ -466,19 +493,20 @@ export default function Store() {
 
           {/* Product grid */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.length === 0 ? (
+            {paginatedProducts.length === 0 ? (
               <p className="text-sm text-white/70 col-span-full">
                 No products found for this filter.
               </p>
             ) : (
-              filteredProducts.map((p, idx) => (
+              paginatedProducts.map((p, idx) => (
                 <motion.article
                   key={p.id}
                   initial={{ opacity: 0, y: 12 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.05 }}
-                  className="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden shadow-xl flex flex-col"
+                  className="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden shadow-xl flex flex-col cursor-pointer hover:border-white/20 transition-colors"
+                  onClick={() => setSelectedProduct(p)}
                 >
                   <div className="relative h-40">
                     <img
@@ -502,10 +530,6 @@ export default function Store() {
                       {p.name}
                     </div>
 
-                    <p className="text-xs md:text-sm text-white/70">
-                      {p.description}
-                    </p>
-
                     {typeof p.pricePerSqm === "number" && (
                       <p className="text-[11px] mt-1">
                         From{" "}
@@ -528,107 +552,177 @@ export default function Store() {
                     )}
 
                     <div className="mt-auto pt-2 flex items-center justify-between">
-                      {cart[p.id] ? (
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => removeFromCart(p.id)}
-                            className="h-7 w-7 inline-flex items-center justify-center rounded-full border border-white/20 text-xs"
-                          >
-                            <Minus className="h-3 w-3" />
-                          </button>
-                          <span className="text-sm">{cart[p.id]}</span>
-                          <button
-                            onClick={() => addToCart(p.id)}
-                            className="h-7 w-7 inline-flex items-center justify-center rounded-full border border-white/20 text-xs"
-                          >
-                            <Plus className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => addToCart(p.id)}
-                          className="text-xs md:text-sm rounded-full border border-red-500/80 px-3 py-1.5 font-semibold hover:bg-red-600/80 hover:border-red-600 transition"
-                        >
-                          Add to cart
-                        </button>
-                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCart(p.id);
+                        }}
+                        className="relative text-xs md:text-sm rounded-full border border-red-500/80 px-3 py-1.5 font-semibold hover:bg-red-600/80 hover:border-red-600 transition"
+                      >
+                        Add to cart
+                        {cart[p.id] && (
+                          <span className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-red-600 border-2 border-neutral-950 flex items-center justify-center text-[10px] font-bold">
+                            {cart[p.id]}
+                          </span>
+                        )}
+                      </button>
                     </div>
                   </div>
                 </motion.article>
               ))
             )}
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="h-10 w-10 inline-flex items-center justify-center rounded-full border border-white/20 hover:bg-white/5 transition disabled:opacity-40 disabled:pointer-events-none"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`h-10 w-10 inline-flex items-center justify-center rounded-full text-sm font-semibold transition ${
+                      currentPage === page
+                        ? "bg-red-600 text-white"
+                        : "border border-white/20 hover:bg-white/5"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="h-10 w-10 inline-flex items-center justify-center rounded-full border border-white/20 hover:bg-white/5 transition disabled:opacity-40 disabled:pointer-events-none"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* CART SIDEBAR */}
-        <aside className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-xl flex flex-col gap-3">
-          <div className="flex items-center justify-between">
+        <aside className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.05] to-white/[0.02] backdrop-blur-sm p-6 shadow-2xl flex flex-col gap-5 self-start mt-16">
+          <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="font-semibold text-lg">Your Cart</div>
-              <p className="text-xs text-white/65 mt-0.5">
-                You can request a quote or complete payment online for Canadian
-                orders.
+              <div className="flex items-center gap-2 mb-1">
+                <ShoppingCart className="h-5 w-5 text-red-400" />
+                <div className="font-bold text-xl">Your Cart</div>
+              </div>
+              <p className="text-xs text-white/60 leading-relaxed">
+                Request a quote or complete payment for Canadian orders
               </p>
             </div>
-            <span className="text-xs rounded-full border border-white/15 px-2 py-0.5 text-white/70">
-              {cartItems.length} items
+            <span className="text-xs rounded-full bg-red-600/20 border border-red-500/40 px-2.5 py-1 text-red-300 font-semibold">
+              {cartItems.length}
             </span>
           </div>
 
           {cartItems.length === 0 ? (
-            <p className="text-sm text-white/70">
-              Your cart is currently empty. Add a few products to get started, or
-              send us a quote request.
-            </p>
+            <div className="py-8 text-center">
+              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-white/[0.03] border border-white/10 mb-3">
+                <ShoppingCart className="h-7 w-7 text-white/40" />
+              </div>
+              <p className="text-sm text-white/60 leading-relaxed">
+                Your cart is empty. Add products to get started!
+              </p>
+            </div>
           ) : (
             <>
-              <div className="space-y-2 text-sm max-h-64 overflow-y-auto pr-1">
+              <div className="space-y-3 max-h-80 overflow-y-auto pr-2 -mr-2">
                 {cartItems.map((p) => (
                   <div
                     key={p.id}
-                    className="flex items-center justify-between gap-2 border-b border-white/10 pb-1"
+                    className="group rounded-xl border border-white/10 bg-white/[0.02] p-3 hover:border-white/20 hover:bg-white/[0.04] transition-all"
                   >
-                    <div>
-                      <div className="font-semibold text-xs md:text-sm">
-                        {p.name}
+                    <div className="flex gap-3">
+                      {/* Product Image */}
+                      <div className="flex-shrink-0 h-16 w-16 rounded-lg overflow-hidden border border-white/10">
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          className="h-full w-full object-cover"
+                        />
                       </div>
-                      <div className="text-[11px] text-white/60">{p.category}</div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => removeFromCart(p.id)}
-                        className="h-6 w-6 inline-flex items-center justify-center rounded-full border border-white/20 text-xs"
-                      >
-                        <Minus className="h-3 w-3" />
-                      </button>
-                      <span>{cart[p.id]}</span>
-                      <button
-                        onClick={() => addToCart(p.id)}
-                        className="h-6 w-6 inline-flex items-center justify-center rounded-full border border-white/20 text-xs"
-                      >
-                        <Plus className="h-3 w-3" />
-                      </button>
+
+                      {/* Product Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm truncate mb-0.5">
+                          {p.name}
+                        </div>
+                        <div className="text-[11px] text-white/50 mb-2">
+                          {p.category}
+                        </div>
+
+                        {/* Quantity Controls */}
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => removeFromCart(p.id)}
+                            className="h-7 w-7 inline-flex items-center justify-center rounded-full border border-white/20 hover:border-red-500/60 hover:bg-red-600/20 transition"
+                          >
+                            <Minus className="h-3 w-3" />
+                          </button>
+                          <span className="min-w-[2rem] text-center text-sm font-semibold">
+                            {cart[p.id]}
+                          </span>
+                          <button
+                            onClick={() => addToCart(p.id)}
+                            className="h-7 w-7 inline-flex items-center justify-center rounded-full border border-white/20 hover:border-red-500/60 hover:bg-red-600/20 transition"
+                          >
+                            <Plus className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Price */}
+                      <div className="flex-shrink-0 text-right">
+                        <div className="text-sm font-semibold text-white/90">
+                          ${(cart[p.id] * p.pricePerSqm).toFixed(2)}
+                        </div>
+                        <div className="text-[10px] text-white/50">
+                          {cart[p.id]} × ${p.pricePerSqm.toFixed(2)}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
 
+              {/* Total Section */}
+              <div className="rounded-xl border border-white/15 bg-white/[0.03] p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-white/70">Subtotal</span>
+                  <span className="text-lg font-bold text-white">
+                    ${totals.total.toFixed(2)} <span className="text-xs text-white/60">CAD</span>
+                  </span>
+                </div>
+              </div>
+
               <button
                 onClick={clearCart}
-                className="self-end text-[11px] text-white/60 underline mt-1"
+                className="self-center text-xs text-white/50 hover:text-red-400 underline transition"
               >
                 Clear cart
               </button>
             </>
           )}
 
-
-
-          <div className="mt-3 flex flex-col gap-2">
+          {/* Action Buttons */}
+          <div className="pt-2 border-t border-white/10 flex flex-col gap-3">
             <button
               onClick={openQuoteModal}
               disabled={sendingQuote || cartItems.length === 0}
-              className="group inline-flex items-center justify-center rounded-full border border-red-500/80 px-5 py-2 font-semibold text-sm text-white/90 hover:bg-red-600/90 hover:border-red-600 transition disabled:opacity-60 disabled:pointer-events-none"
+              className="group w-full inline-flex items-center justify-center rounded-full bg-gradient-to-r from-red-600 to-red-500 px-5 py-3 font-bold text-sm text-white shadow-lg shadow-red-600/30 hover:shadow-red-600/50 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:pointer-events-none disabled:scale-100"
             >
               Send quote request
               <ArrowRight
@@ -637,13 +731,13 @@ export default function Store() {
               />
             </button>
 
-
+            <Link
+              to="/contact"
+              className="text-center text-xs text-white/60 hover:text-white/90 transition"
+            >
+              Need help? Contact us for custom projects
+            </Link>
           </div>
-
-          <Link to="/contact" className="text-xs text-white/70 underline mt-2">
-            Or reach out directly if you’re planning a custom project or need
-            guidance.
-          </Link>
         </aside>
       </section>
 
@@ -845,6 +939,162 @@ export default function Store() {
                       className="flex-1 inline-flex items-center justify-center rounded-full border border-white/20 px-5 py-2 font-semibold text-sm text-white/85 hover:bg-white/5 transition disabled:opacity-60"
                     >
                       {quoteSuccess ? "Close" : "Cancel"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ------------------ PRODUCT DETAIL MODAL ------------------ */}
+      <AnimatePresence>
+        {selectedProduct && (
+          <motion.div
+            className="fixed inset-0 z-[300] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedProduct(null)}
+          >
+            <motion.div
+              className="w-full max-w-4xl rounded-2xl border border-white/10 bg-neutral-950 shadow-2xl overflow-hidden"
+              initial={{ opacity: 0, y: 16, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+                <div>
+                  <div className="text-lg font-semibold">Product Details</div>
+                  <div className="text-xs text-white/60">
+                    View specifications and add to cart
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedProduct(null)}
+                  className="h-9 w-9 inline-flex items-center justify-center rounded-full border border-white/15 hover:bg-white/5 transition"
+                  aria-label="Close"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="p-6 grid md:grid-cols-2 gap-6">
+                {/* Image Side */}
+                <div className="space-y-4">
+                  <div className="relative aspect-square rounded-xl overflow-hidden border border-white/10">
+                    <img
+                      src={getCloudinaryDetailImage(selectedProduct.imageDetail || selectedProduct.image)}
+                      alt={selectedProduct.name}
+                      className="h-full w-full object-cover"
+                    />
+                    {selectedProduct.badge && (
+                      <span className="absolute top-3 left-3 rounded-full bg-red-600/90 text-xs px-3 py-1 font-semibold">
+                        {selectedProduct.badge}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Details Side */}
+                <div className="space-y-4">
+                  <div>
+                    <div className="text-xs uppercase tracking-wide text-white/60 mb-2">
+                      {selectedProduct.category}
+                    </div>
+                    <h3 className="text-2xl font-bold mb-3">
+                      {selectedProduct.name}
+                    </h3>
+                    <p className="text-sm text-white/70 leading-relaxed">
+                      {selectedProduct.description}
+                    </p>
+                  </div>
+
+                  {/* Specifications */}
+                  <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-3">
+                    <div className="text-sm font-semibold mb-2">Specifications</div>
+
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <div className="text-xs text-white/50">Category</div>
+                        <div className="text-white/90">{selectedProduct.category}</div>
+                      </div>
+
+                      <div>
+                        <div className="text-xs text-white/50">Stock Status</div>
+                        <div className="text-white/90">
+                          {selectedProduct.stock > 0 ? `${selectedProduct.stock} in stock` : 'Sold out'}
+                        </div>
+                      </div>
+
+                      {selectedProduct.originalPrice && (
+                        <>
+                          <div>
+                            <div className="text-xs text-white/50">Price per m²</div>
+                            <div className="text-white/90">
+                              {selectedProduct.salePrice ? (
+                                <>
+                                  <span className="line-through text-white/50 text-xs mr-2">
+                                    ${selectedProduct.originalPrice.toFixed(2)}
+                                  </span>
+                                  <span className="text-red-400 font-semibold">
+                                    ${selectedProduct.salePrice.toFixed(2)} CAD
+                                  </span>
+                                </>
+                              ) : (
+                                <span className="font-semibold">
+                                  ${selectedProduct.pricePerSqm.toFixed(2)} CAD
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Cart Actions */}
+                  <div className="pt-4 space-y-3">
+                    {cart[selectedProduct.id] ? (
+                      <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/[0.02]">
+                        <span className="text-sm text-white/70">In cart:</span>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => removeFromCart(selectedProduct.id)}
+                            className="h-8 w-8 inline-flex items-center justify-center rounded-full border border-white/20 text-sm hover:bg-white/5 transition"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </button>
+                          <span className="text-lg font-semibold min-w-[2rem] text-center">
+                            {cart[selectedProduct.id]}
+                          </span>
+                          <button
+                            onClick={() => addToCart(selectedProduct.id)}
+                            className="h-8 w-8 inline-flex items-center justify-center rounded-full border border-white/20 text-sm hover:bg-white/5 transition"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => addToCart(selectedProduct.id)}
+                        className="w-full rounded-full border border-red-500/80 bg-red-600/10 px-5 py-3 font-semibold text-sm hover:bg-red-600/80 hover:border-red-600 transition flex items-center justify-center gap-2"
+                      >
+                        <ShoppingCart className="h-4 w-4" />
+                        Add to cart
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => setSelectedProduct(null)}
+                      className="w-full rounded-full border border-white/20 px-5 py-2 font-medium text-sm text-white/85 hover:bg-white/5 transition"
+                    >
+                      Continue shopping
                     </button>
                   </div>
                 </div>

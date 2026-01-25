@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import Breadcrumbs from "../components/Breadcrumbs.jsx";
 import BreadcrumbLD from "../components/BreadcrumbLD.jsx";
 import { API_BASE } from "../config/api";
+import { getCloudinaryThumbnail } from "../utils/cloudinary";
 import {
   Store,
   Building2,
@@ -51,8 +52,8 @@ export default function Commercial() {
 
         const data = await res.json();
 
-        // ✅ Cloudinary returns full URLs already -> use img.url directly
-        const urls = Array.isArray(data) ? data.map((img) => img.url) : [];
+        // ✅ Cloudinary returns full URLs already -> use img.url directly with optimization
+        const urls = Array.isArray(data) ? data.map((img) => getCloudinaryThumbnail(img.url)) : [];
         setGalleryImages(urls);
       } catch (err) {
         console.error("Failed to load commercial gallery", err);

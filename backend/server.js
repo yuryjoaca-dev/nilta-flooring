@@ -245,7 +245,7 @@ const galleryImageSchema = new mongoose.Schema(
         "Kitchen Flooring",
         "Bathroom Tile & LVP",
         "Stairs & Transitions",
-        "Basement Flooring", // REMOVE this line if you don’t want basement
+        "Basement Flooring", // REMOVE this line if you don't want basement
         "Commercial",
       ],
 

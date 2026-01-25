@@ -14,6 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { API_BASE } from "../config/api";
+import { getCloudinaryThumbnail } from "../utils/cloudinary";
 
 // ✅ Fix: define SITE_URL (Vite env first, fallback to current origin)
 const SITE_URL = import.meta.env.VITE_SITE_URL || window.location.origin;
@@ -140,7 +141,7 @@ export default function Residential() {
             );
             if (!res.ok) return [cat, []];
             const data = await res.json();
-            const urls = Array.isArray(data) ? data.map((img) => img.url) : [];
+            const urls = Array.isArray(data) ? data.map((img) => getCloudinaryThumbnail(img.url)) : [];
             return [cat, urls];
           })
         );

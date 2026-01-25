@@ -2,9 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import { API_BASE } from "../../config/api"; // ajustezi path-ul
 
-fetch(`${API_BASE}/api/admin/inventory`)
-
-
 function getToken() {
   return localStorage.getItem("adminToken");
 }
