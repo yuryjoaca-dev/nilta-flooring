@@ -466,7 +466,7 @@ const TEAM = [
     name: "Ahmet",
     role: "Founder",
     focus: "20+ years of flooring expertise",
-    photo: "/about/avatar-2.JPEG",
+    photo: "/about/avatar-1.JPEG",
     blurb:
       "With over 20 years of flooring experience, Ahmed founded Nilta on a foundation of true craftsmanship and care. He’s dedicated to thorough preparation, thoughtful planning, and flawless finishes that stand the test of time. His professionalism defines our core values.",
   },
@@ -474,7 +474,7 @@ const TEAM = [
     name: "Timea",
     role: "Account Manager & Marketing Coordinator ",
     focus: "Scheduling, coordination & client updates",
-    photo: "/about/avatar-1.JPEG",
+    photo: "/about/avatar-2.JPEG",
     blurb:
       "Timea, our Account Manager and Marketing Coordinator, is the cornerstone of seamless operations. With a sharp focus on scheduling, client communication, and coordination, she ensures every detail is executed with precision. Known for her professional approach and swift, effective coordination, Timea keeps projects on track and clients in the know—every time..",
   },

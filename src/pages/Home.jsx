@@ -11,12 +11,12 @@ const COMPANY = "Nilta Flooring";
  * Put your storefront + interior photos here.
  */
 const STOREFRONT_GALLERY = [
-  { src: "/home/storefront/exterior-1.webp", label: "Showroom exterior" },
-  { src: "/home/storefront/interior-1.webp", label: "Showroom interior" },
-  { src: "/home/storefront/interior-2.webp", label: "Sample wall & displays" },
-  { src: "/home/storefront/exterior-2.webp", label: "Storefront signage" },
-  { src: "/home/storefront/interior-3.webp", label: "Flooring displays" },
-  { src: "/home/storefront/interior-4.webp", label: "Consultation area" },
+  { src: "/home/storefront/exterior-1.jpg", label: "NILTA Flooring storefront" },
+  { src: "/home/storefront/interior-1.jpg", label: "Flooring showroom interior" },
+  { src: "/home/storefront/interior-2.jpg", label: "Hardwood & laminate displays" },
+  { src: "/home/storefront/interior-3.jpg", label: "Flooring sample displays" },
+  { src: "/home/storefront/interior-4.jpg", label: "Tile and flooring displays" },
+  { src: "/home/storefront/interior-5.jpg", label: "Tile & stone showroom" },
 ];
 
 export default function Home() {
@@ -46,7 +46,7 @@ export default function Home() {
             transition={{ duration: 0.7 }}
           >
             <p className="uppercase tracking-[0.3em] text-sm text-gray-300 mb-4">
-              Premium Flooring • Alberta
+              High-End Flooring • Alberta
             </p>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4">
               Floors that <span className="text-[#F3E9EC]">transform</span> your
@@ -146,7 +146,7 @@ export default function Home() {
           </div>
 
           {/* Gallery grid */}
-          <div className="mt-10 grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="mt-10 grid grid-cols-2 md:grid-cols-3 gap-4 auto-rows-[180px] md:auto-rows-[210px]">
             {STOREFRONT_GALLERY.map((img, i) => (
               <button
                 key={img.src}
@@ -157,7 +157,7 @@ export default function Home() {
                 <img
                   src={img.src}
                   alt={img.label}
-                  className="w-full h-44 md:h-52 object-cover group-hover:scale-105 transition-transform duration-700"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-90" />
