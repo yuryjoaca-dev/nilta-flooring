@@ -70,7 +70,7 @@ export default function BlogPost() {
             to="/blog"
             className="inline-block mt-6 rounded-full border border-white/15 bg-white/[0.03] px-5 py-2 hover:bg-white/10 transition"
           >
-            Back to Guide & Tips
+            Back to Guides & Tips
           </Link>
         </div>
       </main>
@@ -97,7 +97,7 @@ export default function BlogPost() {
       style={{ fontFamily: "var(--blog-sans)" }}
     >
       <Helmet>
-        <title>{post.title} | Nilta Flooring • Guide & Tips</title>
+        <title>{post.title} | Nilta Flooring • Guides & Tips</title>
         <meta name="description" content={post.excerpt} />
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={post.title} />
@@ -161,7 +161,7 @@ export default function BlogPost() {
                   to="/blog"
                   className="inline-flex items-center rounded-full border border-white/15 bg-white/[0.03] px-5 py-2 text-sm font-semibold hover:bg-white/10 transition"
                 >
-                  ← Back to Guide & Tips
+                  ← Back to Guides & Tips
                 </Link>
                 <Link
                   to="/contact"
@@ -347,7 +347,7 @@ function ArticleContent({ post, structured, hasBody, hasContent }) {
               to="/blog"
               className="rounded-full border border-white/15 bg-white/[0.03] px-5 py-2 hover:bg-white/10 transition no-underline"
             >
-              ← Back to Guide & Tips
+              ← Back to Guides & Tips
             </Link>
             <Link
               to="/contact"

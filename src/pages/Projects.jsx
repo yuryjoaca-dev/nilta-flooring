@@ -275,7 +275,7 @@ export default function Projects() {
 
             {/* ✅ Updated list per request */}
             <div className="mt-4 grid sm:grid-cols-2 gap-3 text-white/80">
-              <Li icon={<Store />} text="Retail rollouts, refills, and tenant turnovers." />
+              <Li icon={<Store />} text="Retail rollouts, retrofits, and tenant turnovers." />
               <Li icon={<Landmark />} text="Mall corridors, common areas, and lobbies." />
               <Li icon={<Factory />} text="Industrial and offices." />
               <Li icon={<Hotel />} text="Hospitality public spaces, lounges, and corridors." />
@@ -321,7 +321,7 @@ export default function Projects() {
             className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]"
           >
             <img
-              src="/projects/comercial.jpg"
+              src="/projects/commercial.jpg"
               alt="Commercial flooring montage"
               className="h-96 w-full object-cover transition-transform duration-700 hover:scale-105"
             />

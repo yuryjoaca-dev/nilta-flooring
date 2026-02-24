@@ -75,7 +75,7 @@ Ready to step into the future of design? Contact Nilta Flooring today to create 
     title: "Create Your Dream Basement with Nilta Flooring",
     excerpt:
       "Transforming a basement into a compliant suite or cozy retreat starts with moisture prep, smart material choices, and clear Edmonton planning.",
-    image: "/blog/basement-development-legal-suits-in-edminton.webp",
+    image: "/blog/basement-development-legal-suites-in-edmonton.webp",
     date: "2026-01-14",
     category: "Guides",
     readTime: 6,
@@ -177,7 +177,7 @@ Choosing professional waterproofing today means you won't have to worry about "h
     title: "How Much Does Flooring Cost in Edmonton? (2026 Guide)",
     slug: "flooring-cost-edmonton-2026-guide",
     date: "2025-12-28",
-    author: "Vladimir",
+    author: "Nilta Flooring Team",
     category: "Guides",
     readTime: 10,
     image: "/blog/how-much-does-flooring-cost-in-edmonton.jpg",

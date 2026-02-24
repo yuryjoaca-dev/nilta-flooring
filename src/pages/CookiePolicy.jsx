@@ -17,7 +17,7 @@ export default function CookiePolicy() {
         <h1 className="text-3xl md:text-4xl font-bold mb-6">Cookie Policy</h1>
 
         <p className="text-sm text-white/60 mb-8">
-          Last updated: {new Date().toLocaleDateString()}
+          Last updated: February 24, 2026
         </p>
 
         <div className="space-y-6 text-sm md:text-base text-white/80 leading-relaxed">
@@ -105,10 +105,10 @@ export default function CookiePolicy() {
             If you have any questions or concerns about this Cookie Policy or how
             we use cookies, please contact us at{" "}
             <a
-              href="mailto:privacy@niltflooring.com"
+              href="mailto:info@nilta.ca"
               className="text-red-400 underline hover:text-red-300"
             >
-              privacy@niltflooring.com
+              info@nilta.ca
             </a>
             .
           </p>

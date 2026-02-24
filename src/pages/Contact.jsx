@@ -481,7 +481,7 @@ export default function Contact() {
             />
             <InfoCard
               icon={<Phone className="h-5 w-5" />}
-              title="Phone"
+              title="Cell"
               text={PHONE_MAIN}
               href={telMain}
             />
@@ -646,10 +646,10 @@ export default function Contact() {
                 <ArrowRight className="ml-2 h-4 w-4 opacity-0 -translate-x-3 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-x-0" />
               </Link>
               <Link
-                to="/guide"
+                to="/blog"
                 className="group inline-flex items-center rounded-full border border-white/15 px-5 py-2 font-semibold text-white/90 transition hover:border-[#8F2841] hover:bg-[#8F2841]/10 hover:text-[#F2C4D0]"
               >
-                <span className="relative">Guide & tips</span>
+                <span className="relative">Guides & Tips</span>
                 <ArrowRight className="ml-2 h-4 w-4 opacity-0 -translate-x-3 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-x-0" />
               </Link>
             </div>

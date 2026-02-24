@@ -104,7 +104,7 @@ export default function Commercial() {
           name="description"
           content="Commercial flooring supply and installation for retail, office, hospitality and light industrial spaces—planned around schedules, tenants and code."
         />
-        <link rel="canonical" href="https://example.com/commercial" />
+        <link rel="canonical" href="https://nilta.ca/commercial" />
         <meta property="og:title" content="Commercial Flooring – Nilta" />
         <meta
           property="og:description"
@@ -191,8 +191,8 @@ export default function Commercial() {
 
       <BreadcrumbLD
         items={[
-          { label: "Home", url: "https://example.com/" },
-          { label: "Commercial", url: "https://example.com/commercial" },
+          { label: "Home", url: "https://nilta.ca/" },
+          { label: "Commercial", url: "https://nilta.ca/commercial" },
         ]}
       />
 
@@ -210,7 +210,7 @@ export default function Commercial() {
 
           <p className="text-white/80 mt-3 text-sm md:text-base max-w-2xl">
             We simply want to show how thoughtful planning and a friendly,
-            well-executed approach makes a difference in busy spaces.
+            well-executed approach make a difference in busy spaces.
           </p>
 
           <p className="text-white/80 mt-3 text-sm md:text-base max-w-2xl">
@@ -390,9 +390,9 @@ export default function Commercial() {
         >
           <h3 className="text-xl md:text-2xl font-bold">Nilta Flooring Inc.</h3>
           <p className="text-white/75 mt-3 text-sm md:text-base max-w-3xl">
-            Our flooring company, supplying and installing residential and
-            commercial flooring nationwide, with a practical, detail-driven
-            approach to planning, installation, and lasting performance.
+            Nilta Flooring supplies and installs residential and commercial
+            flooring nationwide, with a practical, detail-driven approach to
+            planning, installation, and lasting performance.
           </p>
         </motion.div>
       </section>

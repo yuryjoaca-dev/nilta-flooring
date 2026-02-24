@@ -1,17 +1,16 @@
 import React from "react";
-import { Facebook, Instagram, Twitter, Hammer } from "lucide-react";
+import { Instagram, Hammer } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const NAV = [
   { label: "Projects", href: "/projects" },
   { label: "Residential", href: "/residential" },
-  { label: "Guide & Tips", href: "/blog" },
+  { label: "Guides & Tips", href: "/blog" },
   { label: "About Us", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];
 
 export default function Footer() {
-  const address = "12345 Jasper Ave, Edmonton, AB T5M 2S2";
   const mapsUrl =
     "https://www.google.com/maps/place/Nilta+Flooring/@53.5586217,-113.6048908,42m/data=!3m1!1e3!4m6!3m5!1s0x53a0213143d4e409:0x15831b4db9b30384!8m2!3d53.5582498!4d-113.6045098!16s%2Fg%2F11lkczv91l?entry=ttu";
 
@@ -60,7 +59,7 @@ export default function Footer() {
               rel="noopener noreferrer"
               className="block hover:text-red-400 transition"
             >
-              <div>116307 111 Ave NW,</div>
+              <div>16307 111 Ave NW,</div>
               <div>Edmonton, AB</div>
               <div>T5M 2S2</div>
             </a>
@@ -99,16 +98,6 @@ export default function Footer() {
           {/* SOCIAL */}
           <div className="mt-4 flex items-center gap-4">
             <a
-              aria-label="Facebook"
-              href="https://www.facebook.com/YOUR_PAGE"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-lg hover:bg-white/5 transition"
-            >
-              <Facebook />
-            </a>
-
-            <a
               aria-label="Instagram"
               href="https://www.instagram.com/niltaflooring/"
               target="_blank"
@@ -116,16 +105,6 @@ export default function Footer() {
               className="p-2 rounded-lg hover:bg-white/5 transition"
             >
               <Instagram />
-            </a>
-
-            <a
-              aria-label="X (Twitter)"
-              href="https://x.com/YOUR_HANDLE"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-lg hover:bg-white/5 transition"
-            >
-              <Twitter />
             </a>
           </div>
 

@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 
 export default function TermsAndConditions() {
   return (
-    <main className="pt-16 min-h-screen bg-grey-650 text-white">
+    <main className="pt-16 min-h-screen bg-neutral-950 text-white">
       <Helmet>
         <title>Terms & Conditions | Nilta Flooring</title>
         <meta
@@ -18,7 +18,7 @@ export default function TermsAndConditions() {
           Terms &amp; Conditions
         </h1>
         <p className="text-sm text-white/60 mb-8">
-          Last updated: {new Date().toLocaleDateString()}
+          Last updated: February 24, 2026
         </p>
 
         <div className="space-y-6 text-sm md:text-base text-white/80 leading-relaxed">
@@ -110,9 +110,9 @@ export default function TermsAndConditions() {
 
           <h2 className="text-xl font-semibold mt-6">9. Governing Law</h2>
           <p>
-            These Terms are governed by the laws of the Province of Ontario and
+            These Terms are governed by the laws of the Province of Alberta and
             the laws of Canada applicable therein. Any disputes shall be subject
-            to the exclusive jurisdiction of the courts of Ontario.
+            to the exclusive jurisdiction of the courts of Alberta.
           </p>
 
           <h2 className="text-xl font-semibold mt-6">10. Contact</h2>
@@ -120,10 +120,10 @@ export default function TermsAndConditions() {
             If you have any questions regarding these Terms &amp; Conditions,
             please contact us at{" "}
             <a
-              href="mailto:support@niltflooring.com"
+              href="mailto:info@nilta.ca"
               className="text-red-400 underline hover:text-red-300"
             >
-              support@niltflooring.com
+              info@nilta.ca
             </a>
             .
           </p>

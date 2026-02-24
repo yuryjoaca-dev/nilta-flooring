@@ -6,10 +6,6 @@ import ImageSlider from "../components/ImageSlider";
 
 const COMPANY = "Nilta Flooring";
 
-/**
- * ✅ Update these paths to match your actual images.
- * Put your storefront + interior photos here.
- */
 const STOREFRONT_GALLERY = [
   { src: "/home/storefront/exterior-1.jpg", label: "NILTA Flooring storefront" },
   { src: "/home/storefront/interior-1.jpg", label: "Flooring showroom interior" },
@@ -374,8 +370,8 @@ export default function Home() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="classname mt-4 md:mt-o relative md:absolute md:-bottom-20 md:-right-2 md:left-0 bg-[#8F2841] text-white px-4 py-3 rounded-2xl shadow-lg text-sm">
-                <div className="font-semibold">Over 100+ floors installed</div>
+              <div className="mt-4 md:mt-0 relative md:absolute md:-bottom-20 md:-right-2 md:left-0 bg-[#8F2841] text-white px-4 py-3 rounded-2xl shadow-lg text-sm">
+                <div className="font-semibold">100+ floors installed</div>
                 <div className="text-xs text-pink-100">
                   Residential &amp; light commercial projects completed.
                 </div>

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
 const NAV = [
-  { label: "Home Page", href: "/" },
+  { label: "Home", href: "/" },
   { label: "Projects", href: "/projects" },
   { label: "Residential", href: "/residential" },
   { label: "Commercial", href: "/commercial" },

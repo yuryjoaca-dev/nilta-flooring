@@ -18,7 +18,7 @@ export default function RefundPolicy() {
           Refund &amp; Returns Policy
         </h1>
         <p className="text-sm text-white/60 mb-8">
-          Last updated: {new Date().toLocaleDateString()}
+          Last updated: February 24, 2026
         </p>
 
         <div className="space-y-6 text-sm md:text-base text-white/80 leading-relaxed">
@@ -95,18 +95,13 @@ export default function RefundPolicy() {
           <p>
             Email:{" "}
             <a
-              href="mailto:support@niltflooring.com"
+              href="mailto:info@nilta.ca"
               className="text-red-400 underline hover:text-red-300"
             >
-              support@niltflooring.com
+              info@nilta.ca
             </a>
           </p>
 
-          <p className="text-xs text-white/50 mt-6">
-            This policy is intended as a general guide and may be adapted to
-            specific projects or written agreements. For large commercial or
-            custom work, additional terms may apply.
-          </p>
         </div>
       </section>
     </main>

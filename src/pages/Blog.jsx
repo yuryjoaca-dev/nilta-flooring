@@ -16,7 +16,7 @@ export default function Blog() {
   const PER_PAGE = 6;
 
   // --- SEO / URLs ---
-  const SITE_URL = "https://nilta.ca/"; // TODO: replace with real domain
+  const SITE_URL = "https://nilta.ca/";
   const pageUrl = `${SITE_URL}/blog`;
 
   const blogLd = {
@@ -79,13 +79,13 @@ export default function Blog() {
     <main className="pt-16 min-h-screen bg-neutral-950 text-white">
       {/* SEO META */}
       <Helmet>
-        <title>Guide & Tips | Nilta Flooring – Insights & Practical Guides</title>
+        <title>Guides & Tips | Nilta Flooring – Insights & Practical Guides</title>
         <meta
           name="description"
           content="Flooring insights and practical guidance, shaped by hands-on experience across Alberta residential and commercial projects."
         />
         <link rel="canonical" href={pageUrl} />
-        <meta property="og:title" content="Nilta Flooring • Guide & Tips" />
+        <meta property="og:title" content="Nilta Flooring • Guides & Tips" />
         <meta
           property="og:description"
           content="Practical guides on flooring choices, prep, timelines, and care—built from real experience in Edmonton and across Alberta."
@@ -120,7 +120,7 @@ export default function Blog() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            Nilta Flooring • Guide & Tips
+            Nilta Flooring • Guides & Tips
           </motion.p>
           <motion.h1
             className="text-4xl md:text-6xl font-extrabold"
@@ -185,10 +185,7 @@ export default function Blog() {
               now, and you can always return as new questions come up. And
               remember, if you’d rather chat directly, just give us a call.
               We’re more than happy to answer any questions and guide you
-              through the first steps of your project.Flooring insights
-              and practical guidance shaped by hands-on experience across
-              Alberta residential and commercial projects.
-
+              through the first steps of your project.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
@@ -310,7 +307,7 @@ export default function Blog() {
                 className="h-full w-full object-cover min-h-[260px] lg:min-h-[340px] transition-transform duration-700 hover:scale-105"
               />
               <span className="absolute top-3 left-3 rounded-full bg-black/70 backdrop-blur px-3 py-1 text-xs border border-white/20">
-                Most Recent  · {mostRecentCard.category}
+                Most Recent · {mostRecentCard.category}
               </span>
             </Link>
             <div className="p-6 flex flex-col">

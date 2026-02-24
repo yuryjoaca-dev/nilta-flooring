@@ -2,7 +2,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import mongoose from "mongoose";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -67,24 +67,8 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err.message));
 
-// --- Email helper (cached transporter) ---
-let _transporter = null;
-
-function getTransporter() {
-  if (_transporter) return _transporter;
-
-  _transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_SECURE === "true",
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
-
-  return _transporter;
-}
+// --- Resend email client ---
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Escape user input for safe HTML emails
 function escapeHtml(str = "") {
@@ -717,8 +701,6 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
       console.error("Failed to upsert customer from /api/contact:", err.message);
     }
 
-    const transporter = getTransporter();
-
     const safeName = escapeHtml(name);
     const safeEmail = escapeHtml(email);
     const safePhone = escapeHtml(phone || "-");
@@ -736,11 +718,11 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
       <p><b>Message:</b><br/>${safeMessage}</p>
     `;
 
-    await transporter.sendMail({
-      from: `"Nilta Flooring Website" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+    await resend.emails.send({
+      from: "Nilta Flooring Website <info@nilta.ca>",
       to: process.env.CONTACT_TO,
       subject: `New website quote request from ${safeName}`,
-      replyTo: email,
+      reply_to: email,
       html: adminHtml,
     });
 
@@ -760,8 +742,8 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
       <p>Kind regards,<br/>Nilta Flooring</p>
     `;
 
-    await transporter.sendMail({
-      from: `"Nilta Flooring" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+    await resend.emails.send({
+      from: "Nilta Flooring <info@nilta.ca>",
       to: email,
       subject: "We have received your quote request – Nilta Flooring",
       html: customerHtml,
@@ -851,8 +833,6 @@ app.post("/api/order", async (req, res) => {
     });
 
     // Email
-    const transporter = getTransporter();
-
     const itemsRowsHtml = items
       .map((item, index) => {
         const unit =
@@ -913,11 +893,11 @@ app.post("/api/order", async (req, res) => {
       </p>
     `;
 
-    await transporter.sendMail({
-      from: `"Nilta Flooring Store" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+    await resend.emails.send({
+      from: "Nilta Flooring Store <info@nilta.ca>",
       to: process.env.CONTACT_TO,
       subject: `New quote request from Store - ${escapeHtml(customerName)}`,
-      replyTo: customerEmail || undefined,
+      reply_to: customerEmail || undefined,
       html: adminHtml,
     });
 
@@ -939,8 +919,8 @@ app.post("/api/order", async (req, res) => {
         <p>Kind regards,<br/>Nilta Flooring</p>
       `;
 
-      await transporter.sendMail({
-        from: `"Nilta Flooring" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+      await resend.emails.send({
+        from: "Nilta Flooring <info@nilta.ca>",
         to: customerEmail,
         subject: "We have received your quote request – Nilta Flooring",
         html: confirmHtml,

@@ -339,7 +339,7 @@ export default function About() {
           <div>
             <h3 className="text-2xl md:text-3xl font-bold">Meet our team</h3>
             <p className="text-white/70 mt-2 max-w-3xl text-sm md:text-base">
-              From Ahmed, our founder with over two decades of flooring experience, to Timea, our Marketing Coordinator, and Ercan, our Project Manager, our team is focused on clean planning, tidy sites, and results that last.
+              From Ahmet, our founder with 20+ years of flooring experience, to Timea, our Marketing Coordinator, and Ercan, our Project Manager, our team is focused on clean planning, tidy sites, and results that last.
             </p>
           </div>
           <Link
@@ -468,15 +468,15 @@ const TEAM = [
     focus: "20+ years of flooring expertise",
     photo: "/about/avatar-1.JPEG",
     blurb:
-      "With over 20 years of flooring experience, Ahmed founded Nilta on a foundation of true craftsmanship and care. He’s dedicated to thorough preparation, thoughtful planning, and flawless finishes that stand the test of time. His professionalism defines our core values.",
+      "With over 20 years of flooring experience, Ahmet founded Nilta on a foundation of true craftsmanship and care. He’s dedicated to thorough preparation, thoughtful planning, and flawless finishes that stand the test of time. His professionalism defines our core values.",
   },
   {
     name: "Timea",
-    role: "Account Manager & Marketing Coordinator ",
+    role: "Account Manager & Marketing Coordinator",
     focus: "Scheduling, coordination & client updates",
     photo: "/about/avatar-2.JPEG",
     blurb:
-      "Timea, our Account Manager and Marketing Coordinator, is the cornerstone of seamless operations. With a sharp focus on scheduling, client communication, and coordination, she ensures every detail is executed with precision. Known for her professional approach and swift, effective coordination, Timea keeps projects on track and clients in the know—every time..",
+      "Timea, our Account Manager and Marketing Coordinator, is the cornerstone of seamless operations. With a sharp focus on scheduling, client communication, and coordination, she ensures every detail is executed with precision. Known for her professional approach and swift, effective coordination, Timea keeps projects on track and clients in the know—every time.",
   },
   {
     name: "Ercan",

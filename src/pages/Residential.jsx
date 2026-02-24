@@ -71,7 +71,7 @@ const SERVICES = [
     key: "basement",
     title: "Basement Flooring",
     subtitle:
-      "Designed for comfort and quiet, with moisture-aware materials suited for lower levels—turning basements into a welcoming extensions of your home.",
+      "Designed for comfort and quiet, with moisture-aware materials suited for lower levels—turning basements into welcoming extensions of your home.",
     icon: <Layers className="h-4 w-4" />,
     images: [
       "/residential/basement/1.webp",
@@ -277,7 +277,7 @@ export default function Residential() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            Whole-home installations for room-by-room upgrades, thoughtfully completed with smooth surfaces and clean workmanship, helping create comfortable, peaceful homes for everyday living.
+            Whole-home installations or room-by-room upgrades, thoughtfully completed with smooth surfaces and clean workmanship, helping create comfortable, peaceful homes for everyday living.
           </motion.p>
 
           <motion.div
@@ -348,18 +348,12 @@ export default function Residential() {
         >
           <div className="text-sm text-white/60">What we handle</div>
           <ul className="mt-3 space-y-2 text-white/85">
-            <li>
-              • SPC, LVP, laminate, engineered hardwood & tile, carpet & carpet
-              tile
-            </li>
+            <li>• SPC, LVP, laminate, engineered hardwood & tile, carpet & carpet tile</li>
             <li>• Subfloor prep, leveling & moisture testing</li>
             <li>• Stairs, custom stair nosings, trims & clean transitions</li>
+            <li>• Underlay and sound control for added comfort</li>
+            <li>• Product sourcing and scheduling</li>
             <li>• Clean job sites and clear, realistic timelines</li>
-            <li>• Careful subfloor preparation, levelling, patching, and surface repairs.</li>
-            <li>• Underlay and sound control for added comfort.</li>
-            <li>• Stair nosing and clean transitions.</li>
-            <li>• Product sourcing and scheduling.</li>
-            <li>• Clean, level installation delivered on time.</li>
           </ul>
           <div className="mt-6">
             <Link

@@ -172,19 +172,17 @@ export default function Materials() {
           icon={<Layers className="h-6 w-6" />}
           label="Ceramic Tile"
           badge="Tile • Porcelain • Stone"
-          image="/materials/ceramic-tile.webp" // change to your real image
+          image="/materials/ceramic-tile.webp"
         >
           <p className="text-white/80 text-sm md:text-base">
             Our collection of tile includes a comprehensive selection of{" "}
             <span className="font-medium">ceramic, porcelain, mosaic and natural stone</span>{" "}
             tiles. We are thrilled to bring one of the best selections of elegant
-            tile to Central Alberta at unbeatable pricing. We stock products that
+            tile to Edmonton and surrounding areas at unbeatable pricing. We stock products that
             are sure to satisfy everyone&apos;s taste.
           </p>
           <p className="text-white/75 text-sm md:text-base mt-3">
-            Nilta Flooring was started on the principle that{" "}
-            <span className="font-medium">quality does not have to come at a high price</span>.
-            We stock high quality guaranteed products and offer some of the most
+            We stock high-quality, guaranteed products and offer some of the most
             competitive prices in Edmonton and surrounding cities.
           </p>
         </MaterialBlock>
@@ -195,7 +193,7 @@ export default function Materials() {
           label="Laminate"
           badge="Durable • Budget-Friendly"
           reversed
-          image="/materials/laminate.webp" // change to your real image
+          image="/materials/laminate.webp"
         >
           <p className="text-white/80 text-sm md:text-base">
             Laminate flooring primarily replicates the look and feel of hardwood
@@ -216,7 +214,7 @@ export default function Materials() {
           icon={<BadgeCheck className="h-6 w-6" />}
           label="Hardwood"
           badge="Premium • Natural"
-          image="/materials/hardwood.webp" // change to your real image
+          image="/materials/hardwood.webp"
         >
           <p className="text-white/80 text-sm md:text-base">
             Its many uses make hardwood an indispensable material. For the flooring

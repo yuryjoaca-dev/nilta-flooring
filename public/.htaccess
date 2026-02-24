@@ -1,0 +1,8 @@
+RewriteEngine On
+
+# Serve existing static files directly (robots.txt, sitemap.xml, images, etc.)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Everything else falls back to the React app
+RewriteRule ^ index.html [QSA,L]

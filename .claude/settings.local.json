@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(cat:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd /c \"taskkill /PID 19996 /F\")",
+      "Bash(cmd /c \"netstat -ano | findstr :5000 | findstr LISTENING\")",
+      "Bash(cmd /c \"taskkill /F /IM node.exe 2>nul & echo killed\")",
+      "Bash(cmd /c \"netstat -ano | findstr :5000\")"
     ]
   }
 }

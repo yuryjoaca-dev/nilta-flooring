@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Block admin area from all crawlers
+Disallow: /admin/
+Disallow: /admin
+
+Sitemap: https://nilta.ca/sitemap.xml
