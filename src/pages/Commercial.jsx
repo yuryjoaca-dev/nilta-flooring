@@ -352,8 +352,7 @@ export default function Commercial() {
 
           <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 p-5">
             <p className="text-white/90 font-semibold">
-              Planning a commercial flooring project in Edmonton, surrounding
-              area, or out of province?
+              Planning a commercial flooring project in Edmonton, the surrounding area, or out of province?
             </p>
             <p className="text-white/75 text-sm mt-2">
               Send us your drawings or photos along with your timelines, and

@@ -165,7 +165,7 @@ export default function Contact() {
   const ADDRESS_DISPLAY = "16307 111 Ave NW, Edmonton, AB T5M 2S2";
   const ADDRESS_QUERY = "16307 111 Ave NW, Edmonton, AB T5M 2S2";
   const PHONE_MAIN = "780-222-5669";
-  const PHONE_OFFICE = "1-780-761-9500";
+  const PHONE_OFFICE = "780-761-9500";
   const EMAIL = "info@nilta.ca";
 
   // ---------- Local time + open/closed (LIVE, updates) ----------
@@ -356,7 +356,7 @@ export default function Contact() {
       )}
 
       {/* HERO */}
-      <section className="relative h-[70vh] md:h-[80vh] overflow-hidden">
+      <section className="relative min-h-[100svh] md:h-[80vh] overflow-hidden">
         <video
           className="absolute inset-0 h-full w-full object-cover"
           src="/video/contact-hero.mp4"
@@ -368,7 +368,7 @@ export default function Contact() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/55 to-[#050507]" />
         <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/70 pointer-events-none" />
 
-        <div className="relative z-10 max-w-7xl mx-auto h-full px-6 flex flex-col justify-center">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 py-28 flex flex-col justify-center md:h-full md:py-0">
           <motion.p
             className="uppercase tracking-[0.35em] text-xs md:text-sm text-gray-300 mb-3"
             initial={{ opacity: 0, y: 10 }}

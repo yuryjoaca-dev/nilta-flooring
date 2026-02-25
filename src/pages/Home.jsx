@@ -11,8 +11,8 @@ const STOREFRONT_GALLERY = [
   { src: "/home/storefront/interior-1.jpg", label: "Flooring showroom interior" },
   { src: "/home/storefront/interior-2.jpg", label: "Hardwood & laminate displays" },
   { src: "/home/storefront/interior-3.jpg", label: "Flooring sample displays" },
-  { src: "/home/storefront/interior-4.jpg", label: "Tile and flooring displays" },
-  { src: "/home/storefront/interior-5.jpg", label: "Tile & stone showroom" },
+  { src: "/home/storefront/interior-4.jpg", label: "Carpet and flooring displays" },
+  { src: "/home/storefront/interior-5.jpg", label: "Tile and flooring displays" },
 ];
 
 export default function Home() {

@@ -277,7 +277,7 @@ export default function Projects() {
             <div className="mt-4 grid sm:grid-cols-2 gap-3 text-white/80">
               <Li icon={<Store />} text="Retail rollouts, retrofits, and tenant turnovers." />
               <Li icon={<Landmark />} text="Mall corridors, common areas, and lobbies." />
-              <Li icon={<Factory />} text="Industrial and offices." />
+              <Li icon={<Factory />} text="Industrial facilities and offices." />
               <Li icon={<Hotel />} text="Hospitality public spaces, lounges, and corridors." />
               <Li icon={<Building2 />} text="Office tenant improvements and fit-outs." />
               <Li icon={<ClipboardCheck />} text="Medical and professional office spaces." />
@@ -318,12 +318,12 @@ export default function Projects() {
             initial={{ opacity: 0, y: 14 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]"
+            className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] min-h-96"
           >
             <img
               src="/projects/commercial.jpg"
               alt="Commercial flooring montage"
-              className="h-96 w-full object-cover transition-transform duration-700 hover:scale-105"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 hover:scale-105"
             />
             <div className="absolute bottom-3 left-3 rounded-full bg-black/60 backdrop-blur px-3 py-1 text-xs border border-white/10">
               Commercial
